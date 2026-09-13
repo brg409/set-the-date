@@ -8,7 +8,15 @@
  */
 import { VENUES } from "../src/data/venues";
 import { getRecommendations, getReplacementVenue } from "../src/lib/recommend";
-import type { DatePreferences, DateType, Neighborhood, PriceLevel, Vibe } from "../src/lib/types";
+import type {
+  DatePreferences,
+  DateType,
+  FoodDrinkActivity,
+  IndoorOutdoorPreference,
+  Neighborhood,
+  PriceLevel,
+  Vibe,
+} from "../src/lib/types";
 
 const DATE_TYPES: DateType[] = [
   "first_date",
@@ -141,6 +149,66 @@ console.log("\n--- For comparison, category share of the Rittenhouse dataset its
 for (const [cat, count] of [...rittCategoryTotal.entries()].sort((a, b) => b[1] - a[1])) {
   console.log(`  ${cat}: ${count}/${ritt.length} (${((count / ritt.length) * 100).toFixed(1)}%)`);
 }
+
+// ---- Optional-filter matrix (indoor/outdoor x food/drink/activity) ----
+// Layers the indoorOutdoor and food filters on top of the full
+// dateType x vibe x budget matrix. Only anomalies are printed per
+// filter combo (violations); a summary line always prints so a silent
+// pass is visible too.
+console.log("\n--- Full matrix with optional filters layered in ---");
+const IO_OPTIONS: (IndoorOutdoorPreference | undefined)[] = [undefined, "indoor", "outdoor"];
+const FOOD_OPTIONS: (FoodDrinkActivity | undefined)[] = [undefined, "food", "drinks", "activity"];
+let optionalFilterCombosTested = 0;
+let optionalFilterViolations = 0;
+let optionalFilterShort = 0;
+for (const indoorOutdoor of IO_OPTIONS) {
+  for (const food of FOOD_OPTIONS) {
+    if (!indoorOutdoor && !food) continue; // already covered by the base matrix above
+    let comboShort = 0;
+    let comboViolations = 0;
+    for (const dateType of DATE_TYPES) {
+      for (const vibe of VIBES) {
+        for (const budget of BUDGETS) {
+          optionalFilterCombosTested++;
+          const prefs: DatePreferences = {
+            dateType,
+            vibe,
+            neighborhood: NEIGHBORHOOD,
+            budget,
+            filters: { indoorOutdoor, food },
+          };
+          const rec = getRecommendations(prefs, { count: 3 });
+          const results = rec.results;
+          if (results.length < 3) comboShort++;
+          const violation = results.some((r) => {
+            if (r.venue.neighborhood !== NEIGHBORHOOD) return true;
+            if (r.venue.priceLevel > budget) return true;
+            if (indoorOutdoor === "outdoor" && r.venue.outdoorSeating !== "yes") return true;
+            if (indoorOutdoor === "indoor" && !r.venue.hasIndoorSeating) return true;
+            if (food && !r.venue.foodDrinkActivity.includes(food)) return true;
+            return false;
+          });
+          if (violation) {
+            comboViolations++;
+            console.log(
+              `  VIOLATION io=${indoorOutdoor ?? "-"} food=${food ?? "-"} ${dateType}/${vibe}/$${budget} -> ${results
+                .map((r) => r.venue.name)
+                .join(", ")}`
+            );
+          }
+        }
+      }
+    }
+    optionalFilterShort += comboShort;
+    optionalFilterViolations += comboViolations;
+    console.log(
+      `  io=${indoorOutdoor ?? "-"}, food=${food ?? "-"}: ${comboViolations} hard-filter violations, ${comboShort}/168 combos with fewer than 3 results`
+    );
+  }
+}
+console.log(
+  `\nOptional-filter matrix totals: ${optionalFilterCombosTested} combos tested, ${optionalFilterViolations} hard-filter violations, ${optionalFilterShort} combos with fewer than 3 results`
+);
 
 // ---- Regenerate test ----
 console.log("\n--- Regenerate ('show me different spots') spot checks ---");
