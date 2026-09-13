@@ -38,8 +38,6 @@ export const RECOMMENDATION_WEIGHTS = {
   dateTypeMatch: 4,
   /** Exact vibe match (e.g. venue explicitly supports "romantic"). */
   vibeMatch: 3,
-  /** Extra points for attributes that matter most for the chosen date type / vibe. */
-  secondaryAttributeMax: 6,
   /** Small nudge for matching an optional filter (food/drink/activity, indoor/outdoor). */
   filterMatch: 1,
 };
@@ -73,60 +71,74 @@ function scoreDateType(venue: Venue, dateType: DateType): number {
 
 function scoreVibe(venue: Venue, vibe: Vibe): number {
   if (vibe === "something_different") {
-    // Reward novelty directly instead of requiring an exact vibe tag match.
-    return venue.attributes.novelty;
+    // Reward novelty directly, scaled onto the same 0–vibeMatch range as an
+    // exact vibe tag match — a novelty of 5 is worth exactly one normal
+    // match, not more. (Previously this returned raw novelty, so a
+    // high-novelty venue could outscore an exact match on every OTHER vibe,
+    // which is why novelty-heavy venues like Escape The Room dominated far
+    // more combinations than their actual fit warranted.)
+    return (venue.attributes.novelty / 5) * RECOMMENDATION_WEIGHTS.vibeMatch;
   }
   return venue.vibes.includes(vibe) ? RECOMMENDATION_WEIGHTS.vibeMatch : 0;
 }
 
-/** Bonus points for attributes that matter most for a given date type / vibe combo. */
+/**
+ * Bonus points for attributes that matter most for a given date type / vibe
+ * combo. Deliberately continuous (e.g. `(a.memorable - 3) * 1`) rather than
+ * threshold-based (e.g. `if (memorable >= 4) +2`): a threshold collapses a 4
+ * and a 5 into the same bonus, which — with several similarly-upscale
+ * venues in the same category — produced ties resolved only by array order,
+ * permanently hiding half of them. Continuous scoring lets the actual
+ * differences between venues' attribute values show through in the ranking.
+ * "3" is the neutral midpoint of every 1–5 attribute scale in the schema.
+ */
 function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number {
   const a = venue.attributes;
   let bonus = 0;
 
   switch (prefs.dateType) {
     case "first_date":
-      if (a.goodForFirstMeeting) bonus += 2;
-      if (a.conversationFriendly >= 4) bonus += 1;
+      bonus += a.goodForFirstMeeting ? 2 : 0;
+      bonus += (a.conversationFriendly - 3) * 0.5;
       break;
     case "anniversary":
     case "special_occasion":
-      if (a.memorable >= 4) bonus += 2;
-      if (a.romantic >= 4) bonus += 1;
+      bonus += (a.memorable - 3) * 1;
+      bonus += (a.romantic - 3) * 0.75;
       break;
     case "reconnecting":
-      if (a.conversationFriendly >= 4) bonus += 2;
-      if (a.easyToExtend) bonus += 1;
+      bonus += (a.conversationFriendly - 3) * 0.75;
+      bonus += a.easyToExtend ? 1 : 0;
       break;
     case "casual":
-      if (a.formality === "casual") bonus += 1;
-      if (a.easyToExtend) bonus += 1;
+      bonus += a.formality === "casual" ? 1 : 0;
+      bonus += a.easyToExtend ? 1 : 0;
       break;
     case "surprise_me":
-      bonus += Math.min(2, Math.round(a.novelty / 2));
+      bonus += (a.novelty - 3) * 0.5;
       break;
   }
 
   switch (prefs.vibe) {
     case "cozy_intimate":
     case "romantic":
-      if (a.lighting !== "bright") bonus += 1;
-      if (a.noiseLevel === "quiet") bonus += 1;
+      bonus += a.lighting !== "bright" ? 1 : 0;
+      bonus += a.noiseLevel === "quiet" ? 1 : a.noiseLevel === "lively" ? -1 : 0;
       break;
     case "lively_social":
     case "trendy":
-      if (a.energy >= 4) bonus += 1;
+      bonus += (a.energy - 3) * 0.75;
       break;
     case "fun_playful":
     case "something_different":
-      if (a.builtInActivity) bonus += 2;
+      bonus += a.builtInActivity ? 2 : 0;
       break;
     case "relaxed_casual":
-      if (a.energy <= 3) bonus += 1;
+      bonus += (3 - a.energy) * 0.5;
       break;
   }
 
-  return Math.min(bonus, RECOMMENDATION_WEIGHTS.secondaryAttributeMax);
+  return bonus;
 }
 
 function scoreFilters(venue: Venue, prefs: DatePreferences): number {
@@ -290,8 +302,8 @@ function getVenueBucket(category: VenueCategory): string {
 /**
  * Repeat penalties for variety, applied per venue ALREADY picked that shares
  * a bucket/category with the candidate. These are intentionally small
- * relative to the ranking weights above (max score is roughly dateTypeMatch
- * + vibeMatch + secondaryAttributeMax ≈ 13): a close call between two
+ * relative to the ranking weights above (dateTypeMatch + vibeMatch alone is
+ * 7, before any secondary bonus): a close call between two
  * similarly-good venues can flip toward the more varied one, but a venue
  * that's a genuinely much better fit always wins regardless of category.
  * Raise these to push harder for variety; lower them (or zero them) to rank

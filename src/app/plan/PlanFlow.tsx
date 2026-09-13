@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -42,7 +42,12 @@ export default function PlanFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // If arriving from "Edit preferences", pre-fill the wizard with the last search.
-  const initial = useMemo(() => paramsToPreferences(searchParams), [searchParams]);
+  // Captured once via a lazy initializer (not a reactive useMemo): once the
+  // wizard starts progressively syncing each step to the URL (see `syncUrl`
+  // below), a brand-new walkthrough also ends up with all 4 fields in the
+  // URL by step 4 — recomputing this from live searchParams would flip a
+  // first-time search into "Editing your last search" by the last step.
+  const [initial] = useState(() => paramsToPreferences(searchParams));
   // Editing an existing, fully-specified search (vs. starting fresh) lets us
   // jump straight to the field being changed and skip re-clicking through
   // the rest of the flow.
@@ -74,9 +79,80 @@ export default function PlanFlow() {
   const goNext = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const goBack = () => setStep((s) => Math.max(s - 1, 0));
 
-  function selectAndAdvance<T>(setter: (v: T) => void, value: T) {
-    setter(value);
+  /**
+   * `router.push` (used below to mirror each choice into the URL) updates
+   * history without firing `popstate` — only the browser's own Back/Forward
+   * buttons do. So this listener is exactly "the user pressed Back/Forward,"
+   * and re-derives every field plus which step to show from the URL that
+   * navigation landed on. This is what makes Back restore the previous
+   * step's selections instead of showing an empty step 1.
+   */
+  useEffect(() => {
+    function onPopState() {
+      const params = new URLSearchParams(window.location.search);
+      const dt = params.get("dateType") as DateType | null;
+      const vb = params.get("vibe") as Vibe | null;
+      const nb = params.get("neighborhood") as Neighborhood | null;
+      const bgRaw = params.get("budget");
+      const bg = bgRaw ? (Number(bgRaw) as PriceLevel) : undefined;
+      setDateType(dt ?? undefined);
+      setVibe(vb ?? undefined);
+      setNeighborhood(nb ?? undefined);
+      setBudget(bg);
+      const filled = [dt, vb, nb, bg].filter(Boolean).length;
+      setStep(Math.min(filled, STEPS.length - 1));
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  /**
+   * Mirrors the in-progress selection into the URL on every step (not just
+   * the final submit). Without this, the browser's Back button from
+   * /results lands on whatever bare /plan URL the wizard started from —
+   * with none of the choices just made, since local component state isn't
+   * part of browser history. Pushing here means each step is its own
+   * history entry carrying its own state, so Back naturally un-does one
+   * step at a time instead of wiping everything.
+   */
+  function syncUrl(overrides: {
+    dateType?: DateType;
+    vibe?: Vibe;
+    neighborhood?: Neighborhood;
+    budget?: PriceLevel;
+  }) {
+    const next = {
+      dateType: overrides.dateType ?? dateType,
+      vibe: overrides.vibe ?? vibe,
+      neighborhood: overrides.neighborhood ?? neighborhood,
+      budget: overrides.budget ?? budget,
+    };
+    const params = new URLSearchParams();
+    if (next.dateType) params.set("dateType", next.dateType);
+    if (next.vibe) params.set("vibe", next.vibe);
+    if (next.neighborhood) params.set("neighborhood", next.neighborhood);
+    if (next.budget) params.set("budget", String(next.budget));
+    router.push(`/plan?${params.toString()}`, { scroll: false });
+  }
+
+  function chooseDateType(value: DateType) {
+    setDateType(value);
+    syncUrl({ dateType: value });
     window.setTimeout(goNext, ADVANCE_DELAY_MS);
+  }
+  function chooseVibe(value: Vibe) {
+    setVibe(value);
+    syncUrl({ vibe: value });
+    window.setTimeout(goNext, ADVANCE_DELAY_MS);
+  }
+  function chooseNeighborhood(value: Neighborhood) {
+    setNeighborhood(value);
+    syncUrl({ neighborhood: value });
+    window.setTimeout(goNext, ADVANCE_DELAY_MS);
+  }
+  function chooseBudget(value: PriceLevel) {
+    setBudget(value);
+    syncUrl({ budget: value });
   }
 
   function handleSubmit() {
@@ -144,7 +220,7 @@ export default function PlanFlow() {
                   label={opt.label}
                   description={opt.description}
                   selected={dateType === opt.value}
-                  onClick={() => selectAndAdvance(setDateType, opt.value)}
+                  onClick={() => chooseDateType(opt.value)}
                 />
               ))}
             </div>
@@ -159,7 +235,7 @@ export default function PlanFlow() {
                   label={opt.label}
                   description={opt.description}
                   selected={vibe === opt.value}
-                  onClick={() => selectAndAdvance(setVibe, opt.value)}
+                  onClick={() => chooseVibe(opt.value)}
                 />
               ))}
             </div>
@@ -174,7 +250,7 @@ export default function PlanFlow() {
                   label={opt.label}
                   description={opt.description}
                   selected={neighborhood === opt.value}
-                  onClick={() => selectAndAdvance(setNeighborhood, opt.value)}
+                  onClick={() => chooseNeighborhood(opt.value)}
                 />
               ))}
             </div>
@@ -190,7 +266,7 @@ export default function PlanFlow() {
                     label={opt.label}
                     description={opt.description}
                     selected={budget === opt.value}
-                    onClick={() => setBudget(opt.value)}
+                    onClick={() => chooseBudget(opt.value)}
                   />
                 ))}
               </div>

@@ -1229,7 +1229,7 @@ export const VENUES: Venue[] = [
     description:
       "An Art Deco, 1940s-Hollywood-styled steakhouse with an extensive raw bar, from Stephen Starr.",
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
-    vibes: ["romantic", "trendy"],
+    vibes: ["romantic"],
     foodDrinkActivity: ["food"],
     indoorOutdoor: "indoor",
     attributes: {
@@ -1707,7 +1707,7 @@ export const VENUES: Venue[] = [
     description:
       "A steakhouse inside the Warwick Rittenhouse Hotel with live jazz piano, open since 1997.",
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
-    vibes: ["romantic", "trendy"],
+    vibes: ["romantic"],
     foodDrinkActivity: ["food"],
     indoorOutdoor: "indoor",
     attributes: {
