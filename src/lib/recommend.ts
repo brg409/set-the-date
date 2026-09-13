@@ -1,30 +1,74 @@
 import { VENUES } from "@/data/venues";
-import type { DatePreferences, DateType, ScoredVenue, Venue, Vibe } from "./types";
+import { findOption, DATE_TYPE_OPTIONS } from "./options";
+import type {
+  DatePreferences,
+  DateType,
+  ExpansionState,
+  RecommendationResult,
+  ScoredVenue,
+  Venue,
+  VenueCategory,
+  Vibe,
+} from "./types";
 
 /**
- * Tune the recommendation engine here. Nothing else in the app needs to
- * change if these weights move — scoring, diversity, and copy generation
- * all read from this file.
+ * ── Recommendation engine ──────────────────────────────────────────────
+ *
+ * Two separate concerns, on purpose:
+ *
+ * 1. ELIGIBILITY (hard filters) — neighborhood and budget are constraints
+ *    the user explicitly set, not preferences to be balanced against
+ *    everything else. A venue in the wrong neighborhood or above budget is
+ *    never shown unless the user is told and opts in to widen the search.
+ *    See `isEligible` / `getEligibleVenues`.
+ *
+ * 2. RANKING (soft scoring) — once we know which venues are allowed to
+ *    appear at all, occasion (date type) and vibe decide the order between
+ *    them. See `rankVenue`.
+ *
+ * Keeping these separate is what makes "Rittenhouse stays Rittenhouse"
+ * possible: expanding the pool is an explicit, visible user action
+ * (`expand.neighborhood` / `expand.budget`), never an automatic scoring
+ * side-effect.
  */
+
+/** Tune ranking here. Only affects ORDER among already-eligible venues. */
 export const RECOMMENDATION_WEIGHTS = {
+  /** Exact date-type match (e.g. venue explicitly supports "first_date"). */
   dateTypeMatch: 4,
+  /** Exact vibe match (e.g. venue explicitly supports "romantic"). */
   vibeMatch: 3,
-  neighborhoodMatch: 3,
-  budgetExactMatch: 2,
-  budgetStepPenalty: 1,
-  secondaryAttributeMax: 3,
+  /** Extra points for attributes that matter most for the chosen date type / vibe. */
+  secondaryAttributeMax: 6,
+  /** Small nudge for matching an optional filter (food/drink/activity, indoor/outdoor). */
   filterMatch: 1,
 };
 
+// ── 1. Eligibility (hard filters) ──────────────────────────────────────
+
+const NO_EXPANSION: ExpansionState = { neighborhood: false, budget: false };
+
+function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState): boolean {
+  const neighborhoodOk = expand.neighborhood || venue.neighborhood === prefs.neighborhood;
+  // Budget is a ceiling, not an exact match — a cheaper venue than requested
+  // is fine, a more expensive one is not, unless the user opts to expand.
+  const budgetOk = expand.budget || venue.priceLevel <= prefs.budget;
+  return neighborhoodOk && budgetOk;
+}
+
+function getEligibleVenues(prefs: DatePreferences, expand: ExpansionState): Venue[] {
+  return VENUES.filter((v) => isEligible(v, prefs, expand));
+}
+
+// ── 2. Ranking (soft scoring among eligible venues) ────────────────────
+
 function scoreDateType(venue: Venue, dateType: DateType): number {
   if (dateType === "surprise_me") {
-    // No hard requirement — every venue is "in play" for a surprise, so we
-    // give a flat partial credit rather than the full exact-match bonus.
+    // No hard requirement for "surprise me" — every eligible venue is fair
+    // game, so give flat partial credit rather than the full match bonus.
     return RECOMMENDATION_WEIGHTS.dateTypeMatch / 2;
   }
-  return venue.dateTypes.includes(dateType)
-    ? RECOMMENDATION_WEIGHTS.dateTypeMatch
-    : 0;
+  return venue.dateTypes.includes(dateType) ? RECOMMENDATION_WEIGHTS.dateTypeMatch : 0;
 }
 
 function scoreVibe(venue: Venue, vibe: Vibe): number {
@@ -33,12 +77,6 @@ function scoreVibe(venue: Venue, vibe: Vibe): number {
     return venue.attributes.novelty;
   }
   return venue.vibes.includes(vibe) ? RECOMMENDATION_WEIGHTS.vibeMatch : 0;
-}
-
-function scoreBudget(venue: Venue, budget: number): number {
-  const diff = Math.abs(venue.priceLevel - budget);
-  if (diff === 0) return RECOMMENDATION_WEIGHTS.budgetExactMatch;
-  return -diff * RECOMMENDATION_WEIGHTS.budgetStepPenalty;
 }
 
 /** Bonus points for attributes that matter most for a given date type / vibe combo. */
@@ -88,7 +126,7 @@ function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number 
       break;
   }
 
-  return Math.min(bonus, RECOMMENDATION_WEIGHTS.secondaryAttributeMax * 2);
+  return Math.min(bonus, RECOMMENDATION_WEIGHTS.secondaryAttributeMax);
 }
 
 function scoreFilters(venue: Venue, prefs: DatePreferences): number {
@@ -107,36 +145,35 @@ function scoreFilters(venue: Venue, prefs: DatePreferences): number {
   return bonus;
 }
 
-export function scoreVenue(venue: Venue, prefs: DatePreferences): number {
+/** Ranks an already-eligible venue. Neighborhood/budget are NOT scored here — see `isEligible`. */
+export function rankVenue(venue: Venue, prefs: DatePreferences): number {
   return (
     scoreDateType(venue, prefs.dateType) +
     scoreVibe(venue, prefs.vibe) +
-    (venue.neighborhood === prefs.neighborhood
-      ? RECOMMENDATION_WEIGHTS.neighborhoodMatch
-      : 0) +
-    scoreBudget(venue, prefs.budget) +
     scoreSecondaryAttributes(venue, prefs) +
     scoreFilters(venue, prefs)
   );
 }
 
-const VIBE_ADJECTIVE: Record<Vibe, string> = {
-  cozy_intimate: "cozy and easy to settle into",
-  relaxed_casual: "relaxed without feeling like an afterthought",
-  lively_social: "lively without being overwhelming",
-  romantic: "thoughtful without being overly formal",
-  fun_playful: "playful and a little different",
-  trendy: "current without feeling like just a scene",
-  something_different: "unlike the usual date-night script",
+// ── 3. "Why it fits" copy ───────────────────────────────────────────────
+
+const DATE_TYPE_LABEL: Record<DateType, string> = {
+  first_date: "first date",
+  casual: "casual date",
+  anniversary: "anniversary",
+  special_occasion: "special occasion",
+  reconnecting: "catch-up",
+  surprise_me: "surprise-me date",
 };
 
-const DATE_TYPE_PHRASE: Record<DateType, string> = {
-  first_date: "a first date where you want easy conversation",
-  casual: "a casual date that doesn't need to be a big production",
-  anniversary: "an anniversary you want to feel special",
-  special_occasion: "an occasion worth marking",
-  reconnecting: "reconnecting somewhere relaxed enough to actually catch up",
-  surprise_me: "a date where the destination is half the fun",
+const VIBE_WANT_PHRASE: Record<Vibe, string> = {
+  cozy_intimate: "something intimate but not overly formal",
+  relaxed_casual: "something easy and low-key",
+  lively_social: "something with real energy in the room",
+  romantic: "something that feels thoughtful, not clichéd",
+  fun_playful: "something with a bit of play built in",
+  trendy: "something that feels current",
+  something_different: "something outside the usual dinner-and-drinks script",
 };
 
 function joinWithAnd(items: string[]): string {
@@ -151,60 +188,68 @@ function capitalize(text: string): string {
 }
 
 /**
- * Builds the "why it fits" copy from a venue's tags + the user's selections.
- *
- * This is template-based on purpose: it is fully deterministic and easy to
- * debug for the MVP. Because it only depends on `venue.tags` and `prefs`,
- * swapping this out for an AI-generated explanation later just means
- * replacing this function's body with a model call that receives the same
- * inputs — nothing upstream (scoring, UI) needs to change.
+ * The second sentence of a "why it fits" explanation. Picks ONE concrete,
+ * verified comparison based on the venue's actual attributes — never a
+ * generic filler line — so two venues sharing a vibe don't read as
+ * identical. Every branch only fires when the underlying attribute
+ * actually supports the claim.
+ */
+function buildSpecificClaim(venue: Venue, prefs: DatePreferences): string {
+  const a = venue.attributes;
+
+  if (a.builtInActivity) {
+    return "The built-in activity means you're never just sitting across a table with nothing to do.";
+  }
+  if (a.conversationFriendly >= 4 && a.noiseLevel === "quiet") {
+    return "It's quiet enough that conversation never has to compete with the room.";
+  }
+  if (a.noiseLevel === "lively" && a.energy >= 4) {
+    return "Expect real energy in the room — good if you want the date to feel a little electric rather than hushed.";
+  }
+  if (a.formality === "upscale") {
+    return "It's dressier than most spots on this list, so it fits best when the occasion actually calls for it.";
+  }
+  if (a.romantic >= 4) {
+    return "It reads as romantic without tipping into stiff or overly formal.";
+  }
+  if (a.reservationDifficulty === "walk_in_friendly" && prefs.dateType === "casual") {
+    return "No reservation needed, so it stays low-pressure if plans change.";
+  }
+  if (a.easyToExtend) {
+    return "It's easy to extend the night somewhere else afterward if things are going well.";
+  }
+  if (a.memorable >= 4) {
+    return "It's the kind of place that's genuinely memorable, not just convenient.";
+  }
+  return "It fits the vibe you're going for without overselling it.";
+}
+
+/**
+ * Builds the "why it fits" copy from a venue's own tags + attributes and the
+ * user's selections. Template-based on purpose — fully deterministic and
+ * easy to debug — but structured so each sentence only ever states things
+ * the venue's data actually supports. Swapping this for an AI-generated
+ * explanation later means replacing this function's body with a model call
+ * that receives the same `(venue, prefs)` inputs; nothing upstream changes.
  */
 export function generateWhyItFits(venue: Venue, prefs: DatePreferences): string {
   const tags = venue.tags.slice(0, 3);
   const tagSentence = capitalize(joinWithAnd(tags));
-  const adjective = VIBE_ADJECTIVE[prefs.vibe];
-  const phrase = DATE_TYPE_PHRASE[prefs.dateType];
-  return `${tagSentence} make it feel ${adjective}. It's especially good for ${phrase}.`;
+  const dateTypeLabel = DATE_TYPE_LABEL[prefs.dateType];
+  const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
+  const claim = buildSpecificClaim(venue, prefs);
+
+  return `${tagSentence} make ${venue.name} a strong ${dateTypeLabel} option when you want ${wantPhrase}. ${claim}`;
 }
 
-function scoreAndExplain(venue: Venue, prefs: DatePreferences): ScoredVenue {
+function scoreAndExplain(venue: Venue, prefs: DatePreferences, isExpandedMatch: boolean): ScoredVenue {
   return {
     venue,
-    score: scoreVenue(venue, prefs),
+    score: rankVenue(venue, prefs),
     whyItFits: generateWhyItFits(venue, prefs),
     matchedTags: venue.tags.slice(0, 3),
+    isExpandedMatch,
   };
-}
-
-/**
- * Greedily selects `count` results from a score-sorted list while avoiding
- * more than two picks from the same venue category, so the three results
- * don't all feel interchangeable.
- */
-function diversify(sorted: ScoredVenue[], count: number): ScoredVenue[] {
-  const result: ScoredVenue[] = [];
-  const categoryCounts = new Map<string, number>();
-  const remaining = [...sorted];
-
-  while (result.length < count && remaining.length > 0) {
-    let index = remaining.findIndex(
-      (sv) => (categoryCounts.get(sv.venue.category) ?? 0) < 2
-    );
-    if (index === -1) index = 0;
-    const [picked] = remaining.splice(index, 1);
-    result.push(picked);
-    categoryCounts.set(
-      picked.venue.category,
-      (categoryCounts.get(picked.venue.category) ?? 0) + 1
-    );
-  }
-
-  return result;
-}
-
-export interface RecommendationOptions {
-  excludeIds?: string[];
-  count?: number;
 }
 
 /**
@@ -222,20 +267,153 @@ export function getDefaultWhyItFits(venue: Venue): string {
   return generateWhyItFits(venue, prefs);
 }
 
+// ── 4. Variety ───────────────────────────────────────────────────────────
+
+/** Broad grouping so three results don't all feel like the same kind of place. */
+function getVenueBucket(category: VenueCategory): string {
+  switch (category) {
+    case "cocktail_bar":
+    case "wine_bar":
+    case "brewery":
+    case "rooftop_bar":
+      return "drinks";
+    case "restaurant":
+      return "food";
+    case "cafe":
+    case "dessert":
+      return "coffee_or_dessert";
+    case "activity":
+      return "activity";
+  }
+}
+
+/**
+ * Repeat penalties for variety, applied per venue ALREADY picked that shares
+ * a bucket/category with the candidate. These are intentionally small
+ * relative to the ranking weights above (max score is roughly dateTypeMatch
+ * + vibeMatch + secondaryAttributeMax ≈ 13): a close call between two
+ * similarly-good venues can flip toward the more varied one, but a venue
+ * that's a genuinely much better fit always wins regardless of category.
+ * Raise these to push harder for variety; lower them (or zero them) to rank
+ * on fit alone.
+ */
+const DIVERSITY_PENALTY = {
+  sameBucket: 2.5, // e.g. a second cocktail bar when a wine bar scored close behind
+  sameCategory: 1.5, // additional penalty for the exact same category, not just the same bucket
+};
+
+/**
+ * Greedily selects `count` results from a score-sorted list. Unlike a hard
+ * "max N per category" cutoff, this ranks by score minus a small penalty for
+ * each already-picked venue sharing a bucket/category — so three genuinely
+ * excellent cocktail bars can still all appear if nothing else comes close,
+ * but a near-tie will resolve in favor of variety (e.g. cocktail bar +
+ * restaurant + coffee shop over three interchangeable cocktail bars).
+ */
+function diversify(sorted: ScoredVenue[], count: number): ScoredVenue[] {
+  const result: ScoredVenue[] = [];
+  const bucketCounts = new Map<string, number>();
+  const categoryCounts = new Map<string, number>();
+  const remaining = [...sorted];
+
+  while (result.length < count && remaining.length > 0) {
+    let bestIndex = 0;
+    let bestAdjustedScore = -Infinity;
+
+    remaining.forEach((candidate, index) => {
+      const bucket = getVenueBucket(candidate.venue.category);
+      const penalty =
+        (bucketCounts.get(bucket) ?? 0) * DIVERSITY_PENALTY.sameBucket +
+        (categoryCounts.get(candidate.venue.category) ?? 0) * DIVERSITY_PENALTY.sameCategory;
+      const adjustedScore = candidate.score - penalty;
+      if (adjustedScore > bestAdjustedScore) {
+        bestAdjustedScore = adjustedScore;
+        bestIndex = index;
+      }
+    });
+
+    const [picked] = remaining.splice(bestIndex, 1);
+    result.push(picked);
+    const bucket = getVenueBucket(picked.venue.category);
+    bucketCounts.set(bucket, (bucketCounts.get(bucket) ?? 0) + 1);
+    categoryCounts.set(picked.venue.category, (categoryCounts.get(picked.venue.category) ?? 0) + 1);
+  }
+
+  return result;
+}
+
+// ── 5. Public API ────────────────────────────────────────────────────────
+
+export interface RecommendationOptions {
+  excludeIds?: string[];
+  count?: number;
+  /** Explicit user opt-in to relax neighborhood/budget. Defaults to no expansion. */
+  expand?: Partial<ExpansionState>;
+}
+
 export function getRecommendations(
   prefs: DatePreferences,
   options: RecommendationOptions = {}
-): ScoredVenue[] {
+): RecommendationResult {
   const count = options.count ?? 3;
   const excludeSet = new Set(options.excludeIds ?? []);
+  const expand: ExpansionState = { ...NO_EXPANSION, ...options.expand };
 
-  let pool = VENUES.filter((v) => !excludeSet.has(v.id));
+  const exactPool = getEligibleVenues(prefs, NO_EXPANSION);
+  const exactMatchCount = exactPool.length;
+  const canExpandNeighborhood =
+    getEligibleVenues(prefs, { neighborhood: true, budget: expand.budget }).length > exactPool.length;
+  const canExpandBudget =
+    getEligibleVenues(prefs, { neighborhood: expand.neighborhood, budget: true }).length >
+    getEligibleVenues(prefs, { neighborhood: expand.neighborhood, budget: false }).length;
+
+  let pool = getEligibleVenues(prefs, expand).filter((v) => !excludeSet.has(v.id));
   if (pool.length < count) {
-    // Ran out of fresh venues to show — start the rotation over rather than
-    // returning fewer than three results.
-    pool = VENUES;
+    // Ran out of fresh venues within the eligible pool — restart the
+    // rotation (still respecting the same firm filters) rather than
+    // returning fewer than three, or silently pulling from elsewhere.
+    pool = getEligibleVenues(prefs, expand);
   }
 
-  const scored = pool.map((v) => scoreAndExplain(v, prefs)).sort((a, b) => b.score - a.score);
-  return diversify(scored, count);
+  const exactIds = new Set(exactPool.map((v) => v.id));
+  const scored = pool
+    .map((v) => scoreAndExplain(v, prefs, !exactIds.has(v.id)))
+    .sort((a, b) => b.score - a.score);
+
+  return {
+    results: diversify(scored, count),
+    exactMatchCount,
+    canExpandNeighborhood,
+    canExpandBudget,
+    expanded: expand,
+  };
+}
+
+/** Convenience label used by result-set copy, e.g. "first date". */
+export function getDateTypeLabel(dateType: DateType): string {
+  return findOption(DATE_TYPE_OPTIONS, dateType).label;
+}
+
+/**
+ * Finds a single best replacement venue for "Not for me" — deliberately
+ * does NOT wrap around to previously-seen venues the way `getRecommendations`
+ * does for "show me different spots", so a dismissed (or already-shown)
+ * venue can never silently reappear as its own replacement. Returns null
+ * when nothing eligible is left, so the UI can show one fewer card rather
+ * than a duplicate.
+ */
+export function getReplacementVenue(
+  prefs: DatePreferences,
+  expand: ExpansionState,
+  excludeIds: string[]
+): ScoredVenue | null {
+  const excludeSet = new Set(excludeIds);
+  const pool = getEligibleVenues(prefs, expand).filter((v) => !excludeSet.has(v.id));
+  if (pool.length === 0) return null;
+
+  const exactIds = new Set(getEligibleVenues(prefs, NO_EXPANSION).map((v) => v.id));
+  const [best] = pool
+    .map((v) => scoreAndExplain(v, prefs, !exactIds.has(v.id)))
+    .sort((a, b) => b.score - a.score);
+  return best;
 }

@@ -15,7 +15,7 @@ const EXAMPLE_PREFS: DatePreferences = {
 };
 
 export default function LandingPage() {
-  const previewResults = getRecommendations(EXAMPLE_PREFS);
+  const previewResults = getRecommendations(EXAMPLE_PREFS).results;
 
   return (
     <div className="flex min-h-screen flex-col">

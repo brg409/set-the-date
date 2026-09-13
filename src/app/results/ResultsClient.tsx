@@ -3,27 +3,39 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { SlidersHorizontal, RefreshCw, AlertCircle } from "lucide-react";
+import {
+  SlidersHorizontal,
+  RefreshCw,
+  AlertCircle,
+  Pencil,
+  MapPin,
+  DollarSign,
+} from "lucide-react";
 import { Header } from "@/components/Header";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { VenueResultsGrid } from "@/components/VenueResultsGrid";
+import { VenueDetailModal } from "@/components/VenueDetailModal";
+import { VenueCard } from "@/components/VenueCard";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/Button";
-import { Chip } from "@/components/Chip";
 import { paramsToPreferences } from "@/lib/queryParams";
-import { getRecommendations } from "@/lib/recommend";
+import { getRecommendations, getReplacementVenue, getDateTypeLabel } from "@/lib/recommend";
+import { recordNotForMe } from "@/lib/feedback";
 import { RESULTS_COPY } from "@/lib/copy";
 import {
   findOption,
-  DATE_TYPE_OPTIONS,
   VIBE_OPTIONS,
   NEIGHBORHOOD_OPTIONS,
   PRICE_LABEL,
 } from "@/lib/options";
-import type { DatePreferences } from "@/lib/types";
+import type {
+  DatePreferences,
+  ExpansionState,
+  NotForMeReason,
+  ScoredVenue,
+} from "@/lib/types";
 
-const INITIAL_LOAD_MS = 1100;
-const REGENERATE_LOAD_MS = 650;
+const INITIAL_LOAD_MS = 900;
+const NO_EXPANSION: ExpansionState = { neighborhood: false, budget: false };
 
 export default function ResultsClient() {
   const searchParams = useSearchParams();
@@ -50,8 +62,8 @@ export default function ResultsClient() {
     );
   }
 
-  // Remounted whenever the search itself changes, so loading/exclusion state
-  // always starts fresh without needing to reset it inside an effect.
+  // Remounted whenever the search itself changes, so all local state below
+  // starts fresh without needing to reset it inside an effect.
   return <ResultsForPrefs key={paramsKey} prefs={prefs} paramsKey={paramsKey} />;
 }
 
@@ -63,26 +75,55 @@ function ResultsForPrefs({
   paramsKey: string;
 }) {
   const [loading, setLoading] = useState(true);
+  const [expand, setExpand] = useState<ExpansionState>(NO_EXPANSION);
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Runs once per mount — this component is remounted (via `key`) whenever
+    // the search itself changes, so this simulates a fresh "search" each time.
     const timer = setTimeout(() => setLoading(false), INITIAL_LOAD_MS);
     return () => clearTimeout(timer);
   }, []);
 
-  const results = useMemo(
-    () => getRecommendations(prefs, { excludeIds: excludedIds }),
-    [prefs, excludedIds]
+  // `results` is the single source of truth for what's on screen. Every
+  // action below (expanding the search, regenerating, dismissing one card)
+  // updates it explicitly and directly — there's no separate "recompute on
+  // dependency change" effect, so a single "Not for me" can never be
+  // clobbered by an unrelated recompute reshuffling all three.
+  const [results, setResults] = useState<ScoredVenue[]>(
+    () => getRecommendations(prefs, { expand: NO_EXPANSION, count: 3 }).results
   );
 
-  function handleRegenerate() {
-    setLoading(true);
-    const shownIds = results.map((r) => r.venue.id);
-    window.setTimeout(() => {
-      setExcludedIds((prev) => [...prev, ...shownIds]);
-      setLoading(false);
-    }, REGENERATE_LOAD_MS);
+  // Banner/eligibility info only — depends on prefs + expand, not on which
+  // three venues happen to be displayed right now.
+  const meta = useMemo(() => getRecommendations(prefs, { expand, count: 3 }), [prefs, expand]);
+
+  function applyExpansion(next: ExpansionState) {
+    setExpand(next);
+    setExcludedIds([]);
+    setResults(getRecommendations(prefs, { expand: next, count: 3 }).results);
   }
+
+  function handleRegenerate() {
+    const newExcluded = [...excludedIds, ...results.map((r) => r.venue.id)];
+    setExcludedIds(newExcluded);
+    setResults(getRecommendations(prefs, { expand, excludeIds: newExcluded, count: 3 }).results);
+  }
+
+  function handleNotForMe(venueId: string, reason: NotForMeReason | null) {
+    recordNotForMe(venueId, reason, prefs);
+    const keepIds = results.filter((r) => r.venue.id !== venueId).map((r) => r.venue.id);
+    const newExcluded = [...excludedIds, venueId];
+    const replacement = getReplacementVenue(prefs, expand, [...newExcluded, ...keepIds]);
+    setExcludedIds(newExcluded);
+    setResults((prev) => {
+      const withoutDismissed = prev.filter((r) => r.venue.id !== venueId);
+      return replacement ? [...withoutDismissed, replacement] : withoutDismissed;
+    });
+  }
+
+  const selected = results.find((r) => r.venue.id === selectedId) ?? null;
 
   if (loading) {
     return (
@@ -93,55 +134,174 @@ function ResultsForPrefs({
     );
   }
 
-  const dateTypeLabel = findOption(DATE_TYPE_OPTIONS, prefs.dateType).label;
+  const dateTypeLabel = getDateTypeLabel(prefs.dateType);
   const vibeLabel = findOption(VIBE_OPTIONS, prefs.vibe).label;
   const neighborhoodLabel = findOption(NEIGHBORHOOD_OPTIONS, prefs.neighborhood).label;
+  const budgetLabel = PRICE_LABEL[prefs.budget];
+
+  const needsExpansionChoice =
+    !expand.neighborhood &&
+    !expand.budget &&
+    meta.exactMatchCount < 3 &&
+    (meta.canExpandNeighborhood || meta.canExpandBudget);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 sm:py-12">
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          <Chip tone="navy">{dateTypeLabel}</Chip>
-          <Chip tone="navy">{vibeLabel}</Chip>
-          <Chip tone="navy">{neighborhoodLabel}</Chip>
-          <Chip tone="navy">{PRICE_LABEL[prefs.budget]}</Chip>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-8 pt-6 sm:pb-12 sm:pt-8">
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          <EditablePill paramsKey={paramsKey} step="dateType" label={dateTypeLabel} />
+          <EditablePill paramsKey={paramsKey} step="vibe" label={vibeLabel} />
+          <EditablePill paramsKey={paramsKey} step="neighborhood" label={neighborhoodLabel} />
+          <EditablePill paramsKey={paramsKey} step="budget" label={budgetLabel} />
         </div>
-        <div className="mb-8">
+
+        <div className="mb-6 scroll-mt-24">
           <h1 className="font-display text-2xl text-navy sm:text-3xl">
-            {RESULTS_COPY.heading}
+            {results.length === 3
+              ? RESULTS_COPY.heading
+              : results.length === 0
+                ? "No spots yet"
+                : `Your ${results.length} spot${results.length > 1 ? "s" : ""}`}
           </h1>
           <p className="text-sm text-ink/60">{RESULTS_COPY.subheading}</p>
         </div>
 
-        {results.length === 0 ? (
+        {meta.exactMatchCount === 0 && !expand.neighborhood && !expand.budget && (
           <EmptyState
             icon={AlertCircle}
-            title="No matches yet"
-            body={RESULTS_COPY.emptyState}
+            title={`No exact matches in ${neighborhoodLabel} at ${budgetLabel} or less`}
+            body={`Nothing in our ${neighborhoodLabel} data fits a ${budgetLabel} budget for this occasion yet. Widen the search to see options.`}
+            action={
+              <div className="flex flex-wrap justify-center gap-2">
+                {meta.canExpandNeighborhood && (
+                  <Button
+                    variant="outline"
+                    onClick={() => applyExpansion({ ...expand, neighborhood: true })}
+                  >
+                    <MapPin size={15} strokeWidth={2.25} />
+                    Include nearby neighborhoods
+                  </Button>
+                )}
+                {meta.canExpandBudget && (
+                  <Button
+                    variant="outline"
+                    onClick={() => applyExpansion({ ...expand, budget: true })}
+                  >
+                    <DollarSign size={15} strokeWidth={2.25} />
+                    Allow a higher budget
+                  </Button>
+                )}
+              </div>
+            }
           />
-        ) : (
-          <VenueResultsGrid results={results} />
         )}
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-t border-line pt-8 text-sm">
-          <button
-            type="button"
-            onClick={handleRegenerate}
-            className="inline-flex items-center gap-1.5 font-medium text-navy/70 transition-colors hover:text-navy"
-          >
-            <RefreshCw size={14} strokeWidth={2.25} />
-            {RESULTS_COPY.regenerate}
-          </button>
-          <Link
-            href={`/plan?${paramsKey}`}
-            className="inline-flex items-center gap-1.5 font-medium text-navy/70 transition-colors hover:text-navy"
-          >
-            <SlidersHorizontal size={14} strokeWidth={2.25} />
-            {RESULTS_COPY.adjustFilters}
-          </Link>
-        </div>
+        {meta.exactMatchCount > 0 && needsExpansionChoice && (
+          <div className="mb-6 rounded-2xl border border-gold/40 bg-gold/10 p-4">
+            <p className="text-sm text-ink">
+              Only <strong>{meta.exactMatchCount}</strong>{" "}
+              {meta.exactMatchCount === 1 ? "spot matches" : "spots match"} {neighborhoodLabel} at{" "}
+              {budgetLabel} or less exactly for a {dateTypeLabel}. Showing
+              {meta.exactMatchCount === 1 ? " that one" : " those"} below — widen the search for
+              more:
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {meta.canExpandNeighborhood && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyExpansion({ ...expand, neighborhood: true })}
+                >
+                  <MapPin size={14} strokeWidth={2.25} />
+                  Include nearby neighborhoods
+                </Button>
+              )}
+              {meta.canExpandBudget && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyExpansion({ ...expand, budget: true })}
+                >
+                  <DollarSign size={14} strokeWidth={2.25} />
+                  Allow a higher budget
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {results.length > 0 && (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((scored, i) => (
+              <VenueCard
+                key={scored.venue.id}
+                scored={scored}
+                rank={i + 1}
+                onViewDetails={setSelectedId}
+                prefs={prefs}
+                onNotForMe={handleNotForMe}
+              />
+            ))}
+          </div>
+        )}
+
+        {results.length > 0 && (
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-t border-line pt-8 text-sm">
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              className="inline-flex items-center gap-1.5 font-medium text-navy/70 transition-colors hover:text-navy"
+            >
+              <RefreshCw size={14} strokeWidth={2.25} />
+              {RESULTS_COPY.regenerate}
+            </button>
+            <Link
+              href={`/plan?${paramsKey}`}
+              className="inline-flex items-center gap-1.5 font-medium text-navy/70 transition-colors hover:text-navy"
+            >
+              <SlidersHorizontal size={14} strokeWidth={2.25} />
+              {RESULTS_COPY.editPreferences}
+            </Link>
+          </div>
+        )}
+
+        <p className="mt-8 text-center text-xs text-ink/40">
+          Venue details and availability can change — double check before you go.
+        </p>
       </main>
+
+      {selected && (
+        <VenueDetailModal
+          venue={selected.venue}
+          whyItFits={selected.whyItFits}
+          onClose={() => setSelectedId(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function EditablePill({
+  paramsKey,
+  step,
+  label,
+}: {
+  paramsKey: string;
+  step: "dateType" | "vibe" | "neighborhood" | "budget";
+  label: string;
+}) {
+  return (
+    <Link
+      href={`/plan?${paramsKey}&focus=${step}`}
+      className="group inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-medium text-cream transition-colors hover:bg-navy-light"
+    >
+      {label}
+      <Pencil
+        size={11}
+        strokeWidth={2.5}
+        className="text-cream/50 transition-colors group-hover:text-cream"
+      />
+    </Link>
   );
 }

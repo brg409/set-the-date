@@ -17,7 +17,7 @@ import {
   DollarSign,
   type LucideIcon,
 } from "lucide-react";
-import type { DateType, Vibe, Neighborhood, PriceLevel } from "./types";
+import type { DateType, Vibe, Neighborhood, PriceLevel, NotForMeReason } from "./types";
 
 export interface OptionMeta<T extends string | number> {
   value: T;
@@ -192,4 +192,14 @@ export const PRICE_LABEL: Record<PriceLevel, string> = {
   2: "$$",
   3: "$$$",
   4: "$$$$",
+};
+
+export const NOT_FOR_ME_REASON_LABELS: Record<NotForMeReason, string> = {
+  too_expensive: "Too expensive",
+  too_far: "Too far",
+  wrong_vibe: "Wrong vibe",
+  too_formal: "Too formal",
+  too_casual: "Too casual",
+  already_been: "I've already been",
+  not_interested: "Just not interested",
 };

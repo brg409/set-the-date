@@ -2,7 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, ChevronDown, Utensils, Martini, Sparkles, Home, TreePine } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Utensils,
+  Martini,
+  Sparkles,
+  Home,
+  TreePine,
+  Check,
+} from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/Button";
 import { ProgressSteps } from "@/components/ProgressSteps";
@@ -32,10 +41,18 @@ const ADVANCE_DELAY_MS = 280;
 export default function PlanFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // If arriving from "Adjust filters", pre-fill the wizard with the last search.
+  // If arriving from "Edit preferences", pre-fill the wizard with the last search.
   const initial = useMemo(() => paramsToPreferences(searchParams), [searchParams]);
+  // Editing an existing, fully-specified search (vs. starting fresh) lets us
+  // jump straight to the field being changed and skip re-clicking through
+  // the rest of the flow.
+  const isEditing = Boolean(initial);
+  const focusStep = searchParams.get("focus");
+  const initialStep = focusStep && (STEPS as readonly string[]).includes(focusStep)
+    ? STEPS.indexOf(focusStep as StepKey)
+    : 0;
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(initialStep);
   const [dateType, setDateType] = useState<DateType | undefined>(initial?.dateType);
   const [vibe, setVibe] = useState<Vibe | undefined>(initial?.vibe);
   const [neighborhood, setNeighborhood] = useState<Neighborhood | undefined>(
@@ -101,6 +118,18 @@ export default function PlanFlow() {
             {progressLabel}
           </p>
         </div>
+
+        {isEditing && (
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-sand/70 px-4 py-3">
+            <p className="text-xs text-navy/70">
+              Editing your last search — change what you need, then update.
+            </p>
+            <Button size="sm" onClick={handleSubmit} disabled={!canSubmit}>
+              <Check size={14} strokeWidth={2.5} />
+              Update results
+            </Button>
+          </div>
+        )}
 
         <h1 className="font-display text-2xl text-navy sm:text-3xl">{title}</h1>
         <p className="mt-1.5 text-sm text-ink/60">{subtitle}</p>
@@ -239,7 +268,7 @@ export default function PlanFlow() {
                 disabled={!canSubmit}
                 className="w-full"
               >
-                Find my spot
+                {isEditing ? "Update results" : "Find my spot"}
               </Button>
             </div>
           )}

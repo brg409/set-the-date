@@ -118,4 +118,55 @@ export interface ScoredVenue {
   score: number;
   whyItFits: string;
   matchedTags: string[];
+  /** True when this result required relaxing the user's neighborhood and/or budget filter. */
+  isExpandedMatch?: boolean;
+}
+
+export interface ExpansionState {
+  /** Include venues outside the selected neighborhood. */
+  neighborhood: boolean;
+  /** Include venues priced above the selected budget. */
+  budget: boolean;
+}
+
+/**
+ * Whether the current result set satisfies the user's neighborhood/budget
+ * filters exactly, or had to relax one to fill out three results. The UI
+ * uses this to explain itself instead of silently substituting venues.
+ */
+export interface RecommendationResult {
+  results: ScoredVenue[];
+  /** How many venues exist that match neighborhood + budget exactly (before any expansion). */
+  exactMatchCount: number;
+  /** Whether expanding to nearby neighborhoods would surface additional eligible venues. */
+  canExpandNeighborhood: boolean;
+  /** Whether allowing a higher budget would surface additional eligible venues. */
+  canExpandBudget: boolean;
+  /** Which relaxations are currently applied to produce `results`. */
+  expanded: {
+    neighborhood: boolean;
+    budget: boolean;
+  };
+}
+
+export const NOT_FOR_ME_REASONS = [
+  "too_expensive",
+  "too_far",
+  "wrong_vibe",
+  "too_formal",
+  "too_casual",
+  "already_been",
+  "not_interested",
+] as const;
+
+export type NotForMeReason = (typeof NOT_FOR_ME_REASONS)[number];
+
+/** A single "not for me" event, kept locally so it could later inform personalization. */
+export interface VenueFeedback {
+  venueId: string;
+  reason: NotForMeReason | null;
+  dateType: DateType;
+  vibe: Vibe;
+  neighborhood: Neighborhood;
+  createdAt: string;
 }

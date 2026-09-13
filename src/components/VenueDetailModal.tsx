@@ -35,6 +35,7 @@ export function VenueDetailModal({
 
   const neighborhood = findOption(NEIGHBORHOOD_OPTIONS, venue.neighborhood);
   const attributes = getFullAttributeList(venue);
+  const reserveUrl = getReserveUrl(venue);
 
   return (
     <div
@@ -112,14 +113,12 @@ export function VenueDetailModal({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 border-t border-line pt-5">
-            <LinkButton
-              href={getReserveUrl(venue)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink size={15} strokeWidth={2.25} />
-              Reserve
-            </LinkButton>
+            {reserveUrl && (
+              <LinkButton href={reserveUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink size={15} strokeWidth={2.25} />
+                Reserve / Visit website
+              </LinkButton>
+            )}
             <LinkButton
               href={getDirectionsUrl(venue)}
               target="_blank"
@@ -131,6 +130,11 @@ export function VenueDetailModal({
             </LinkButton>
             <SaveButton venueId={venue.id} />
           </div>
+
+          <p className="-mt-2 text-xs text-ink/45">
+            Details, hours, and availability can change — confirm on the
+            venue&rsquo;s own site before you go.
+          </p>
         </div>
       </div>
     </div>

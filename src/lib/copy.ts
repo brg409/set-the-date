@@ -36,10 +36,9 @@ export const STEP_SUBTITLES = {
 export const RESULTS_COPY = {
   heading: "Your three spots",
   subheading: "Ranked for this date, not just Philadelphia in general.",
-  regenerate: "Show me 3 different spots",
-  adjustFilters: "Adjust filters",
+  regenerate: "Show me different spots",
+  editPreferences: "Edit preferences",
   whyItFitsLabel: "Why it fits",
-  emptyState: "We couldn't build a plan from that combination — try adjusting a filter.",
 };
 
 export const SAVED_COPY = {

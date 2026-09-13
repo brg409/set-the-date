@@ -33,6 +33,9 @@
 
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* Belt-and-suspenders against any element that could force a horizontal
+     scrollbar on narrow phones (a fixed-width child, a long unbroken URL, etc.). */
+  overflow-x: hidden;
 }
 
 .font-display {
@@ -42,4 +45,19 @@ body {
 ::selection {
   background: var(--color-coral);
   color: var(--color-white);
+}
+
+/* Visible keyboard focus everywhere, since several interactive elements use
+   custom classes rather than native button/link styling. */
+:focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Sticky header is ~64px tall — anything jumped to via an anchor or focus
+   should land clear of it rather than partially underneath it. */
+h1,
+section[id] {
+  scroll-margin-top: 5rem;
 }
