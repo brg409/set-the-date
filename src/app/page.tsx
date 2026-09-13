@@ -128,8 +128,10 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-line px-5 py-8 text-center text-xs text-ink/45">
-        Set the Date is a prototype. Venue data shown is illustrative sample
-        content, not live listings.
+        Set the Date is a prototype. Rittenhouse venues are real Philadelphia
+        spots; other neighborhoods use illustrative sample data. Attributes
+        like noise and romance are editorial judgment calls, not measured
+        data.
       </footer>
     </div>
   );
