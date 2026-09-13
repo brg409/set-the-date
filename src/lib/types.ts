@@ -10,6 +10,44 @@ export type DateType =
   | "reconnecting"
   | "surprise_me";
 
+/**
+ * ── Tagging guidelines ──────────────────────────────────────────────────
+ * A venue should only carry a `Vibe` or `DateType` tag it actually earns —
+ * these are not "coverage" checkboxes to tick for exposure. Apply these
+ * definitions when adding or auditing a venue:
+ *
+ * Vibes:
+ * - cozy_intimate: smaller scale, comfortable seating, lower energy,
+ *   conversation-friendly. Does NOT require romance — a quiet daytime cafe
+ *   can be cozy_intimate without being romantic.
+ * - relaxed_casual: low-pressure, approachable, not overly formal.
+ * - lively_social: noticeable energy, crowds, music, or people-watching;
+ *   conversation may take a back seat to atmosphere.
+ * - romantic: intentional atmosphere, seating/lighting/setting suited to
+ *   two people, and an experience that credibly feels special. Requires a
+ *   genuinely elevated or intimate setting — being quiet or warmly lit is
+ *   not sufficient on its own (a bakery-luncheonette is not romantic).
+ * - fun_playful: a built-in activity, interactive element, or experience
+ *   beyond simply eating or drinking.
+ * - trendy: currently stylish, distinctive, or culturally buzzed-about —
+ *   not simply "upscale" or "classic" (an old-school steakhouse from 1997
+ *   is not trendy even if it's excellent).
+ * - something_different: a genuinely unusual format, concept, environment,
+ *   or activity — not just "a bit livelier than average."
+ *
+ * Date types:
+ * - first_date: conversation-friendly, or includes a low-pressure activity.
+ * - casual: approachable, flexible, low commitment.
+ * - anniversary: memorable, intentional, capable of feeling special —
+ *   requires real evidence of romance/ceremony, not just "nice restaurant."
+ * - special_occasion: elevated service, setting, experience, or
+ *   celebration value.
+ * - reconnecting: comfortable, conversation-friendly, suited to spending
+ *   real time together (not a rushed quick-service spot).
+ *
+ * When a venue's actual character doesn't clearly satisfy one of these,
+ * leave the tag off rather than including it "to be safe" or for coverage.
+ */
 export type Vibe =
   | "cozy_intimate"
   | "relaxed_casual"
@@ -49,7 +87,22 @@ export type ReservationDifficulty =
   | "walk_in_friendly"
   | "recommended"
   | "required";
-export type IndoorOutdoor = "indoor" | "outdoor" | "both";
+/**
+ * Deliberately two separate facts, not one "indoor | outdoor | both" enum.
+ * Virtually every restaurant/bar/cafe has SOME indoor seating — that's
+ * rarely the uncertain fact. Outdoor seating is the fact that's actually in
+ * doubt for a given venue, so it gets its own tri-state:
+ *
+ * - "yes": verified — a patio, sidewalk seating, courtyard, rooftop, etc.
+ * - "no": verified absence (e.g. a below-street speakeasy with no windows).
+ * - "unknown": not verified either way. This is a REAL state, not a
+ *   placeholder for "no" — it must never satisfy a user's "outdoor" filter.
+ *   See `isEligible` in recommend.ts.
+ */
+export type OutdoorSeatingStatus = "yes" | "no" | "unknown";
+
+/** The user's preference when they select the optional indoor/outdoor filter. */
+export type IndoorOutdoorPreference = "indoor" | "outdoor";
 
 export interface VenueAttributes {
   /** 1 (hard to talk) - 5 (very easy to talk) */
@@ -89,17 +142,32 @@ export interface Venue {
   dateTypes: DateType[];
   vibes: Vibe[];
   foodDrinkActivity: FoodDrinkActivity[];
-  indoorOutdoor: IndoorOutdoor;
+  /** Almost always true for a conventional restaurant/bar/cafe — false only for a genuinely outdoor-only activity. */
+  hasIndoorSeating: boolean;
+  /** The fact actually worth verifying per-venue. See `OutdoorSeatingStatus`. */
+  outdoorSeating: OutdoorSeatingStatus;
   attributes: VenueAttributes;
   /** Short concrete phrases used to build "why it fits" copy, e.g. "dim lighting", "cozy booths" */
   tags: string[];
   reservationUrl?: string;
   websiteUrl?: string;
+  /**
+   * Evidence trail for factual claims (mainly `outdoorSeating` today). Not
+   * shown in the UI — its purpose is to make future audits possible and to
+   * discourage guessing: if you can't say where a fact came from, it
+   * probably belongs in `verificationNotes` as an open question, and the
+   * field itself should be "unknown" rather than a guess.
+   */
+  attributeSources?: string;
+  /** ISO date (YYYY-MM-DD) this record's factual attributes were last checked against a real source. */
+  lastVerified?: string;
+  /** Caveats a factual attribute doesn't fully capture, e.g. "outdoor seating is seasonal, closed Nov–Mar". */
+  verificationNotes?: string;
 }
 
 export interface DateFilters {
   food?: FoodDrinkActivity;
-  indoorOutdoor?: IndoorOutdoor;
+  indoorOutdoor?: IndoorOutdoorPreference;
   maxTravelMinutes?: number;
   alcohol?: "yes" | "no";
   dietary?: string;
@@ -127,6 +195,10 @@ export interface ExpansionState {
   neighborhood: boolean;
   /** Include venues priced above the selected budget. */
   budget: boolean;
+  /** Ignore the indoor/outdoor filter (if one was selected). */
+  indoorOutdoor: boolean;
+  /** Ignore the food/drinks/activity filter (if one was selected). */
+  food: boolean;
 }
 
 /**
@@ -136,17 +208,18 @@ export interface ExpansionState {
  */
 export interface RecommendationResult {
   results: ScoredVenue[];
-  /** How many venues exist that match neighborhood + budget exactly (before any expansion). */
+  /** How many venues exist that match every selected hard filter exactly (before any expansion). */
   exactMatchCount: number;
   /** Whether expanding to nearby neighborhoods would surface additional eligible venues. */
   canExpandNeighborhood: boolean;
   /** Whether allowing a higher budget would surface additional eligible venues. */
   canExpandBudget: boolean;
+  /** Whether dropping the indoor/outdoor filter would surface additional eligible venues. */
+  canExpandIndoorOutdoor: boolean;
+  /** Whether dropping the food/drinks/activity filter would surface additional eligible venues. */
+  canExpandFood: boolean;
   /** Which relaxations are currently applied to produce `results`. */
-  expanded: {
-    neighborhood: boolean;
-    budget: boolean;
-  };
+  expanded: ExpansionState;
 }
 
 export const NOT_FOR_ME_REASONS = [

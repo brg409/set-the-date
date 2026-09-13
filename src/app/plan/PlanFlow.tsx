@@ -30,7 +30,7 @@ import type {
   Neighborhood,
   PriceLevel,
   FoodDrinkActivity,
-  IndoorOutdoor,
+  IndoorOutdoorPreference,
 } from "@/lib/types";
 
 const STEPS = ["dateType", "vibe", "neighborhood", "budget"] as const;
@@ -67,7 +67,7 @@ export default function PlanFlow() {
   const [food, setFood] = useState<FoodDrinkActivity | undefined>(
     initial?.filters?.food
   );
-  const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoor | undefined>(
+  const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoorPreference | undefined>(
     initial?.filters?.indoorOutdoor
   );
   const [showMoreFilters, setShowMoreFilters] = useState(Boolean(initial?.filters));

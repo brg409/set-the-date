@@ -31,7 +31,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "special_occasion", "reconnecting"],
     vibes: ["cozy_intimate", "romantic"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Aggregator listings claim a patio using generic templated language; the official site is silent and the venue is universally described as an intimate interior \'living room\' lounge. Treated as indoor-only pending firmer confirmation \u2014 this was the venue that surfaced the outdoor-filter bug.",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "quiet",
@@ -71,7 +75,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "special_occasion", "reconnecting"],
     vibes: ["cozy_intimate", "romantic", "trendy"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Unmarked speakeasy below street level with no windows; multiple sources confirm no outdoor space.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -111,7 +119,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "anniversary", "special_occasion", "reconnecting"],
     vibes: ["lively_social", "romantic", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Extensive covered/heated sidewalk seating wrapping the building, a signature feature; usable most of the year.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -152,7 +164,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Outdoor seating offered seasonally (warmer months) per hotel dining info.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -192,7 +208,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Sidewalk/streetery seating confirmed.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -233,7 +253,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "casual", "reconnecting"],
     vibes: ["relaxed_casual", "cozy_intimate"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -273,7 +295,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "surprise_me"],
     vibes: ["fun_playful", "relaxed_casual"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -313,7 +337,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting", "surprise_me"],
     vibes: ["fun_playful"],
     foodDrinkActivity: ["activity"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Basement-level activity space; no seating area of any kind.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -353,7 +381,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "cozy_intimate"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Sidewalk seating, covered/heated for extended-season use.",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "moderate",
@@ -393,7 +425,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["trendy", "lively_social"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Outdoor seating at 18th & Walnut overlooking Rittenhouse Square (walk-in only) \u2014 corrects an earlier \'indoor-only\' assignment.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -433,7 +469,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "special_occasion", "reconnecting"],
     vibes: ["cozy_intimate", "romantic", "trendy"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Seasonal courtyard/outdoor seating (warmer months).",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "quiet",
@@ -473,7 +513,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "special_occasion", "reconnecting", "surprise_me"],
     vibes: ["cozy_intimate", "romantic", "trendy"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Underground speakeasy/lounge below street level; no outdoor space.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -513,7 +557,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "reconnecting", "special_occasion"],
     vibes: ["cozy_intimate", "romantic"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Includes a heated outdoor seating area in addition to the hidden-entrance interior.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -553,7 +601,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["trendy", "fun_playful", "lively_social"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "No source confirms or denies outdoor seating.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -593,7 +645,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "casual", "reconnecting"],
     vibes: ["cozy_intimate", "relaxed_casual"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Roughly 18 outdoor seats reported.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -632,7 +688,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting", "surprise_me"],
     vibes: ["fun_playful", "lively_social"],
     foodDrinkActivity: ["drinks", "activity"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "No outdoor seating mentioned on the official site or in reviews found; not confirmed absent either.",
     attributes: {
       conversationFriendly: 2,
       noiseLevel: "lively",
@@ -672,7 +732,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "reconnecting", "first_date"],
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -712,7 +774,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "casual", "reconnecting"],
     vibes: ["cozy_intimate", "trendy"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Patio/outdoor dining listed among amenities.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -752,7 +818,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "reconnecting", "first_date"],
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Multiple reviews explicitly state there is no outdoor seating.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -792,7 +862,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "reconnecting", "first_date"],
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Converted street patio, heated in-season.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -832,7 +906,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "anniversary", "special_occasion", "reconnecting"],
     vibes: ["lively_social", "romantic", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Iconic sidewalk seating overlooking Rittenhouse Square since 1998; seasonal.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -871,7 +949,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting", "surprise_me"],
     vibes: ["fun_playful", "trendy", "lively_social"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "One vague \'indoor-outdoor\' mention with no photo/review confirmation.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -911,7 +993,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "casual", "reconnecting"],
     vibes: ["cozy_intimate", "romantic", "relaxed_casual"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "A few sidewalk two-top tables; seasonal.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -951,7 +1037,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "trendy"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "The prior South Street location had a patio; the current Rittenhouse location (relocated ~fall 2025) is unconfirmed.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -991,7 +1081,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "first_date", "reconnecting"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Outdoor seating reported as seasonal (warmer months).",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1031,7 +1125,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "trendy", "lively_social"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -1071,7 +1167,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Intimate 53-seat interior dining room only; no outdoor/garden seating found.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -1111,7 +1211,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "24-seat reservation-only dining room; no outdoor seating confirmed either way.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -1151,7 +1255,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "No clear confirmation found.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -1191,7 +1299,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "A few sidewalk tables reported, seasonal.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1231,7 +1343,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
     vibes: ["romantic"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "General claims of patio dining found but not tied to a specific, verifiable source.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -1271,7 +1387,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Four outdoor tables in addition to indoor seating.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1310,7 +1430,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "casual", "reconnecting"],
     vibes: ["romantic", "trendy", "relaxed_casual"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Patio/sidewalk seating on a walk-in basis, seasonal.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1350,7 +1474,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "fun_playful"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Sidewalk patio (about 4 tables, walk-in only).",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1390,7 +1518,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "first_date", "reconnecting"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -1430,7 +1560,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Covered outdoor dining.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -1467,10 +1601,12 @@ export const VENUES: Venue[] = [
     address: "2009 Sansom St, Philadelphia, PA",
     description:
       "A three-story, 150-seat restaurant and bar from chef Brett Naylor, with a raw bar, pasta, and wood-fired pizza.",
-    dateTypes: ["casual", "first_date", "anniversary", "reconnecting"],
+    dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["lively_social", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -1510,7 +1646,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "casual", "reconnecting"],
     vibes: ["romantic", "relaxed_casual", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Heated curbside seating, usable beyond just warm months.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1550,7 +1690,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["lively_social", "trendy", "fun_playful"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Downstairs rum bar opens directly to the street.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -1590,7 +1734,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -1630,7 +1776,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["lively_social", "fun_playful"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "unknown",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Has an interior skylit courtyard/atrium rather than confirmed open-air street seating \u2014 ambiguous enough not to count as verified outdoor seating.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -1666,10 +1816,14 @@ export const VENUES: Venue[] = [
     address: "2013 Chestnut St, Philadelphia, PA",
     description:
       "A Stephen Starr Mexican restaurant inspired by Puebla and Veracruz, with a dedicated mezcal and tequila bar.",
-    dateTypes: ["casual", "first_date", "reconnecting", "anniversary"],
+    dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["lively_social", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Patio with table heaters.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -1709,7 +1863,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
     vibes: ["romantic"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Patio/outdoor dining listed as an amenity.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1746,10 +1904,14 @@ export const VENUES: Venue[] = [
     address: "1516 Sansom St, Philadelphia, PA",
     description:
       "A historic, decades-old oyster bar with a black-and-white-tiled dining room and a daily-changing seafood menu.",
-    dateTypes: ["casual", "first_date", "anniversary", "reconnecting"],
+    dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["lively_social", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Sidewalk tables on Sansom Street, confirmed via owner quotes.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -1789,7 +1951,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "cozy_intimate"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Outdoor patio, popular in warmer months; seasonal.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1829,7 +1995,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -1868,7 +2036,9 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "surprise_me"],
     vibes: ["fun_playful", "relaxed_casual"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -1908,7 +2078,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "surprise_me"],
     vibes: ["fun_playful", "something_different"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Reviewer feedback indicates no current outdoor seating (one review specifically wished they would add it).",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -1947,7 +2121,11 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["relaxed_casual", "cozy_intimate"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
+    lastVerified: "2026-09-13",
+    verificationNotes:
+      "Outdoor seating/tables confirmed by customer reviews.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -1989,7 +2167,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "special_occasion", "first_date"],
     vibes: ["trendy", "lively_social"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -2028,7 +2207,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "reconnecting", "first_date"],
     vibes: ["relaxed_casual", "cozy_intimate"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -2067,7 +2247,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -2106,7 +2287,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting", "surprise_me"],
     vibes: ["fun_playful", "lively_social"],
     foodDrinkActivity: ["activity", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -2147,7 +2329,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
     vibes: ["romantic", "cozy_intimate"],
     foodDrinkActivity: ["food", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "quiet",
@@ -2186,7 +2369,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "special_occasion"],
     vibes: ["cozy_intimate", "romantic", "trendy"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -2225,7 +2409,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting", "surprise_me"],
     vibes: ["fun_playful", "lively_social"],
     foodDrinkActivity: ["drinks", "activity"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -2264,7 +2449,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "anniversary", "casual", "reconnecting"],
     vibes: ["cozy_intimate", "romantic", "relaxed_casual"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "quiet",
@@ -2305,7 +2491,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["lively_social", "trendy"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -2344,7 +2531,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting"],
     vibes: ["cozy_intimate", "relaxed_casual"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -2383,7 +2571,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "reconnecting", "surprise_me"],
     vibes: ["fun_playful", "relaxed_casual"],
     foodDrinkActivity: ["activity", "drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -2422,7 +2611,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "special_occasion", "first_date"],
     vibes: ["trendy", "lively_social"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -2463,7 +2653,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date"],
     vibes: ["relaxed_casual", "cozy_intimate"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -2502,7 +2693,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["first_date", "casual", "reconnecting"],
     vibes: ["cozy_intimate", "relaxed_casual"],
     foodDrinkActivity: ["drinks", "food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "quiet",
@@ -2541,7 +2733,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "surprise_me"],
     vibes: ["fun_playful", "relaxed_casual", "something_different"],
     foodDrinkActivity: ["activity", "food"],
-    indoorOutdoor: "outdoor",
+    hasIndoorSeating: false,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -2580,7 +2773,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion", "reconnecting"],
     vibes: ["romantic", "cozy_intimate"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 5,
       noiseLevel: "quiet",
@@ -2621,7 +2815,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["anniversary", "special_occasion"],
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",
@@ -2660,7 +2855,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "reconnecting", "first_date"],
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["drinks"],
-    indoorOutdoor: "indoor",
+    hasIndoorSeating: true,
+    outdoorSeating: "no",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -2699,7 +2895,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "surprise_me"],
     vibes: ["fun_playful", "something_different", "lively_social"],
     foodDrinkActivity: ["activity", "drinks"],
-    indoorOutdoor: "outdoor",
+    hasIndoorSeating: false,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "moderate",
@@ -2738,7 +2935,8 @@ export const VENUES: Venue[] = [
     dateTypes: ["casual", "first_date", "surprise_me"],
     vibes: ["fun_playful", "relaxed_casual"],
     foodDrinkActivity: ["food"],
-    indoorOutdoor: "both",
+    hasIndoorSeating: true,
+    outdoorSeating: "yes",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "quiet",

@@ -165,10 +165,11 @@ for (const prefs of regenSamples) {
   const initial = getRecommendations(prefs, { count: 3 });
   const dismissedId = initial.results[0].venue.id;
   const keepIds = initial.results.slice(1).map((r) => r.venue.id);
-  const replacement = getReplacementVenue(prefs, { neighborhood: false, budget: false }, [
-    dismissedId,
-    ...keepIds,
-  ]);
+  const replacement = getReplacementVenue(
+    prefs,
+    { neighborhood: false, budget: false, indoorOutdoor: false, food: false },
+    [dismissedId, ...keepIds]
+  );
   const dupInKeep = replacement && keepIds.includes(replacement.venue.id);
   const isDismissed = replacement && replacement.venue.id === dismissedId;
   console.log(

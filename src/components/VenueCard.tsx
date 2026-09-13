@@ -1,4 +1,4 @@
-import { MapPin, ExternalLink, Navigation, MapPinOff, DollarSign } from "lucide-react";
+import { MapPin, ExternalLink, Navigation, MapPinOff, DollarSign, TreePine, Utensils } from "lucide-react";
 import type { DatePreferences, NotForMeReason, ScoredVenue } from "@/lib/types";
 import { PRICE_LABEL, findOption, NEIGHBORHOOD_OPTIONS } from "@/lib/options";
 import { getKeyAttributeChips } from "@/lib/attributeLabels";
@@ -32,6 +32,12 @@ export function VenueCard({
 
   const outsideNeighborhood = prefs && venue.neighborhood !== prefs.neighborhood;
   const outsideBudget = prefs && venue.priceLevel > prefs.budget;
+  const wantedIO = prefs?.filters?.indoorOutdoor;
+  const outsideIndoorOutdoor =
+    wantedIO &&
+    !(wantedIO === "indoor" ? venue.hasIndoorSeating : venue.outdoorSeating === "yes");
+  const wantedFood = prefs?.filters?.food;
+  const outsideFood = wantedFood && !venue.foodDrinkActivity.includes(wantedFood);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-sm shadow-navy/[0.03] transition-shadow hover:shadow-md hover:shadow-navy/[0.06]">
@@ -52,7 +58,7 @@ export function VenueCard({
       </button>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        {(outsideNeighborhood || outsideBudget) && (
+        {(outsideNeighborhood || outsideBudget || outsideIndoorOutdoor || outsideFood) && (
           <div className="flex flex-wrap gap-1.5">
             {outsideNeighborhood && (
               <Chip icon={MapPinOff} tone="coral">
@@ -62,6 +68,16 @@ export function VenueCard({
             {outsideBudget && (
               <Chip icon={DollarSign} tone="coral">
                 Above your {PRICE_LABEL[prefs!.budget]} budget
+              </Chip>
+            )}
+            {outsideIndoorOutdoor && (
+              <Chip icon={TreePine} tone="coral">
+                No verified {wantedIO} seating
+              </Chip>
+            )}
+            {outsideFood && (
+              <Chip icon={Utensils} tone="coral">
+                Not tagged as {wantedFood}
               </Chip>
             )}
           </div>

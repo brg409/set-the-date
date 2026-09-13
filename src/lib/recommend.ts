@@ -38,20 +38,50 @@ export const RECOMMENDATION_WEIGHTS = {
   dateTypeMatch: 4,
   /** Exact vibe match (e.g. venue explicitly supports "romantic"). */
   vibeMatch: 3,
-  /** Small nudge for matching an optional filter (food/drink/activity, indoor/outdoor). */
-  filterMatch: 1,
 };
 
 // ── 1. Eligibility (hard filters) ──────────────────────────────────────
+//
+// Neighborhood, budget, indoor/outdoor, and food/drink/activity are all
+// treated identically here: a constraint the user explicitly set is a wall,
+// not a preference to balance against everything else. A venue that fails
+// any selected hard filter is excluded from the pool entirely — it can
+// never be scored into a top-3 slot by being strong on other axes. The only
+// way a filter relaxes is `expand`, which the user opts into explicitly
+// (see the results-page banner); it is never automatic.
+//
+// "unknown" on a factual attribute (e.g. `outdoorSeating: "unknown"`) is
+// deliberately NOT the same as a match — an unverified fact must not be
+// treated as satisfying the user's request.
 
-const NO_EXPANSION: ExpansionState = { neighborhood: false, budget: false };
+const NO_EXPANSION: ExpansionState = {
+  neighborhood: false,
+  budget: false,
+  indoorOutdoor: false,
+  food: false,
+};
 
 function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState): boolean {
   const neighborhoodOk = expand.neighborhood || venue.neighborhood === prefs.neighborhood;
   // Budget is a ceiling, not an exact match — a cheaper venue than requested
   // is fine, a more expensive one is not, unless the user opts to expand.
   const budgetOk = expand.budget || venue.priceLevel <= prefs.budget;
-  return neighborhoodOk && budgetOk;
+
+  const wantedIO = prefs.filters?.indoorOutdoor;
+  // "indoor" is satisfied by virtually every venue (see `hasIndoorSeating`).
+  // "outdoor" requires a VERIFIED "yes" — "unknown" and "no" both fail, per
+  // the rule that an unverified fact never counts as satisfying a request.
+  const indoorOutdoorOk =
+    expand.indoorOutdoor ||
+    !wantedIO ||
+    (wantedIO === "indoor" && venue.hasIndoorSeating) ||
+    (wantedIO === "outdoor" && venue.outdoorSeating === "yes");
+
+  const wantedFood = prefs.filters?.food;
+  const foodOk =
+    expand.food || !wantedFood || venue.foodDrinkActivity.includes(wantedFood);
+
+  return neighborhoodOk && budgetOk && indoorOutdoorOk && foodOk;
 }
 
 function getEligibleVenues(prefs: DatePreferences, expand: ExpansionState): Venue[] {
@@ -120,8 +150,21 @@ function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number 
   }
 
   switch (prefs.vibe) {
-    case "cozy_intimate":
     case "romantic":
+      // The venue's own `romantic` rating is the primary signal — lighting
+      // and quiet are supporting evidence, not substitutes for it. Without
+      // this, a quiet, warmly-lit bakery scored the same "romantic" bonus
+      // as an actually candlelit restaurant purely from ambient proxies,
+      // which is how a bakery-luncheonette ended up ranking for romantic
+      // searches despite not being tagged (or being) romantic at all.
+      bonus += (a.romantic - 3) * 1.25;
+      bonus += a.lighting !== "bright" ? 0.5 : 0;
+      bonus += a.noiseLevel === "quiet" ? 0.5 : a.noiseLevel === "lively" ? -0.5 : 0;
+      break;
+    case "cozy_intimate":
+      // Cozy/intimate is about scale and calm, not romance specifically —
+      // a quiet daytime cafe can genuinely be cozy without being romantic.
+      bonus += (a.romantic - 3) * 0.4;
       bonus += a.lighting !== "bright" ? 1 : 0;
       bonus += a.noiseLevel === "quiet" ? 1 : a.noiseLevel === "lively" ? -1 : 0;
       break;
@@ -141,29 +184,17 @@ function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number 
   return bonus;
 }
 
-function scoreFilters(venue: Venue, prefs: DatePreferences): number {
-  const filters = prefs.filters;
-  if (!filters) return 0;
-  let bonus = 0;
-  if (filters.food && venue.foodDrinkActivity.includes(filters.food)) {
-    bonus += RECOMMENDATION_WEIGHTS.filterMatch;
-  }
-  if (
-    filters.indoorOutdoor &&
-    (venue.indoorOutdoor === filters.indoorOutdoor || venue.indoorOutdoor === "both")
-  ) {
-    bonus += RECOMMENDATION_WEIGHTS.filterMatch;
-  }
-  return bonus;
-}
-
-/** Ranks an already-eligible venue. Neighborhood/budget are NOT scored here — see `isEligible`. */
+/**
+ * Ranks an already-eligible venue. Neighborhood, budget, indoor/outdoor, and
+ * food/drink/activity are NOT scored here — they're hard filters (see
+ * `isEligible`), so every venue reaching this function already satisfies
+ * them equally; there's nothing left to differentiate on that basis.
+ */
 export function rankVenue(venue: Venue, prefs: DatePreferences): number {
   return (
     scoreDateType(venue, prefs.dateType) +
     scoreVibe(venue, prefs.vibe) +
-    scoreSecondaryAttributes(venue, prefs) +
-    scoreFilters(venue, prefs)
+    scoreSecondaryAttributes(venue, prefs)
   );
 }
 
@@ -373,11 +404,18 @@ export function getRecommendations(
 
   const exactPool = getEligibleVenues(prefs, NO_EXPANSION);
   const exactMatchCount = exactPool.length;
-  const canExpandNeighborhood =
-    getEligibleVenues(prefs, { neighborhood: true, budget: expand.budget }).length > exactPool.length;
-  const canExpandBudget =
-    getEligibleVenues(prefs, { neighborhood: expand.neighborhood, budget: true }).length >
-    getEligibleVenues(prefs, { neighborhood: expand.neighborhood, budget: false }).length;
+  const currentPoolSize = getEligibleVenues(prefs, expand).length;
+
+  /** Would relaxing just this ONE dimension (on top of whatever's already expanded) help? */
+  function canExpand(dimension: keyof ExpansionState): boolean {
+    if (expand[dimension]) return false; // already relaxed
+    return getEligibleVenues(prefs, { ...expand, [dimension]: true }).length > currentPoolSize;
+  }
+
+  const canExpandNeighborhood = canExpand("neighborhood");
+  const canExpandBudget = canExpand("budget");
+  const canExpandIndoorOutdoor = canExpand("indoorOutdoor");
+  const canExpandFood = canExpand("food");
 
   let pool = getEligibleVenues(prefs, expand).filter((v) => !excludeSet.has(v.id));
   if (pool.length < count) {
@@ -397,6 +435,8 @@ export function getRecommendations(
     exactMatchCount,
     canExpandNeighborhood,
     canExpandBudget,
+    canExpandIndoorOutdoor,
+    canExpandFood,
     expanded: expand,
   };
 }

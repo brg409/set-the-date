@@ -10,6 +10,8 @@ import {
   Pencil,
   MapPin,
   DollarSign,
+  TreePine,
+  Utensils,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -35,7 +37,12 @@ import type {
 } from "@/lib/types";
 
 const INITIAL_LOAD_MS = 900;
-const NO_EXPANSION: ExpansionState = { neighborhood: false, budget: false };
+const NO_EXPANSION: ExpansionState = {
+  neighborhood: false,
+  budget: false,
+  indoorOutdoor: false,
+  food: false,
+};
 
 export default function ResultsClient() {
   const searchParams = useSearchParams();
@@ -139,11 +146,53 @@ function ResultsForPrefs({
   const neighborhoodLabel = findOption(NEIGHBORHOOD_OPTIONS, prefs.neighborhood).label;
   const budgetLabel = PRICE_LABEL[prefs.budget];
 
-  const needsExpansionChoice =
-    !expand.neighborhood &&
-    !expand.budget &&
-    meta.exactMatchCount < 3 &&
-    (meta.canExpandNeighborhood || meta.canExpandBudget);
+  const anyExpansionAvailable =
+    meta.canExpandNeighborhood ||
+    meta.canExpandBudget ||
+    meta.canExpandIndoorOutdoor ||
+    meta.canExpandFood;
+  const anyExpansionActive = expand.neighborhood || expand.budget || expand.indoorOutdoor || expand.food;
+  const needsExpansionChoice = meta.exactMatchCount < 3 && anyExpansionAvailable;
+
+  const limitingFilters = [
+    `${neighborhoodLabel}`,
+    `${budgetLabel} or less`,
+    prefs.filters?.indoorOutdoor ? prefs.filters.indoorOutdoor + " seating" : null,
+    prefs.filters?.food ? `${prefs.filters.food} only` : null,
+  ].filter((v): v is string => Boolean(v));
+
+  const expansionButtons = (size: "sm" | "md") => (
+    <div className="flex flex-wrap justify-center gap-2">
+      {meta.canExpandNeighborhood && (
+        <Button variant="outline" size={size} onClick={() => applyExpansion({ ...expand, neighborhood: true })}>
+          <MapPin size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
+          Include nearby neighborhoods
+        </Button>
+      )}
+      {meta.canExpandBudget && (
+        <Button variant="outline" size={size} onClick={() => applyExpansion({ ...expand, budget: true })}>
+          <DollarSign size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
+          Allow a higher budget
+        </Button>
+      )}
+      {meta.canExpandIndoorOutdoor && (
+        <Button
+          variant="outline"
+          size={size}
+          onClick={() => applyExpansion({ ...expand, indoorOutdoor: true })}
+        >
+          <TreePine size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
+          Include {prefs.filters?.indoorOutdoor === "outdoor" ? "indoor" : "outdoor"} spots too
+        </Button>
+      )}
+      {meta.canExpandFood && (
+        <Button variant="outline" size={size} onClick={() => applyExpansion({ ...expand, food: true })}>
+          <Utensils size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
+          Drop the {prefs.filters?.food} filter
+        </Button>
+      )}
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -167,33 +216,12 @@ function ResultsForPrefs({
           <p className="text-sm text-ink/60">{RESULTS_COPY.subheading}</p>
         </div>
 
-        {meta.exactMatchCount === 0 && !expand.neighborhood && !expand.budget && (
+        {meta.exactMatchCount === 0 && !anyExpansionActive && (
           <EmptyState
             icon={AlertCircle}
-            title={`No exact matches in ${neighborhoodLabel} at ${budgetLabel} or less`}
-            body={`Nothing in our ${neighborhoodLabel} data fits a ${budgetLabel} budget for this occasion yet. Widen the search to see options.`}
-            action={
-              <div className="flex flex-wrap justify-center gap-2">
-                {meta.canExpandNeighborhood && (
-                  <Button
-                    variant="outline"
-                    onClick={() => applyExpansion({ ...expand, neighborhood: true })}
-                  >
-                    <MapPin size={15} strokeWidth={2.25} />
-                    Include nearby neighborhoods
-                  </Button>
-                )}
-                {meta.canExpandBudget && (
-                  <Button
-                    variant="outline"
-                    onClick={() => applyExpansion({ ...expand, budget: true })}
-                  >
-                    <DollarSign size={15} strokeWidth={2.25} />
-                    Allow a higher budget
-                  </Button>
-                )}
-              </div>
-            }
+            title={`No exact matches for ${limitingFilters.join(", ")}`}
+            body="Nothing in our data satisfies every selected filter yet. Widen the search to see options — nothing gets substituted without asking first."
+            action={anyExpansionAvailable ? expansionButtons("md") : undefined}
           />
         )}
 
@@ -201,33 +229,12 @@ function ResultsForPrefs({
           <div className="mb-6 rounded-2xl border border-gold/40 bg-gold/10 p-4">
             <p className="text-sm text-ink">
               Only <strong>{meta.exactMatchCount}</strong>{" "}
-              {meta.exactMatchCount === 1 ? "spot matches" : "spots match"} {neighborhoodLabel} at{" "}
-              {budgetLabel} or less exactly for a {dateTypeLabel}. Showing
+              {meta.exactMatchCount === 1 ? "spot matches" : "spots match"} every filter exactly
+              ({limitingFilters.join(", ")}) for a {dateTypeLabel}. Showing
               {meta.exactMatchCount === 1 ? " that one" : " those"} below — widen the search for
               more:
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {meta.canExpandNeighborhood && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyExpansion({ ...expand, neighborhood: true })}
-                >
-                  <MapPin size={14} strokeWidth={2.25} />
-                  Include nearby neighborhoods
-                </Button>
-              )}
-              {meta.canExpandBudget && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyExpansion({ ...expand, budget: true })}
-                >
-                  <DollarSign size={14} strokeWidth={2.25} />
-                  Allow a higher budget
-                </Button>
-              )}
-            </div>
+            <div className="mt-3">{expansionButtons("sm")}</div>
           </div>
         )}
 

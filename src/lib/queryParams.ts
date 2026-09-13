@@ -3,7 +3,7 @@ import type {
   DatePreferences,
   DateType,
   FoodDrinkActivity,
-  IndoorOutdoor,
+  IndoorOutdoorPreference,
   Neighborhood,
   PriceLevel,
   Vibe,
@@ -72,8 +72,8 @@ export function paramsToPreferences(
   const filters: DateFilters = {};
   const food = params.get("food") as FoodDrinkActivity | null;
   if (food) filters.food = food;
-  const io = params.get("io") as IndoorOutdoor | null;
-  if (io) filters.indoorOutdoor = io;
+  const io = params.get("io") as IndoorOutdoorPreference | null;
+  if (io === "indoor" || io === "outdoor") filters.indoorOutdoor = io;
 
   return {
     dateType,

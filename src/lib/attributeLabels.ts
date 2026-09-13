@@ -10,6 +10,7 @@ import {
   CloudSun,
   Shirt,
   Star,
+  TreePine,
   type LucideIcon,
 } from "lucide-react";
 import type { Venue } from "./types";
@@ -81,5 +82,8 @@ export function getFullAttributeList(venue: Venue): AttributeChip[] {
     { icon: CalendarCheck, label: RESERVATION_LABEL[a.reservationDifficulty] },
     ...(a.builtInActivity ? [{ icon: Sparkles, label: "Built-in activity" }] : []),
     ...(a.weatherDependent ? [{ icon: CloudSun, label: "Weather dependent" }] : []),
+    // Only ever a positive claim — "no" and "unknown" both stay silent here
+    // rather than asserting an absence we haven't fully verified either.
+    ...(venue.outdoorSeating === "yes" ? [{ icon: TreePine, label: "Outdoor seating available" }] : []),
   ];
 }

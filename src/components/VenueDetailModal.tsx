@@ -134,6 +134,7 @@ export function VenueDetailModal({
           <p className="-mt-2 text-xs text-ink/45">
             Details, hours, and availability can change — confirm on the
             venue&rsquo;s own site before you go.
+            {venue.verificationNotes && ` ${venue.verificationNotes}`}
           </p>
         </div>
       </div>
