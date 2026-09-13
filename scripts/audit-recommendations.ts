@@ -1,13 +1,14 @@
 /**
- * Recommendation-quality audit for the Rittenhouse dataset.
+ * Recommendation-quality audit for one neighborhood's dataset.
  *
- * Runs every (dateType × vibe × budget) combination for Rittenhouse through
- * the real recommendation engine and reports coverage, variety, and
- * concentration stats. Run with: npm run audit
+ * Runs every (dateType × vibe × budget) combination through the real
+ * recommendation engine and reports coverage, variety, and concentration
+ * stats. Run with: npm run audit:recommendations -- <neighborhood>
+ * (defaults to rittenhouse if no argument is given).
  */
 import { VENUES } from "../src/data/venues";
 import { getRecommendations, getReplacementVenue } from "../src/lib/recommend";
-import type { DatePreferences, DateType, PriceLevel, Vibe } from "../src/lib/types";
+import type { DatePreferences, DateType, Neighborhood, PriceLevel, Vibe } from "../src/lib/types";
 
 const DATE_TYPES: DateType[] = [
   "first_date",
@@ -27,10 +28,10 @@ const VIBES: Vibe[] = [
   "something_different",
 ];
 const BUDGETS: PriceLevel[] = [1, 2, 3, 4];
-const NEIGHBORHOOD = "rittenhouse" as const;
+const NEIGHBORHOOD = (process.argv[2] ?? "rittenhouse") as Neighborhood;
 
 const ritt = VENUES.filter((v) => v.neighborhood === NEIGHBORHOOD);
-console.log(`Rittenhouse venue count: ${ritt.length}\n`);
+console.log(`${NEIGHBORHOOD} venue count: ${ritt.length}\n`);
 
 interface ComboResult {
   dateType: DateType;

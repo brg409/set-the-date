@@ -146,6 +146,14 @@ export interface Venue {
   hasIndoorSeating: boolean;
   /** The fact actually worth verifying per-venue. See `OutdoorSeatingStatus`. */
   outdoorSeating: OutdoorSeatingStatus;
+  /**
+   * Whether the venue itself serves alcohol (BYOB counts as `false` here —
+   * the venue isn't the one serving it). Tracked so an alcohol/no-alcohol
+   * filter can be added later without re-auditing every venue; there is no
+   * such filter in the UI yet, so this is not currently enforced as a hard
+   * constraint anywhere.
+   */
+  servesAlcohol: boolean;
   attributes: VenueAttributes;
   /** Short concrete phrases used to build "why it fits" copy, e.g. "dim lighting", "cozy booths" */
   tags: string[];

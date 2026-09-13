@@ -279,10 +279,20 @@ export function generateWhyItFits(venue: Venue, prefs: DatePreferences): string 
   const tags = venue.tags.slice(0, 3);
   const tagSentence = capitalize(joinWithAnd(tags));
   const dateTypeLabel = DATE_TYPE_LABEL[prefs.dateType];
-  const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
   const claim = buildSpecificClaim(venue, prefs);
 
-  return `${tagSentence} make ${venue.name} a strong ${dateTypeLabel} option when you want ${wantPhrase}. ${claim}`;
+  // The "when you want [vibe]" clause asserts the venue actually delivers
+  // that vibe. Only make that claim when the venue is genuinely tagged with
+  // it — otherwise this venue only surfaced because the eligible pool for
+  // the selected hard filters was small, and the vibe claim would be
+  // unsupported (e.g. a coffee shop shown for "romantic" purely because it
+  // was one of the only outdoor-seating options left at that budget).
+  if (venue.vibes.includes(prefs.vibe)) {
+    const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
+    return `${tagSentence} make ${venue.name} a strong ${dateTypeLabel} option when you want ${wantPhrase}. ${claim}`;
+  }
+
+  return `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option here, even if it's not a classic pick for that vibe. ${claim}`;
 }
 
 function scoreAndExplain(venue: Venue, prefs: DatePreferences, isExpandedMatch: boolean): ScoredVenue {
