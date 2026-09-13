@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette — warm, editorial, premium. Edit these to restyle the app. */
+  --color-ink: #23262f;
+  --color-navy: #1f2a44;
+  --color-navy-light: #33436a;
+  --color-coral: #e2683f;
+  --color-coral-dark: #c8552f;
+  --color-cream: #fbf6ee;
+  --color-sand: #f2e8d8;
+  --color-sand-dark: #e7d9c2;
+  --color-gold: #c99a3c;
+  --color-line: #e6dcc9;
+  --color-white: #ffffff;
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-navy: var(--color-navy);
+  --color-navy-light: var(--color-navy-light);
+  --color-coral: var(--color-coral);
+  --color-coral-dark: var(--color-coral-dark);
+  --color-cream: var(--color-cream);
+  --color-sand: var(--color-sand);
+  --color-sand-dark: var(--color-sand-dark);
+  --color-gold: var(--color-gold);
+  --color-line: var(--color-line);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+::selection {
+  background: var(--color-coral);
+  color: var(--color-white);
+}
