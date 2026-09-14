@@ -2078,8 +2078,8 @@ export const VENUES: Venue[] = [
     category: "cafe",
     categoryLabel: "Coffee Shop",
     neighborhood: "rittenhouse",
-    priceLevel: 2,
-    pricePerPerson: [15, 25],
+    priceLevel: 1,
+    pricePerPerson: [10, 18],
     address: "1701 Locust St, Philadelphia, PA",
     description:
       "An Australian-style all-day cafe inside the Warwick Hotel, known for flat whites and avocado toast.",

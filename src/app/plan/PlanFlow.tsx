@@ -70,7 +70,7 @@ export default function PlanFlow() {
   const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoorPreference | undefined>(
     initial?.filters?.indoorOutdoor
   );
-  const [showMoreFilters, setShowMoreFilters] = useState(Boolean(initial?.filters));
+  const [showMoreFilters, setShowMoreFilters] = useState(true);
 
   const stepKey: StepKey = STEPS[step];
 

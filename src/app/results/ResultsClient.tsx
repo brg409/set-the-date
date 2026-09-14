@@ -145,6 +145,12 @@ function ResultsForPrefs({
   const vibeLabel = findOption(VIBE_OPTIONS, prefs.vibe).label;
   const neighborhoodLabel = findOption(NEIGHBORHOOD_OPTIONS, prefs.neighborhood).label;
   const budgetLabel = PRICE_LABEL[prefs.budget];
+  const foodLabel = prefs.filters?.food
+    ? prefs.filters.food.charAt(0).toUpperCase() + prefs.filters.food.slice(1) + " only"
+    : null;
+  const indoorOutdoorLabel = prefs.filters?.indoorOutdoor
+    ? prefs.filters.indoorOutdoor.charAt(0).toUpperCase() + prefs.filters.indoorOutdoor.slice(1)
+    : null;
 
   const anyExpansionAvailable =
     meta.canExpandNeighborhood ||
@@ -203,6 +209,10 @@ function ResultsForPrefs({
           <EditablePill paramsKey={paramsKey} step="vibe" label={vibeLabel} />
           <EditablePill paramsKey={paramsKey} step="neighborhood" label={neighborhoodLabel} />
           <EditablePill paramsKey={paramsKey} step="budget" label={budgetLabel} />
+          {foodLabel && <EditablePill paramsKey={paramsKey} step="budget" label={foodLabel} />}
+          {indoorOutdoorLabel && (
+            <EditablePill paramsKey={paramsKey} step="budget" label={indoorOutdoorLabel} />
+          )}
         </div>
 
         <div className="mb-6 scroll-mt-24">
