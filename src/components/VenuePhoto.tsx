@@ -8,6 +8,7 @@ import {
   Building2,
   Coffee,
   Beer,
+  GlassWater,
   IceCreamCone,
   Gamepad2,
   CircleDot,
@@ -34,6 +35,7 @@ const CATEGORY_GRADIENT: Record<VenueCategory, string> = {
   cafe: "from-[#4b3826] via-[#6b5238] to-[#3a2c1c]",
   activity: "from-[#1d4a4a] via-[#2c6363] to-[#c99a3c]/70",
   brewery: "from-[#3b2a17] via-[#5c4020] to-[#2a1d10]",
+  bar_pub: "from-[#33241a] via-[#54392a] to-[#231810]",
   dessert: "from-[#5c2b3f] via-[#7a3a52] to-[#3d1c2a]",
 };
 
@@ -45,6 +47,7 @@ const CATEGORY_ICON: Record<VenueCategory, LucideIcon> = {
   cafe: Coffee,
   activity: Sparkles,
   brewery: Beer,
+  bar_pub: GlassWater,
   dessert: IceCreamCone,
 };
 

@@ -340,6 +340,7 @@ function getVenueBucket(category: VenueCategory): string {
     case "cocktail_bar":
     case "wine_bar":
     case "brewery":
+    case "bar_pub":
     case "rooftop_bar":
       return "drinks";
     case "restaurant":

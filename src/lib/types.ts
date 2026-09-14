@@ -68,6 +68,16 @@ export type Neighborhood =
 /** 1 = $, 2 = $$, 3 = $$$, 4 = $$$$ */
 export type PriceLevel = 1 | 2 | 3 | 4;
 
+/**
+ * `brewery` is reserved for venues that actually brew their own beer
+ * on-site (a production brewery/taproom). Pubs, taverns, beer halls,
+ * sports bars, and bar-and-music venues that merely serve beer belong in
+ * `bar_pub` instead — conflating the two skewed diversification, since
+ * category is what `diversify()` in recommend.ts uses to vary a result
+ * set (a search could otherwise land 3 "breweries" that were actually a
+ * sports bar, a historic tavern, and an Irish pub with nothing brewed
+ * on-site among them).
+ */
 export type VenueCategory =
   | "cocktail_bar"
   | "wine_bar"
@@ -76,6 +86,7 @@ export type VenueCategory =
   | "cafe"
   | "activity"
   | "brewery"
+  | "bar_pub"
   | "dessert";
 
 export type FoodDrinkActivity = "food" | "drinks" | "activity";

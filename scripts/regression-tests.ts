@@ -293,6 +293,57 @@ check(
   scarce.results.every((r) => r.venue.priceLevel <= scarcePrefs.budget)
 );
 
+// ── 5. Brewery/bar_pub taxonomy split ───────────────────────────────────
+//
+// `brewery` used to include actual breweries alongside pubs, taverns, beer
+// halls, sports bars, and bar/music venues that don't brew on-site — since
+// diversify() varies results by category, this let e.g. a sports bar, a
+// historic tavern, and an Irish pub count as "different enough" purely
+// because none of them were literally called a restaurant. Locks the split
+// in place so a future data edit can't silently blur it back together.
+
+section("Brewery/bar_pub taxonomy");
+
+const TRUE_BREWERY_IDS = [
+  "iron-hill-brewery-center-city",
+  "evil-genius-beer-company",
+  "two-locals-brewing",
+  "cartesian-brewing",
+  "human-robot-sud",
+];
+const BAR_PUB_IDS = [
+  "garage-rittenhouse",
+  "monks-cafe",
+  "mcgillins-olde-ale-house",
+  "bru-craft-and-wurst",
+  "khyber-pass-pub",
+  "sassafras-bar",
+  "national-mechanics",
+  "plough-and-the-stars",
+  "frankford-hall",
+  "johnny-brendas",
+  "fishtown-tavern",
+  "cedar-point-bar-and-kitchen",
+  "new-deck-tavern",
+  "local-44",
+  "fountain-porter",
+  "triangle-tavern",
+];
+
+const actualBreweryIds = VENUES.filter((v) => v.category === "brewery").map((v) => v.id).sort();
+const actualBarPubIds = VENUES.filter((v) => v.category === "bar_pub").map((v) => v.id).sort();
+
+check(
+  "exactly 5 venues are categorized as brewery, and they're the right 5",
+  JSON.stringify(actualBreweryIds) === JSON.stringify([...TRUE_BREWERY_IDS].sort()),
+  actualBreweryIds.join(", ")
+);
+check(
+  "exactly 16 venues are categorized as bar_pub, and they're the right 16",
+  JSON.stringify(actualBarPubIds) === JSON.stringify([...BAR_PUB_IDS].sort()),
+  actualBarPubIds.join(", ")
+);
+
 // ── Summary ──────────────────────────────────────────────────────────────
 
 console.log(`\n${passed} passed, ${failures} failed.`);
