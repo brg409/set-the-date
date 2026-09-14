@@ -103,6 +103,11 @@ type PhotoState =
   | { status: "static"; url: string }
   | { status: "ready"; photos: ApiPhoto[]; googleMapsUri?: string };
 
+// Bump this when the /api/venue-photo response shape changes, or to force
+// past CDN/browser caches of a since-fixed failure to expire immediately
+// instead of waiting out their remaining Cache-Control TTL.
+export const CACHE_VERSION = "2";
+
 // Module-level cache: dedupes fetches for the same venue (+ outdoor
 // preference) across every card/detail view mounted during this browser
 // session. Intentionally in-memory only — we never persist Google's photo
@@ -206,7 +211,7 @@ export function VenuePhoto({
 
     let inFlight = pendingFetches.get(key);
     if (!inFlight) {
-      const params = new URLSearchParams({ w: String(sizePx), count: "1" });
+      const params = new URLSearchParams({ w: String(sizePx), count: "1", v: CACHE_VERSION });
       if (preferOutdoor) params.set("outdoor", "1");
       inFlight = fetch(`/api/venue-photo/${venue.id}?${params.toString()}`)
         .then((r) => r.json() as Promise<ApiResponse>)

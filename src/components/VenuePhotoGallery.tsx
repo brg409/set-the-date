@@ -6,6 +6,7 @@ import {
   VenuePhoto,
   PhotoSkeleton,
   AttributionBadge,
+  CACHE_VERSION,
   type ApiPhoto,
   type ApiResponse,
 } from "./VenuePhoto";
@@ -33,7 +34,7 @@ export function VenuePhotoGallery({ venue }: { venue: Venue }) {
   useEffect(() => {
     if (!venue.googlePlaceId) return;
     let cancelled = false;
-    fetch(`/api/venue-photo/${venue.id}?w=1200&count=3`)
+    fetch(`/api/venue-photo/${venue.id}?w=1200&count=3&v=${CACHE_VERSION}`)
       .then((r) => r.json() as Promise<ApiResponse>)
       .then((data) => {
         if (cancelled) return;
