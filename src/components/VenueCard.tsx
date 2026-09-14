@@ -44,9 +44,19 @@ export function VenueCard({
       <button
         type="button"
         onClick={() => onViewDetails(venue.id)}
-        className="relative block aspect-[16/10] w-full text-left"
+        className="relative block aspect-[16/10] w-full overflow-hidden text-left sm:aspect-[4/3]"
       >
-        <VenuePhoto venue={venue} preferOutdoor={wantedIO === "outdoor"} linkAttribution={false} />
+        {/*
+          `aspect-ratio` alone only sets a *preferred* size — a normal-flow
+          child taller than that ratio (e.g. a portrait-oriented source
+          photo) still forces the box to grow to fit it. Wrapping the photo
+          in its own `absolute inset-0` layer takes it out of flow entirely,
+          so its content can never influence this button's size regardless
+          of the source image's natural dimensions.
+        */}
+        <div className="absolute inset-0">
+          <VenuePhoto venue={venue} preferOutdoor={wantedIO === "outdoor"} linkAttribution={false} />
+        </div>
         {rank && (
           <span className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm font-semibold text-navy shadow-sm">
             {rank}

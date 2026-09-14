@@ -244,7 +244,7 @@ export function VenuePhoto({
         src={state.url}
         alt={venue.name}
         loading="lazy"
-        className={`h-full w-full object-cover ${className}`}
+        className={`h-full w-full object-cover object-center ${className}`}
         onError={() => setState({ status: "unavailable" })}
       />
     );
@@ -259,7 +259,7 @@ export function VenuePhoto({
           src={photo.url}
           alt={`${venue.categoryLabel} interior at ${venue.name}`}
           loading="lazy"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center"
           onError={() => setState({ status: "unavailable" })}
         />
         <AttributionBadge photo={photo} googleMapsUri={state.googleMapsUri} linkable={linkAttribution} />
