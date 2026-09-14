@@ -10,7 +10,7 @@ import type { Venue } from "./types";
 const PLACES_BASE = "https://places.googleapis.com/v1";
 
 export type VenuePhotoResult =
-  | { available: false; reason: "no_api_key" | "no_place_id" | "no_photos" | "fetch_failed"; debug?: string }
+  | { available: false; reason: "no_api_key" | "no_place_id" | "no_photos" | "fetch_failed" }
   | {
       available: true;
       photos: Array<{
@@ -65,15 +65,10 @@ export async function fetchVenuePhotos(
       // short-lived HTTP cache header instead (see the route handler).
       cache: "no-store",
     });
-    if (!detailsRes.ok) {
-      // TEMP DEBUG — remove once the production key issue is diagnosed.
-      // Never includes the key itself, only Google's own status/error text.
-      const bodyText = await detailsRes.text().catch(() => "");
-      return { available: false, reason: "fetch_failed", debug: `details ${detailsRes.status}: ${bodyText.slice(0, 300)}` };
-    }
+    if (!detailsRes.ok) return { available: false, reason: "fetch_failed" };
     details = await detailsRes.json();
-  } catch (err) {
-    return { available: false, reason: "fetch_failed", debug: `details threw: ${err instanceof Error ? err.message : String(err)}` };
+  } catch {
+    return { available: false, reason: "fetch_failed" };
   }
 
   const allPhotos = details.photos ?? [];
