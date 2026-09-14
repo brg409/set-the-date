@@ -20,8 +20,13 @@ export interface AttributeChip {
   label: string;
 }
 
+// Deliberately just describes the ambient decibel level, not whether
+// conversation is actually possible — those are different facts (a quiet,
+// hushed audience during a show is not "easy to talk"). The separate
+// "Great for conversation" chip below, gated on conversationFriendly, is
+// what actually claims conversational ease.
 const NOISE_LABEL: Record<Venue["attributes"]["noiseLevel"], string> = {
-  quiet: "Quiet — easy to talk",
+  quiet: "Quiet",
   moderate: "Moderate noise",
   lively: "Lively energy",
 };

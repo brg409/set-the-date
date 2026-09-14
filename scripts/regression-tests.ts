@@ -222,6 +222,30 @@ check(
   cozyRomanticLeaks.join("; ")
 );
 
+// Center City-specific: the same failure mode, for its big-spectacle
+// theater/concert venues (grand halls you watch a show in, not intimate
+// rooms you can talk in during the performance).
+section("Center City: big spectacle venues never win a cozy/romantic search");
+
+const BIG_SPECTACLE_CENTER_CITY_IDS = ["academy-of-music", "walnut-street-theatre"];
+const centerCityLeaks: string[] = [];
+for (const vibe of ["cozy_intimate", "romantic"] as const) {
+  for (const dateType of ["first_date", "anniversary", "special_occasion", "reconnecting"] as const) {
+    const prefs: DatePreferences = { dateType, vibe, neighborhood: "center_city", budget: 4 };
+    const results = getRecommendations(prefs, { count: 3 }).results;
+    for (const r of results) {
+      if (BIG_SPECTACLE_CENTER_CITY_IDS.includes(r.venue.id)) {
+        centerCityLeaks.push(`${dateType}/${vibe} -> ${r.venue.name}`);
+      }
+    }
+  }
+}
+check(
+  "no big-spectacle theater/concert hall appears in any Center City cozy_intimate/romantic search",
+  centerCityLeaks.length === 0,
+  centerCityLeaks.join("; ")
+);
+
 // ── 4. Fewer-than-3 results is handled honestly (no padding) ───────────
 
 section("Fewer-than-3-results handling");
