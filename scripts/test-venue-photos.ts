@@ -1,8 +1,8 @@
 /**
- * Plain assertion tests for the venue-photo fallback logic — the parts
- * that are fully testable without a live Google API key (which this
- * project doesn't have configured yet). Covers exactly the failure modes
- * the app must degrade gracefully through. Run with:
+ * Plain assertion tests for the venue-photo fallback logic and the
+ * googlePlaceId dataset. Deliberately does not make any real network call
+ * to Google — see the browser-based manual test steps in the completion
+ * notes for verifying an actual photo renders. Run with:
  *   npx tsx scripts/test-venue-photos.ts
  */
 import { VENUES, getVenueById } from "../src/data/venues";
@@ -27,6 +27,11 @@ function section(title: string) {
 
 const originalKey = process.env.GOOGLE_PLACES_API_KEY;
 
+// A venue deliberately left without a googlePlaceId (see the comment on it
+// in src/data/venues.ts for why) — used below to test the "missing place
+// ID" path without depending on which venues happen to have one looked up.
+const venueMissingPlaceId = getVenueById("franklin-mortgage-investment-co")!;
+
 // ── 1. No API key configured — the app must stay fully functional ──────
 
 section("No API key configured");
@@ -47,12 +52,11 @@ const anyRealVenue = VENUES.find((v) => v.lastVerified)!;
   process.env.GOOGLE_PLACES_API_KEY = "fake-test-key-not-a-real-credential";
 
   check(
-    "no currently-active venue has a googlePlaceId yet (Place IDs haven't been looked up against a real key)",
-    VENUES.every((v) => !v.googlePlaceId),
-    "if this fails because IDs were added, this assertion (and this comment) should be updated/removed"
+    "the test venue for this case genuinely has no googlePlaceId",
+    !venueMissingPlaceId.googlePlaceId
   );
 
-  const missingIdResult = await fetchVenuePhotos(anyRealVenue, {});
+  const missingIdResult = await fetchVenuePhotos(venueMissingPlaceId, {});
   check(
     'returns { available: false, reason: "no_place_id" } when googlePlaceId is unset, even with a key present',
     !missingIdResult.available && missingIdResult.reason === "no_place_id",
@@ -72,6 +76,17 @@ const anyRealVenue = VENUES.find((v) => v.lastVerified)!;
   check(
     "no fictional (non-lastVerified) venue has a googlePlaceId set",
     VENUES.filter((v) => !v.lastVerified).every((v) => !v.googlePlaceId)
+  );
+  const withId = realVenues.filter((v) => v.googlePlaceId);
+  const withoutId = realVenues.filter((v) => !v.googlePlaceId);
+  check(
+    `98 real venues have a verified googlePlaceId, 2 pending manual verification`,
+    withId.length === 98 && withoutId.length === 2,
+    `${withId.length} with, ${withoutId.length} without: ${withoutId.map((v) => v.id).join(", ")}`
+  );
+  check(
+    "every googlePlaceId looks like a real Places API (New) ID (starts with 'ChIJ')",
+    withId.every((v) => v.googlePlaceId!.startsWith("ChIJ"))
   );
 
   process.env.GOOGLE_PLACES_API_KEY = originalKey;

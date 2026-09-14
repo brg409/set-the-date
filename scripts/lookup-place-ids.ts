@@ -13,8 +13,23 @@
  * Run with: npx tsx scripts/lookup-place-ids.ts [neighborhood]
  * (omit the neighborhood to check every real venue that's missing one)
  */
+import fs from "node:fs";
+import path from "node:path";
 import { VENUES } from "../src/data/venues";
 import type { Neighborhood } from "../src/lib/types";
+
+// Plain scripts run via `tsx` don't get Next.js's automatic .env.local
+// loading, so read it directly here rather than adding a dotenv
+// dependency just for this one script.
+function loadEnvLocal() {
+  const envPath = path.join(process.cwd(), ".env.local");
+  if (!fs.existsSync(envPath)) return;
+  for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
+    const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (match && !process.env[match[1]]) process.env[match[1]] = match[2].trim();
+  }
+}
+loadEnvLocal();
 
 const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 if (!apiKey) {

@@ -19,6 +19,7 @@ export const VENUES: Venue[] = [
   // Rittenhouse below remains illustrative placeholder content.
   {
     id: "one-tippling-place",
+    googlePlaceId: "ChIJiV8LFDfGxokRUPrVhS6gQZY",
     name: "1 Tippling Place",
     category: "cocktail_bar",
     categoryLabel: "Cocktail Lounge",
@@ -109,6 +110,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "parc",
+    googlePlaceId: "ChIJTXp5cjrGxokRLfPNjcDBQRs",
     name: "Parc",
     category: "restaurant",
     categoryLabel: "French Brasserie",
@@ -155,6 +157,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "lacroix",
+    googlePlaceId: "ChIJBZC45TnGxokR_0zGxg5lWiM",
     name: "Lacroix",
     category: "restaurant",
     categoryLabel: "Fine Dining",
@@ -200,6 +203,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "village-whiskey",
+    googlePlaceId: "ChIJLfhKaTfGxokRiOZL6x398WY",
     name: "Village Whiskey",
     category: "restaurant",
     categoryLabel: "Gastropub",
@@ -246,6 +250,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "la-colombe-rittenhouse",
+    googlePlaceId: "ChIJL4OUUjfGxokRWbdDe02buok",
     name: "La Colombe Coffee Roasters",
     category: "cafe",
     categoryLabel: "Coffee Shop",
@@ -289,6 +294,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "vita-gelato",
+    googlePlaceId: "ChIJ0fmqgN7HxokRjzGpsYNbNzk",
     name: "Vita",
     category: "dessert",
     categoryLabel: "Gelato & Pastry",
@@ -332,6 +338,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "escape-the-room-rittenhouse",
+    googlePlaceId: "ChIJ6-07pzrGxokR2v4wysDc_bo",
     name: "Escape The Room Philadelphia",
     category: "activity",
     categoryLabel: "Escape Room",
@@ -377,6 +384,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "tria-rittenhouse",
+    googlePlaceId: "ChIJCx6IljDGxokR_dB0RlZWQ3w",
     name: "Tria Cafe Rittenhouse",
     category: "wine_bar",
     categoryLabel: "Wine Bar",
@@ -422,6 +430,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "a-bar",
+    googlePlaceId: "ChIJDz7wnzDGxokRv3nWlwBnovk",
     name: "a.bar",
     category: "cocktail_bar",
     categoryLabel: "Cocktail Bar",
@@ -467,6 +476,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "library-bar",
+    googlePlaceId: "ChIJ1T1A5DnGxokRrj3nmO5Te9E",
     name: "Library Bar",
     category: "cocktail_bar",
     categoryLabel: "Hotel Bar",
@@ -512,6 +522,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "midnight-and-the-wicked",
+    googlePlaceId: "ChIJo2Hq4i_GxokR8JmHsU-s45M",
     name: "Midnight & The Wicked",
     category: "cocktail_bar",
     categoryLabel: "Speakeasy Lounge",
@@ -557,6 +568,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "ranstead-room",
+    googlePlaceId: "ChIJueM_GTfGxokRq_IKa4nOJi4",
     name: "The Ranstead Room",
     category: "cocktail_bar",
     categoryLabel: "Speakeasy",
@@ -602,6 +614,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "the-elephant-espresso-martini-bar",
+    googlePlaceId: "ChIJZ7IXF4PHxokRB1pe6lBbAW4",
     name: "The Elephant",
     category: "cocktail_bar",
     categoryLabel: "Espresso Martini Bar",
@@ -647,6 +660,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "enswell",
+    googlePlaceId: "ChIJc3Mxf-3HxokRJ4WamINbRd8",
     name: "Enswell",
     category: "cocktail_bar",
     categoryLabel: "Cafe & Cocktail Bar",
@@ -691,6 +705,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "garage-rittenhouse",
+    googlePlaceId: "ChIJSWZcYwDHxokRtGw-APfgEnk",
     name: "Garage Rittenhouse",
     category: "brewery",
     categoryLabel: "Sports Bar",
@@ -736,6 +751,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "bonners-irish-pub",
+    googlePlaceId: "ChIJKaM7GkjGxokRQ91nB2nx8cs",
     name: "Bonner's Irish Pub",
     category: "restaurant",
     categoryLabel: "Irish Pub",
@@ -779,6 +795,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "bar-cicci",
+    googlePlaceId: "ChIJFzoBaADHxokRS7uS-LW-z24",
     name: "Bar Cicci",
     category: "wine_bar",
     categoryLabel: "Italian Aperitivo Bar",
@@ -824,6 +841,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "monks-cafe",
+    googlePlaceId: "ChIJo8Mj5DrGxokRzOysJp3HPrw",
     name: "Monk's Cafe",
     category: "brewery",
     categoryLabel: "Belgian Beer Bar",
@@ -869,6 +887,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "good-dog-bar",
+    googlePlaceId: "ChIJPzXhsjrGxokRfz0Y3386McU",
     name: "Good Dog Bar",
     category: "restaurant",
     categoryLabel: "Gastropub",
@@ -914,6 +933,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "rouge",
+    googlePlaceId: "ChIJf-mICzrGxokR7ra7ZY1MLv4",
     name: "Rouge",
     category: "restaurant",
     categoryLabel: "Bistro",
@@ -958,6 +978,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "dancerobot",
+    googlePlaceId: "ChIJ2R-jLADHxokRZFDwQebYLo0",
     name: "Dancerobot",
     category: "cocktail_bar",
     categoryLabel: "Izakaya Bar",
@@ -1003,6 +1024,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "superfolie",
+    googlePlaceId: "ChIJV7mDzCrHxokR54jPeQWwq9w",
     name: "Superfolie",
     category: "wine_bar",
     categoryLabel: "Wine Bar",
@@ -1048,6 +1070,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "winedive-rittenhouse",
+    googlePlaceId: "ChIJP8qIVdfHxokRPNX2elJQG0M",
     name: "WineDive Rittenhouse",
     category: "wine_bar",
     categoryLabel: "Wine Bar",
@@ -1093,6 +1116,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "little-water",
+    googlePlaceId: "ChIJbxwrQdLHxokROKx-NHJAoZg",
     name: "Little Water",
     category: "restaurant",
     categoryLabel: "Seafood Restaurant",
@@ -1138,6 +1162,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "la-jefa",
+    googlePlaceId: "ChIJUceOdgDHxokRU5xBTGGuGlI",
     name: "La Jefa",
     category: "restaurant",
     categoryLabel: "Mexican Cafe",
@@ -1181,6 +1206,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "friday-saturday-sunday",
+    googlePlaceId: "ChIJf7rSRDjGxokR1cJYp_u6uv8",
     name: "Friday Saturday Sunday",
     category: "restaurant",
     categoryLabel: "Fine Dining",
@@ -1226,6 +1252,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "her-place-supper-club",
+    googlePlaceId: "ChIJMW-WlpXHxokRw9Sf2FaFXjE",
     name: "Her Place Supper Club",
     category: "restaurant",
     categoryLabel: "Fine Dining",
@@ -1271,6 +1298,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "my-loup",
+    googlePlaceId: "ChIJf31Ku3nHxokRG2R6LRpXXFE",
     name: "My Loup",
     category: "restaurant",
     categoryLabel: "French Restaurant",
@@ -1316,6 +1344,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "vernick-food-and-drink",
+    googlePlaceId: "ChIJ2Xk-fzfGxokRQZMpUsa-jJQ",
     name: "Vernick Food & Drink",
     category: "restaurant",
     categoryLabel: "New American Restaurant",
@@ -1361,6 +1390,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "butcher-and-singer",
+    googlePlaceId: "ChIJOxKK_y_GxokRAcSUh1dzBbM",
     name: "Butcher & Singer",
     category: "restaurant",
     categoryLabel: "Steakhouse",
@@ -1406,6 +1436,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "jj-thai-cuisine",
+    googlePlaceId: "ChIJzxWSCzfGxokRhDncLS8qpBs",
     name: "JJ Thai Cuisine",
     category: "restaurant",
     categoryLabel: "Thai Restaurant (BYOB)",
@@ -1450,6 +1481,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "a-kitchen",
+    googlePlaceId: "ChIJCTJClDHGxokRyq9mPKfA1mc",
     name: "a.kitchen",
     category: "restaurant",
     categoryLabel: "New American Restaurant",
@@ -1495,6 +1527,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "dizengoff",
+    googlePlaceId: "ChIJhbVkbzDGxokRxnLVOvp28Ms",
     name: "Dizengoff",
     category: "restaurant",
     categoryLabel: "Israeli Hummusiya",
@@ -1540,6 +1573,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "zama",
+    googlePlaceId: "ChIJ-fWOUjfGxokRhyXawdCfnBg",
     name: "Zama",
     category: "restaurant",
     categoryLabel: "Sushi Restaurant",
@@ -1583,6 +1617,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "barclay-prime",
+    googlePlaceId: "ChIJhTaGPjrGxokRmUbaylc1LXw",
     name: "Barclay Prime",
     category: "restaurant",
     categoryLabel: "Steakhouse",
@@ -1628,6 +1663,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "wilder",
+    googlePlaceId: "ChIJrWKnrM3HxokRykMoFT3yhpk",
     name: "Wilder",
     category: "restaurant",
     categoryLabel: "New American Restaurant",
@@ -1671,6 +1707,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "via-locusta",
+    googlePlaceId: "ChIJX6c5BajHxokRW4G0y0ZU4q4",
     name: "Via Locusta",
     category: "restaurant",
     categoryLabel: "Italian Restaurant",
@@ -1716,6 +1753,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "bolo",
+    googlePlaceId: "ChIJnbEpcxzHxokRGpPRH98wePo",
     name: "Bolo",
     category: "restaurant",
     categoryLabel: "Puerto Rican Restaurant",
@@ -1761,6 +1799,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "dandan",
+    googlePlaceId: "ChIJLbw-DTDGxokR0hlDxRcMUso",
     name: "DanDan",
     category: "restaurant",
     categoryLabel: "Sichuan & Taiwanese Restaurant",
@@ -1804,6 +1843,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "mission-taqueria",
+    googlePlaceId: "ChIJL7KgHDDGxokRHpPNs28xCfY",
     name: "Mission Taqueria",
     category: "restaurant",
     categoryLabel: "Mexican Restaurant",
@@ -1848,6 +1888,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "el-rey",
+    googlePlaceId: "ChIJ5-m_ETfGxokRlOaR-SV4jUU",
     name: "El Rey",
     category: "restaurant",
     categoryLabel: "Mexican Restaurant",
@@ -1893,6 +1934,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "rittenhouse-grill",
+    googlePlaceId: "ChIJCdP2YjrGxokRjI3k4o0E_uo",
     name: "Rittenhouse Grill",
     category: "restaurant",
     categoryLabel: "Steakhouse",
@@ -1938,6 +1980,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "oyster-house",
+    googlePlaceId: "ChIJz4hVGTDGxokRYnn8nCLNB3k",
     name: "Oyster House",
     category: "restaurant",
     categoryLabel: "Seafood Restaurant",
@@ -1983,6 +2026,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "kfar",
+    googlePlaceId: "ChIJQZ34orbHxokRdCwA_7uoCYk",
     name: "K'Far",
     category: "cafe",
     categoryLabel: "Israeli Cafe",
@@ -2028,6 +2072,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "bluestone-lane",
+    googlePlaceId: "ChIJIy28ZjrGxokRObebJDP1Wm8",
     name: "Bluestone Lane",
     category: "cafe",
     categoryLabel: "Coffee Shop",
@@ -2071,6 +2116,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "weckerlys-ice-cream",
+    googlePlaceId: "ChIJOafIsJrHxokRd2jK-JukPiE",
     name: "Weckerly's Ice Cream",
     category: "dessert",
     categoryLabel: "Ice Cream Shop",
@@ -2113,6 +2159,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "malai",
+    googlePlaceId: "ChIJ749hURjHxokRGzqMolAMVRc",
     name: "Malai",
     category: "dessert",
     categoryLabel: "Ice Cream Shop",
@@ -2157,6 +2204,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "bakeshop-on-twentieth",
+    googlePlaceId: "ChIJobjvpTnGxokRC4jBz-jJEh0",
     name: "The Bakeshop on Twentieth",
     category: "dessert",
     categoryLabel: "Bakery Cafe",
@@ -2370,6 +2418,7 @@ export const VENUES: Venue[] = [
   // ---------------------------------------------------------------- Old City
   {
     id: "fork",
+    googlePlaceId: "ChIJyal5TYTIxokRfhJy2WNx4T0",
     name: "Fork",
     category: "restaurant",
     categoryLabel: "New American",
@@ -2413,6 +2462,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "buddakan",
+    googlePlaceId: "ChIJocR57YTIxokRVbmWuISm8ww",
     name: "Buddakan",
     category: "restaurant",
     categoryLabel: "Pan-Asian",
@@ -2457,6 +2507,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "amada",
+    googlePlaceId: "ChIJ2YytEYXIxokRxmFAvm4D_bs",
     name: "Amada",
     category: "restaurant",
     categoryLabel: "Spanish Tapas",
@@ -2500,6 +2551,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "royal-boucherie",
+    googlePlaceId: "ChIJOaE5coXIxokRpQt1kuCvTZs",
     name: "Royal Boucherie",
     category: "restaurant",
     categoryLabel: "French Brasserie",
@@ -2544,6 +2596,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "red-owl-tavern",
+    googlePlaceId: "ChIJ48EXY4PIxokRk-baJiWsQdU",
     name: "Red Owl Tavern",
     category: "restaurant",
     categoryLabel: "New American",
@@ -2587,6 +2640,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "cuba-libre",
+    googlePlaceId: "ChIJ_8Tvm4XIxokRBA-RzDneztg",
     name: "Cuba Libre Restaurant & Rum Bar",
     category: "restaurant",
     categoryLabel: "Cuban",
@@ -2632,6 +2686,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "forsythia",
+    googlePlaceId: "ChIJP4qCIxbJxokRGxfZTNVu-_0",
     name: "Forsythia",
     category: "restaurant",
     categoryLabel: "Modern French",
@@ -2675,6 +2730,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "positano-coast",
+    googlePlaceId: "ChIJsRPbNIXIxokREqsjrq7cP3Q",
     name: "Positano Coast",
     category: "restaurant",
     categoryLabel: "Italian Seafood",
@@ -2720,6 +2776,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "revolution-house",
+    googlePlaceId: "ChIJt-KhkIXIxokRrDVlOQKbmJA",
     name: "Revolution House",
     category: "restaurant",
     categoryLabel: "New American Gastropub",
@@ -2763,6 +2820,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "panorama",
+    googlePlaceId: "ChIJWYx1XY_IxokRdeJwgE_Gc54",
     name: "Panorama",
     category: "restaurant",
     categoryLabel: "Italian",
@@ -2807,6 +2865,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "vista-peru",
+    googlePlaceId: "ChIJgfbEnoXIxokRquQ4MmJC-yM",
     name: "Vista Peru",
     category: "restaurant",
     categoryLabel: "Peruvian",
@@ -2851,6 +2910,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "almanac",
+    googlePlaceId: "ChIJ9XsiToTIxokRH_KKvc2Y9Eo",
     name: "Almanac",
     category: "cocktail_bar",
     categoryLabel: "Cocktail Bar",
@@ -2894,6 +2954,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "48-record-bar",
+    googlePlaceId: "ChIJ-3gUPgDJxokRSc4ti-ZS5PM",
     name: "48 Record Bar",
     category: "cocktail_bar",
     categoryLabel: "Vinyl Listening Bar",
@@ -2937,6 +2998,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "calandrinos-old-city-vino",
+    googlePlaceId: "ChIJkxn6Sz7JxokRcVWev1tVtDI",
     name: "Calandrino's Old City Vino",
     category: "wine_bar",
     categoryLabel: "Wine Bar",
@@ -2981,6 +3043,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "khyber-pass-pub",
+    googlePlaceId: "ChIJ6dM0coXIxokRzky__HwL7LU",
     name: "Khyber Pass Pub",
     category: "brewery",
     categoryLabel: "Gastropub",
@@ -3024,6 +3087,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "sassafras-bar",
+    googlePlaceId: "ChIJVxCRc4XIxokRIQ9K6Vf7w9w",
     name: "Sassafras Bar",
     category: "brewery",
     categoryLabel: "Neighborhood Bar",
@@ -3068,6 +3132,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "national-mechanics",
+    googlePlaceId: "ChIJOSWtVYTIxokRwl_XrRL1xz0",
     name: "National Mechanics",
     category: "brewery",
     categoryLabel: "Historic Pub",
@@ -3113,6 +3178,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "plough-and-the-stars",
+    googlePlaceId: "ChIJpxWEcYXIxokRZUYTDyQB0mY",
     name: "The Plough and the Stars",
     category: "brewery",
     categoryLabel: "Irish Pub",
@@ -3156,6 +3222,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "old-city-coffee",
+    googlePlaceId: "ChIJt67yxoXIxokRNv9HLjLfD_o",
     name: "Old City Coffee",
     category: "cafe",
     categoryLabel: "Coffee Shop",
@@ -3200,6 +3267,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "menagerie-coffee-old-city",
+    googlePlaceId: "ChIJDx2uVITIxokROUmNnBs573o",
     name: "Menagerie Coffee",
     category: "cafe",
     categoryLabel: "Coffee Shop",
@@ -3245,6 +3313,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "franklin-fountain",
+    googlePlaceId: "ChIJX-r0h4XIxokRt1eX25BeJ9c",
     name: "The Franklin Fountain",
     category: "dessert",
     categoryLabel: "Ice Cream Parlor",
@@ -3288,6 +3357,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "shane-confectionery",
+    googlePlaceId: "ChIJbzwXfY_IxokRfFuaybuN-Hc",
     name: "Shane Confectionery",
     category: "dessert",
     categoryLabel: "Candy Shop",
@@ -3333,6 +3403,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "museum-of-the-american-revolution",
+    googlePlaceId: "ChIJ74Iw4oTIxokRONknVjwsA2E",
     name: "Museum of the American Revolution",
     category: "activity",
     categoryLabel: "History Museum",
@@ -3377,6 +3448,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "betsy-ross-house",
+    googlePlaceId: "ChIJD4g-cobIxokRtyNk6bqTL9Y",
     name: "The Betsy Ross House",
     category: "activity",
     categoryLabel: "Historic House Museum",
@@ -3420,6 +3492,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "firemans-hall-museum",
+    googlePlaceId: "ChIJzZIHJ4bIxokRhNlL1b6xYP4",
     name: "Fireman's Hall Museum",
     category: "activity",
     categoryLabel: "History Museum",
@@ -3464,6 +3537,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "elfreths-alley-museum",
+    googlePlaceId: "ChIJn_0OoojIxokRli62b71uVCo",
     name: "Elfreth's Alley Museum",
     category: "activity",
     categoryLabel: "Historic Street & Museum",
@@ -3509,6 +3583,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "christ-church-old-city",
+    googlePlaceId: "ChIJOfuR6YXIxokRhbnMS1NL9vE",
     name: "Christ Church",
     category: "activity",
     categoryLabel: "Historic Site",
@@ -3554,6 +3629,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "muse-gallery",
+    googlePlaceId: "ChIJibeH_IXIxokRJgkFMcfBfhs",
     name: "Muse Gallery",
     category: "activity",
     categoryLabel: "Art Gallery",
@@ -3770,6 +3846,7 @@ export const VENUES: Venue[] = [
   // honestly in the data rather than forced.
   {
     id: "louie-louie",
+    googlePlaceId: "ChIJXyrKehzHxokRyNnPbgANeEI",
     name: "Louie Louie",
     category: "restaurant",
     categoryLabel: "French Bistro & Bar",
@@ -3813,6 +3890,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "white-dog-cafe-university-city",
+    googlePlaceId: "ChIJA9BZj1DGxokRIn0q5RahK9o",
     name: "White Dog Cafe",
     category: "restaurant",
     categoryLabel: "New American Restaurant",
@@ -3856,6 +3934,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "sabrinas-cafe-university-city",
+    googlePlaceId: "ChIJ43PcY1LGxokRqo2baR6epGs",
     name: "Sabrina's Café",
     category: "restaurant",
     categoryLabel: "Brunch Restaurant",
@@ -3901,6 +3980,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "lascalas-fire-university-city",
+    googlePlaceId: "ChIJufUgjL_HxokRHjtaw5yvo3s",
     name: "LaScala's Fire",
     category: "restaurant",
     categoryLabel: "Italian-American Restaurant",
@@ -3945,6 +4025,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "han-dynasty-university-city",
+    googlePlaceId: "ChIJ_U0V4VbGxokR1Wld0GVIjrY",
     name: "Han Dynasty",
     category: "restaurant",
     categoryLabel: "Szechuan Restaurant",
@@ -3988,6 +4069,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "new-delhi-indian",
+    googlePlaceId: "ChIJyQp0FfjGxokRb8SXEFjMVK4",
     name: "New Delhi Indian Restaurant",
     category: "restaurant",
     categoryLabel: "Indian Restaurant",
@@ -4032,6 +4114,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "aksum",
+    googlePlaceId: "ChIJE_mjV-zGxokRn6S-eI8hLY0",
     name: "Aksum",
     category: "restaurant",
     categoryLabel: "Mediterranean Restaurant (BYOB)",
@@ -4076,6 +4159,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "hadramout",
+    googlePlaceId: "ChIJ46BMofrGxokRs5EkeYJ5x8s",
     name: "Hadramout",
     category: "restaurant",
     categoryLabel: "Yemeni Restaurant",
@@ -4120,6 +4204,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "dim-sum-house-university-city",
+    googlePlaceId: "ChIJAUdEcfjGxokRGdEc94ZBvWc",
     name: "Dim Sum House by Jane G's",
     category: "restaurant",
     categoryLabel: "Dim Sum & Cocktail Lounge",
@@ -4164,6 +4249,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "loco-pez-west-philly",
+    googlePlaceId: "ChIJFZUOf3THxokR8fXWFMZfKfw",
     name: "Loco Pez",
     category: "restaurant",
     categoryLabel: "Mexican Taqueria",
@@ -4209,6 +4295,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "green-line-cafe",
+    googlePlaceId: "ChIJuxXrHzLGxokRIHrTFx6yDyQ",
     name: "Green Line Cafe",
     category: "cafe",
     categoryLabel: "Coffee Shop",
@@ -4252,6 +4339,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "haraz-coffee-house",
+    googlePlaceId: "ChIJkfuYEATHxokRplXqxbj6l00",
     name: "Haraz Coffee House",
     category: "cafe",
     categoryLabel: "Yemeni Coffee House",
@@ -4295,6 +4383,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "knockbox-cafe",
+    googlePlaceId: "ChIJ7ZuY5vHGxokRNt9zUNldZb4",
     name: "Knockbox Cafe",
     category: "cafe",
     categoryLabel: "Coffee Shop",
@@ -4339,6 +4428,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "soyu-coffee-shop",
+    googlePlaceId: "ChIJE9BU30LHxokRBTMUDEhx7eI",
     name: "Soyu Coffee Shop",
     category: "cafe",
     categoryLabel: "Coffee & Matcha Cafe",
@@ -4382,6 +4472,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "surreal-creamery",
+    googlePlaceId: "ChIJP2DSvj3HxokR49cYSJEW0-c",
     name: "Surreal Creamery",
     category: "dessert",
     categoryLabel: "Soft-Serve Shop",
@@ -4425,6 +4516,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "cocos-cookies-and-creamery",
+    googlePlaceId: "ChIJMYkqZVbHxokR7pOQUlAr9sQ",
     name: "Coco's Cookies & Creamery",
     category: "dessert",
     categoryLabel: "Ice Cream & Bakery",
@@ -4468,6 +4560,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "new-deck-tavern",
+    googlePlaceId: "ChIJoWUGiFDGxokRdLTsrPnVAT0",
     name: "New Deck Tavern",
     category: "brewery",
     categoryLabel: "Neighborhood Tavern",
@@ -4512,6 +4605,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "local-44",
+    googlePlaceId: "ChIJs7Fhq_HGxokRbzsrOBEPHxY",
     name: "Local 44",
     category: "brewery",
     categoryLabel: "Craft Beer Bar",
@@ -4599,6 +4693,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "copabanana-university-city",
+    googlePlaceId: "ChIJVe6vTfbGxokRLGsTOsmpLpw",
     name: "Copabanana",
     category: "restaurant",
     categoryLabel: "Mexican-American Bar & Grill",
@@ -4642,6 +4737,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "two-locals-brewing",
+    googlePlaceId: "ChIJrc7u0Z7HxokRGatudfYavPM",
     name: "Two Locals Brewing Company",
     category: "brewery",
     categoryLabel: "Brewery & Taproom",
@@ -4686,6 +4782,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "the-board-and-brew",
+    googlePlaceId: "ChIJ2zLzkIHHxokReRRwR-sE10E",
     name: "The Board and Brew",
     category: "activity",
     categoryLabel: "Board Game Cafe",
@@ -4730,6 +4827,7 @@ export const VENUES: Venue[] = [
   },
   {
     id: "the-post-university-city",
+    googlePlaceId: "ChIJMYPKMKLHxokR6wpPCnKIAyo",
     name: "The Post",
     category: "activity",
     categoryLabel: "Beer Hall & Arcade",
