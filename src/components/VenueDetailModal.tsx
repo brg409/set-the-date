@@ -6,7 +6,7 @@ import type { Venue } from "@/lib/types";
 import { PRICE_LABEL, findOption, NEIGHBORHOOD_OPTIONS } from "@/lib/options";
 import { getFullAttributeList } from "@/lib/attributeLabels";
 import { getDirectionsUrl, getReserveUrl } from "@/lib/externalLinks";
-import { VenuePhoto } from "./VenuePhoto";
+import { VenuePhotoGallery } from "./VenuePhotoGallery";
 import { WhyItFits } from "./WhyItFits";
 import { Chip } from "./Chip";
 import { LinkButton } from "./Button";
@@ -58,9 +58,7 @@ export function VenueDetailModal({
           <X size={18} strokeWidth={2.25} />
         </button>
 
-        <div className="aspect-[16/9] w-full">
-          <VenuePhoto venue={venue} iconSize={56} />
-        </div>
+        <VenuePhotoGallery venue={venue} />
 
         <div className="flex flex-col gap-5 p-6">
           <div>

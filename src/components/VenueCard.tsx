@@ -46,7 +46,7 @@ export function VenueCard({
         onClick={() => onViewDetails(venue.id)}
         className="relative block aspect-[16/10] w-full text-left"
       >
-        <VenuePhoto venue={venue} />
+        <VenuePhoto venue={venue} preferOutdoor={wantedIO === "outdoor"} linkAttribution={false} />
         {rank && (
           <span className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm font-semibold text-navy shadow-sm">
             {rank}

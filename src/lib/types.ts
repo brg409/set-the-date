@@ -171,6 +171,25 @@ export interface Venue {
   lastVerified?: string;
   /** Caveats a factual attribute doesn't fully capture, e.g. "outdoor seating is seasonal, closed Nov–Mar". */
   verificationNotes?: string;
+  /**
+   * The venue's Google Places (New) place ID (format `ChIJ...`), used
+   * server-side only to look up live photo metadata — see
+   * `src/lib/googlePlaces.ts`. Never sent to the client and never used to
+   * permanently store a photo resource name (those expire). Left unset for
+   * a venue until it's been verified against a real Google Places result;
+   * an unset value simply falls back to the category illustration.
+   */
+  googlePlaceId?: string;
+  /**
+   * Google does not expose a semantic "this photo shows outdoor seating"
+   * label, so true automatic selection isn't possible from the API alone.
+   * This is a manual curation hook: after visually checking a venue's
+   * Google Photos, set this to the 0-based index (within the first 3
+   * photos we ever fetch) of the photo that best shows outdoor seating, so
+   * `/api/venue-photo` can prefer it when the user has selected the
+   * outdoor filter. Leave unset to just use the default (first) photo.
+   */
+  googlePhotoOutdoorIndex?: number;
 }
 
 export interface DateFilters {

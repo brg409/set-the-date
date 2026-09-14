@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "audit:recommendations": "tsx scripts/audit-recommendations.ts",
-    "test:regression": "tsx scripts/regression-tests.ts"
+    "test:regression": "tsx scripts/regression-tests.ts",
+    "test:venue-photos": "tsx scripts/test-venue-photos.ts",
+    "lookup:place-ids": "tsx scripts/lookup-place-ids.ts"
   },
   "dependencies": {
     "lucide-react": "^1.45.0",
