@@ -246,6 +246,30 @@ check(
   centerCityLeaks.join("; ")
 );
 
+// South Philly-specific: the same failure mode, for venues explicitly
+// documented in review sources as loud/high-energy and deliberately left
+// untagged for romantic/cozy_intimate.
+section("South Philly: loud venues never win a cozy/romantic search");
+
+const LOUD_SOUTH_PHILLY_IDS = ["barcelona-wine-bar-south-philly", "stateside", "pistolas-del-sur"];
+const southPhillyLeaks: string[] = [];
+for (const vibe of ["cozy_intimate", "romantic"] as const) {
+  for (const dateType of ["first_date", "anniversary", "special_occasion", "reconnecting"] as const) {
+    const prefs: DatePreferences = { dateType, vibe, neighborhood: "south_philly", budget: 4 };
+    const results = getRecommendations(prefs, { count: 3 }).results;
+    for (const r of results) {
+      if (LOUD_SOUTH_PHILLY_IDS.includes(r.venue.id)) {
+        southPhillyLeaks.push(`${dateType}/${vibe} -> ${r.venue.name}`);
+      }
+    }
+  }
+}
+check(
+  "no loud bar/restaurant appears in any South Philly cozy_intimate/romantic search",
+  southPhillyLeaks.length === 0,
+  southPhillyLeaks.join("; ")
+);
+
 // ── 4. Fewer-than-3 results is handled honestly (no padding) ───────────
 
 section("Fewer-than-3-results handling");
