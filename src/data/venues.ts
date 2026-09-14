@@ -66,6 +66,7 @@ export const VENUES: Venue[] = [
   {
     id: "franklin-mortgage-investment-co",
     name: "The Franklin Mortgage & Investment Company",
+    googlePlaceId: "ChIJlwYTlTDGxokR8h4PWNXFhTY",
     category: "cocktail_bar",
     categoryLabel: "Speakeasy",
     neighborhood: "rittenhouse",

@@ -30,7 +30,7 @@ const originalKey = process.env.GOOGLE_PLACES_API_KEY;
 // A venue deliberately left without a googlePlaceId (see the comment on it
 // in src/data/venues.ts for why) — used below to test the "missing place
 // ID" path without depending on which venues happen to have one looked up.
-const venueMissingPlaceId = getVenueById("franklin-mortgage-investment-co")!;
+const venueMissingPlaceId = getVenueById("upstairs-at-abyssinia")!;
 
 // ── 1. No API key configured — the app must stay fully functional ──────
 
@@ -80,8 +80,8 @@ const anyRealVenue = VENUES.find((v) => v.lastVerified)!;
   const withId = realVenues.filter((v) => v.googlePlaceId);
   const withoutId = realVenues.filter((v) => !v.googlePlaceId);
   check(
-    `98 real venues have a verified googlePlaceId, 2 pending manual verification`,
-    withId.length === 98 && withoutId.length === 2,
+    `99 real venues have a verified googlePlaceId, 1 pending manual verification`,
+    withId.length === 99 && withoutId.length === 1,
     `${withId.length} with, ${withoutId.length} without: ${withoutId.map((v) => v.id).join(", ")}`
   );
   check(
