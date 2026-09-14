@@ -281,18 +281,30 @@ export function generateWhyItFits(venue: Venue, prefs: DatePreferences): string 
   const dateTypeLabel = DATE_TYPE_LABEL[prefs.dateType];
   const claim = buildSpecificClaim(venue, prefs);
 
-  // The "when you want [vibe]" clause asserts the venue actually delivers
-  // that vibe. Only make that claim when the venue is genuinely tagged with
-  // it — otherwise this venue only surfaced because the eligible pool for
-  // the selected hard filters was small, and the vibe claim would be
-  // unsupported (e.g. a coffee shop shown for "romantic" purely because it
-  // was one of the only outdoor-seating options left at that budget).
-  if (venue.vibes.includes(prefs.vibe)) {
-    const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
+  // Both the "[dateType] option" framing and the "when you want [vibe]"
+  // clause assert the venue actually delivers on that occasion/vibe. Only
+  // make each claim when the venue is genuinely tagged for it — neither
+  // dateType nor vibe is a hard filter, so a venue can reach the top 3
+  // purely because the eligible pool for the selected hard filters was
+  // small, with no real evidence it suits the occasion or vibe asked for
+  // (e.g. a coffee shop shown for "special occasion" purely because it was
+  // one of the only outdoor-seating options left at that budget).
+  // "surprise_me" has no hard requirement by design (see scoreDateType) —
+  // every eligible venue is fair game, so it always counts as genuine.
+  const dateTypeGenuine = prefs.dateType === "surprise_me" || venue.dateTypes.includes(prefs.dateType);
+  const vibeGenuine = venue.vibes.includes(prefs.vibe);
+  const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
+
+  if (dateTypeGenuine && vibeGenuine) {
     return `${tagSentence} make ${venue.name} a strong ${dateTypeLabel} option when you want ${wantPhrase}. ${claim}`;
   }
-
-  return `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option here, even if it's not a classic pick for that vibe. ${claim}`;
+  if (dateTypeGenuine && !vibeGenuine) {
+    return `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option here, even if it's not a classic pick for that vibe. ${claim}`;
+  }
+  if (!dateTypeGenuine && vibeGenuine) {
+    return `${tagSentence} make ${venue.name} a solid pick here for ${wantPhrase}, even if it's not the most traditional choice for a ${dateTypeLabel}. ${claim}`;
+  }
+  return `${tagSentence} make ${venue.name} worth considering here, even if it's not a classic ${dateTypeLabel} pick or vibe match. ${claim}`;
 }
 
 function scoreAndExplain(venue: Venue, prefs: DatePreferences, isExpandedMatch: boolean): ScoredVenue {
