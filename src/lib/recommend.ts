@@ -368,6 +368,66 @@ const DIVERSITY_PENALTY = {
   sameCategory: 1.5, // additional penalty for the exact same category, not just the same bucket
 };
 
+// ── Tie-breaking (Phase 2B) ──────────────────────────────────────────────
+//
+// Before this, a tie in adjusted score (common: many venues share the same
+// dateTypeMatch/vibeMatch/secondary-bonus combination) fell back to
+// JavaScript's stable sort, i.e. whichever venue happens to sit earlier in
+// VENUES — a fixed, invisible advantage for nothing more meaningful than
+// array position. Two problems: (1) the same handful of venues won every
+// tie forever, burying others that were an equally good fit, and (2) it's
+// not reproducible in any principled way — "why this one" had no answer
+// beyond "it was listed first."
+//
+// Fixed with a three-step gate, applied only among candidates already tied
+// on adjusted score (this never overrides a real score difference, so it
+// can't touch eligibility, scoring weights, or the diversity penalties
+// above — it only decides among options the model already considers
+// equal):
+//   1. Prefer the higher RAW (pre-diversity-penalty) score. This is the
+//      key fix: a strong venue knocked down by the diversity penalty (e.g.
+//      a 3rd "drinks"-bucket pick) can coincidentally land on the same
+//      adjusted score as a genuinely weak venue that never had a penalty
+//      to begin with. Preferring raw score ensures the penalty can change
+//      the ORDER of a tie-break but never smuggle in a worse match.
+//   2. If raw score is ALSO exactly tied, use a stable hash of the venue
+//      ID plus every selected preference — deterministic (same search
+//      always resolves the same way) but no longer biased toward source
+//      order.
+//   3. If the hash itself ties (astronomically unlikely), venue ID string
+//      comparison is the final, always-terminating fallback.
+
+/**
+ * FNV-1a, a standard 32-bit string hash. Chosen for being simple, fast, and
+ * well-distributed — not for any cryptographic property (this is a
+ * tie-break, not a security boundary). Pure function of its input: the same
+ * string always produces the same number, on any machine, forever.
+ */
+function fnv1aHash(input: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+/** Every selected preference, so the same search always hashes the same way and a different search can resolve a tie differently. */
+function preferencesKey(prefs: DatePreferences): string {
+  return [
+    prefs.neighborhood,
+    prefs.dateType,
+    prefs.vibe,
+    prefs.budget,
+    prefs.filters?.food ?? "",
+    prefs.filters?.indoorOutdoor ?? "",
+  ].join("|");
+}
+
+function tieBreakHash(venue: Venue, prefs: DatePreferences): number {
+  return fnv1aHash(`${venue.id}::${preferencesKey(prefs)}`);
+}
+
 /**
  * Greedily selects `count` results from a score-sorted list. Unlike a hard
  * "max N per category" cutoff, this ranks by score minus a small penalty for
@@ -375,30 +435,53 @@ const DIVERSITY_PENALTY = {
  * excellent cocktail bars can still all appear if nothing else comes close,
  * but a near-tie will resolve in favor of variety (e.g. cocktail bar +
  * restaurant + coffee shop over three interchangeable cocktail bars).
+ *
+ * Among candidates tied on adjusted score at a given step, see the
+ * "Tie-breaking" comment above for the raw-score / hash / venue-ID cascade.
  */
-function diversify(sorted: ScoredVenue[], count: number): ScoredVenue[] {
+function diversify(sorted: ScoredVenue[], count: number, prefs: DatePreferences): ScoredVenue[] {
   const result: ScoredVenue[] = [];
   const bucketCounts = new Map<string, number>();
   const categoryCounts = new Map<string, number>();
   const remaining = [...sorted];
 
   while (result.length < count && remaining.length > 0) {
-    let bestIndex = 0;
-    let bestAdjustedScore = -Infinity;
-
-    remaining.forEach((candidate, index) => {
+    const candidates = remaining.map((candidate, index) => {
       const bucket = getVenueBucket(candidate.venue.category);
       const penalty =
         (bucketCounts.get(bucket) ?? 0) * DIVERSITY_PENALTY.sameBucket +
         (categoryCounts.get(candidate.venue.category) ?? 0) * DIVERSITY_PENALTY.sameCategory;
-      const adjustedScore = candidate.score - penalty;
-      if (adjustedScore > bestAdjustedScore) {
-        bestAdjustedScore = adjustedScore;
-        bestIndex = index;
-      }
+      return { index, candidate, adjustedScore: candidate.score - penalty };
     });
 
-    const [picked] = remaining.splice(bestIndex, 1);
+    // Step 1: rank by adjusted score (unchanged from before).
+    const maxAdjustedScore = Math.max(...candidates.map((c) => c.adjustedScore));
+    let tied = candidates.filter((c) => c.adjustedScore === maxAdjustedScore);
+
+    if (tied.length > 1) {
+      // Step 2: among adjusted-score ties, prefer the higher raw score.
+      const maxRawScore = Math.max(...tied.map((c) => c.candidate.score));
+      tied = tied.filter((c) => c.candidate.score === maxRawScore);
+    }
+
+    let best = tied[0];
+    if (tied.length > 1) {
+      // Step 3: still tied on both adjusted and raw score — hash it.
+      let bestHash = tieBreakHash(best.candidate.venue, prefs);
+      for (const t of tied.slice(1)) {
+        const hash = tieBreakHash(t.candidate.venue, prefs);
+        if (
+          hash > bestHash ||
+          // Step 4: hash also tied — venue ID is the final, always-terminating fallback.
+          (hash === bestHash && t.candidate.venue.id > best.candidate.venue.id)
+        ) {
+          bestHash = hash;
+          best = t;
+        }
+      }
+    }
+
+    const [picked] = remaining.splice(best.index, 1);
     result.push(picked);
     const bucket = getVenueBucket(picked.venue.category);
     bucketCounts.set(bucket, (bucketCounts.get(bucket) ?? 0) + 1);
@@ -454,7 +537,7 @@ export function getRecommendations(
     .sort((a, b) => b.score - a.score);
 
   return {
-    results: diversify(scored, count),
+    results: diversify(scored, count, prefs),
     exactMatchCount,
     canExpandNeighborhood,
     canExpandBudget,

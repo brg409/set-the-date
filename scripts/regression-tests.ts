@@ -5,8 +5,18 @@
  * and the script exits non-zero. Run with: npm run test:regression
  */
 import { VENUES, getVenueById } from "../src/data/venues";
-import { getRecommendations, getReplacementVenue } from "../src/lib/recommend";
-import type { DatePreferences, ExpansionState } from "../src/lib/types";
+import { getRecommendations, getReplacementVenue, rankVenue } from "../src/lib/recommend";
+import type {
+  DatePreferences,
+  DateType,
+  ExpansionState,
+  Neighborhood,
+  PriceLevel,
+  ScoredVenue,
+  Venue,
+  VenueCategory,
+  Vibe,
+} from "../src/lib/types";
 
 const NO_EXPANSION: ExpansionState = {
   neighborhood: false,
@@ -83,15 +93,21 @@ check(
 );
 
 // Explicitly expanding the indoor/outdoor filter should be the ONLY way an
-// unverified/no venue can appear.
-const expandedOutdoor = getRecommendations(outdoorPrefs, {
-  count: 3,
+// unverified/no venue can appear. Checked against the full expanded POOL
+// (a very large `count` returns every eligible venue, ordered) rather than
+// just the top-3: which single non-verified venue (if several are tied)
+// happens to win the top-3 tie-break is a legitimate, expected detail of
+// Phase 2B's deterministic tie-breaking, not something this check should
+// depend on — what actually matters is that the hard filter's removal
+// genuinely changed which venues are eligible at all.
+const expandedOutdoorPool = getRecommendations(outdoorPrefs, {
+  count: 500,
   expand: { indoorOutdoor: true },
 });
 check(
   "expanding indoorOutdoor can surface non-outdoor-verified venues",
-  expandedOutdoor.results.some((r) => r.venue.outdoorSeating !== "yes") ||
-    expandedOutdoor.results.length === 0,
+  expandedOutdoorPool.results.some((r) => r.venue.outdoorSeating !== "yes") ||
+    expandedOutdoorPool.results.length === 0,
   "(informational: only fails if the pool has nothing else to offer)"
 );
 
@@ -343,6 +359,197 @@ check(
   JSON.stringify(actualBarPubIds) === JSON.stringify([...BAR_PUB_IDS].sort()),
   actualBarPubIds.join(", ")
 );
+
+// ── 6. Phase 2B: quality-gated exact-tie hashing ────────────────────────
+//
+// Before this, a tie in adjusted score fell back to source-array order —
+// the same handful of venues won every tie, and 31 venues never appeared
+// in an initial top-3 across the full 1,008-combo matrix. diversify() now
+// breaks adjusted-score ties by preferring the higher raw (pre-diversity-
+// penalty) score first, and only hashes venue ID + preferences if raw
+// score is ALSO tied. This section locks in the properties that made that
+// change safe to ship: fully deterministic, every hard filter untouched,
+// and — the key guarantee — no selected slot is ever a lower-raw-score
+// venue than what the OLD source-order tie-break would have picked.
+
+section("Phase 2B: quality-gated exact-tie hashing");
+
+// Determinism: the exact same preferences must always produce the exact
+// same three venues, in the exact same order.
+{
+  const prefs: DatePreferences = { dateType: "casual", vibe: "trendy", neighborhood: "old_city", budget: 3 };
+  const run1 = getRecommendations(prefs, { count: 3 }).results.map((r) => r.venue.id);
+  const run2 = getRecommendations(prefs, { count: 3 }).results.map((r) => r.venue.id);
+  const run3 = getRecommendations(prefs, { count: 3 }).results.map((r) => r.venue.id);
+  check(
+    "identical preferences always produce identical results (3 runs)",
+    JSON.stringify(run1) === JSON.stringify(run2) && JSON.stringify(run2) === JSON.stringify(run3),
+    `${run1.join(",")} / ${run2.join(",")} / ${run3.join(",")}`
+  );
+}
+
+// The specific case Approach 4 was built to fix: a strong romantic venue
+// (Superfolie) knocked down by the diversity penalty must not lose a tie
+// to a genuinely unrelated, poor-fit venue (Mission Taqueria) that
+// happens to coincidentally land on the same adjusted score.
+{
+  const prefs: DatePreferences = {
+    neighborhood: "rittenhouse",
+    dateType: "special_occasion",
+    vibe: "romantic",
+    budget: 2,
+  };
+  const ids = getRecommendations(prefs, { count: 3 }).results.map((r) => r.venue.id);
+  check(
+    "Rittenhouse special_occasion/romantic/$$ retains Superfolie, not Mission Taqueria",
+    ids.includes("superfolie") && !ids.includes("mission-taqueria"),
+    ids.join(", ")
+  );
+}
+
+// No selected slot may ever score lower (raw, pre-penalty) than the venue
+// the OLD (pre-Phase-2B) source-order tie-break would have selected for
+// that same slot. The old behavior is re-derived here — not imported —
+// specifically so this test keeps comparing against the historical
+// baseline even as diversify() itself evolves further.
+{
+  function oldIsEligible(venue: Venue, prefs: DatePreferences): boolean {
+    return venue.neighborhood === prefs.neighborhood && venue.priceLevel <= prefs.budget;
+  }
+  function oldGetVenueBucket(category: VenueCategory): string {
+    switch (category) {
+      case "cocktail_bar":
+      case "wine_bar":
+      case "brewery":
+      case "bar_pub":
+      case "rooftop_bar":
+        return "drinks";
+      case "restaurant":
+        return "food";
+      case "cafe":
+      case "dessert":
+        return "coffee_or_dessert";
+      case "activity":
+        return "activity";
+    }
+  }
+  const OLD_DIVERSITY_PENALTY = { sameBucket: 2.5, sameCategory: 1.5 };
+  function oldDiversify(sorted: ScoredVenue[], count: number): ScoredVenue[] {
+    const result: ScoredVenue[] = [];
+    const bucketCounts = new Map<string, number>();
+    const categoryCounts = new Map<string, number>();
+    const remaining = [...sorted];
+    while (result.length < count && remaining.length > 0) {
+      let bestIndex = 0;
+      let bestAdjustedScore = -Infinity;
+      remaining.forEach((candidate, index) => {
+        const bucket = oldGetVenueBucket(candidate.venue.category);
+        const penalty =
+          (bucketCounts.get(bucket) ?? 0) * OLD_DIVERSITY_PENALTY.sameBucket +
+          (categoryCounts.get(candidate.venue.category) ?? 0) * OLD_DIVERSITY_PENALTY.sameCategory;
+        const adjustedScore = candidate.score - penalty;
+        if (adjustedScore > bestAdjustedScore) {
+          bestAdjustedScore = adjustedScore;
+          bestIndex = index;
+        }
+      });
+      const [picked] = remaining.splice(bestIndex, 1);
+      result.push(picked);
+      const bucket = oldGetVenueBucket(picked.venue.category);
+      bucketCounts.set(bucket, (bucketCounts.get(bucket) ?? 0) + 1);
+      categoryCounts.set(picked.venue.category, (categoryCounts.get(picked.venue.category) ?? 0) + 1);
+    }
+    return result;
+  }
+  function oldTop3(prefs: DatePreferences): ScoredVenue[] {
+    const pool = VENUES.filter((v) => oldIsEligible(v, prefs));
+    const scored = pool
+      .map((v) => ({ venue: v, score: rankVenue(v, prefs), whyItFits: "", matchedTags: [] as string[] }))
+      .sort((a, b) => b.score - a.score);
+    return oldDiversify(scored, 3);
+  }
+
+  const DATE_TYPES: DateType[] = ["first_date", "casual", "anniversary", "special_occasion", "reconnecting", "surprise_me"];
+  const VIBES: Vibe[] = ["cozy_intimate", "relaxed_casual", "lively_social", "romantic", "fun_playful", "trendy", "something_different"];
+  const NEIGHBORHOODS: Neighborhood[] = ["rittenhouse", "center_city", "old_city", "fishtown", "university_city", "south_philly"];
+  const BUDGETS: PriceLevel[] = [1, 2, 3, 4];
+
+  let combosChecked = 0;
+  let combosReordered = 0;
+  let slotRegressions = 0;
+  const exposure = new Map<string, number>();
+  for (const v of VENUES) exposure.set(v.id, 0);
+
+  for (const neighborhood of NEIGHBORHOODS) {
+    for (const dateType of DATE_TYPES) {
+      for (const vibe of VIBES) {
+        for (const budget of BUDGETS) {
+          combosChecked++;
+          const prefs: DatePreferences = { neighborhood, dateType, vibe, budget };
+          const oldPicks = oldTop3(prefs);
+          const newPicks = getRecommendations(prefs, { count: 3 }).results;
+          for (const r of newPicks) exposure.set(r.venue.id, (exposure.get(r.venue.id) ?? 0) + 1);
+          if (JSON.stringify(oldPicks.map((p) => p.venue.id)) !== JSON.stringify(newPicks.map((p) => p.venue.id))) {
+            combosReordered++;
+          }
+          for (let slot = 0; slot < 3; slot++) {
+            if (oldPicks[slot] && newPicks[slot] && oldPicks[slot].score - newPicks[slot].score > 1e-9) {
+              slotRegressions++;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  check(
+    `no selected slot scores lower (raw) than the old tie-break's pick, across all ${combosChecked} combinations`,
+    slotRegressions === 0,
+    `${slotRegressions} regression(s) found`
+  );
+
+  const buriedCount = [...exposure.values()].filter((n) => n === 0).length;
+  check(
+    "buried venues (never in an initial top-3) fall to 16 or fewer (was 31 before Phase 2B)",
+    buriedCount <= 16,
+    `${buriedCount} buried venues`
+  );
+
+  console.log(`  (informational: ${combosReordered} / ${combosChecked} combinations reordered vs. the old tie-break)`);
+}
+
+// Regeneration must still exclude every currently-displayed venue.
+{
+  const prefs: DatePreferences = { neighborhood: "fishtown", dateType: "casual", vibe: "relaxed_casual", budget: 3 };
+  const first = getRecommendations(prefs, { count: 3 });
+  const shownIds = first.results.map((r) => r.venue.id);
+  const regenerated = getRecommendations(prefs, { count: 3, excludeIds: shownIds });
+  check(
+    "regenerating still excludes every currently-displayed venue",
+    regenerated.results.every((r) => !shownIds.includes(r.venue.id)) || regenerated.results.length === 0,
+    regenerated.results.map((r) => r.venue.id).join(", ")
+  );
+}
+
+// Dataset integrity: Phase 2B must not touch venue data.
+check("all 180 venues remain", VENUES.length === 180, `found ${VENUES.length}`);
+{
+  const NEIGHBORHOOD_COUNTS: Record<string, number> = {
+    rittenhouse: 49,
+    center_city: 29,
+    old_city: 28,
+    fishtown: 26,
+    university_city: 23,
+    south_philly: 25,
+  };
+  const actualCounts: Record<string, number> = {};
+  for (const v of VENUES) actualCounts[v.neighborhood] = (actualCounts[v.neighborhood] ?? 0) + 1;
+  check(
+    "all six neighborhood counts remain unchanged",
+    JSON.stringify(actualCounts) === JSON.stringify(NEIGHBORHOOD_COUNTS),
+    JSON.stringify(actualCounts)
+  );
+}
 
 // ── Summary ──────────────────────────────────────────────────────────────
 
