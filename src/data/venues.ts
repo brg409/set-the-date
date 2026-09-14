@@ -583,11 +583,11 @@ export const VENUES: Venue[] = [
     vibes: ["cozy_intimate", "romantic"],
     foodDrinkActivity: ["drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "yes",
+    outdoorSeating: "no",
     servesAlcohol: true,
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
-      "Includes a heated outdoor seating area in addition to the hidden-entrance interior.",
+      "Official venue and operator pages describe a hidden, enclosed 40-person speakeasy and do not identify any patio or outdoor seating. Treat as indoor-only unless the venue confirms otherwise.",
     attributes: {
       conversationFriendly: 4,
       noiseLevel: "moderate",
@@ -677,7 +677,7 @@ export const VENUES: Venue[] = [
     hasIndoorSeating: true,
     outdoorSeating: "yes",
     servesAlcohol: true,
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
       "Roughly 18 outdoor seats reported.",
     attributes: {
@@ -703,6 +703,7 @@ export const VENUES: Venue[] = [
       "low-key and unhurried",
       "easy to walk in without a plan",
     ],
+    websiteUrl: "https://www.enswellphilly.com/",
   },
   {
     id: "garage-rittenhouse",
@@ -950,7 +951,7 @@ export const VENUES: Venue[] = [
     hasIndoorSeating: true,
     outdoorSeating: "yes",
     servesAlcohol: true,
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
       "Iconic sidewalk seating overlooking Rittenhouse Square since 1998; seasonal.",
     attributes: {
@@ -976,6 +977,7 @@ export const VENUES: Venue[] = [
       "extensive cocktail program",
       "lively people-watching energy",
     ],
+    websiteUrl: "https://www.rouge98.com/",
   },
   {
     id: "dancerobot",
@@ -1453,7 +1455,7 @@ export const VENUES: Venue[] = [
     hasIndoorSeating: true,
     outdoorSeating: "yes",
     servesAlcohol: false,
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
       "Four outdoor tables in addition to indoor seating.",
     attributes: {
@@ -1479,6 +1481,7 @@ export const VENUES: Venue[] = [
       "unpretentious neighborhood spot",
       "easy to talk without trying",
     ],
+    websiteUrl: "https://www.jjthaicuisine.com/",
   },
   {
     id: "a-kitchen",
@@ -1858,11 +1861,11 @@ export const VENUES: Venue[] = [
     vibes: ["lively_social", "fun_playful"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "no",
     servesAlcohol: true,
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
-      "Has an interior skylit courtyard/atrium rather than confirmed open-air street seating \u2014 ambiguous enough not to count as verified outdoor seating.",
+      "The venue is upstairs and its courtyard is a skylit interior atrium, not confirmed open-air seating. Treat as indoor-only for the outdoor hard filter.",
     attributes: {
       conversationFriendly: 3,
       noiseLevel: "lively",
@@ -1876,7 +1879,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: true,
+      weatherDependent: false,
       reservationDifficulty: "recommended",
       novelty: 2,
     },
@@ -2176,7 +2179,7 @@ export const VENUES: Venue[] = [
     hasIndoorSeating: true,
     outdoorSeating: "no",
     servesAlcohol: false,
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
       "Reviewer feedback indicates no current outdoor seating (one review specifically wished they would add it).",
     attributes: {
@@ -2202,6 +2205,7 @@ export const VENUES: Venue[] = [
       "a step outside the usual ice cream stop",
       "short, sweet, and a little different",
     ],
+    websiteUrl: "https://www.malai.co/",
   },
   {
     id: "bakeshop-on-twentieth",
@@ -2453,7 +2457,7 @@ export const VENUES: Venue[] = [
     vibes: ["lively_social", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 1,
@@ -2468,7 +2472,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 2,
     },
@@ -2480,6 +2484,8 @@ export const VENUES: Venue[] = [
     ],
     websiteUrl: "https://www.starr-restaurants.com/restaurants/el-vez-philadelphia",
     lastVerified: "2026-09-14",
+    verificationNotes:
+      "Sidewalk/outdoor dining is currently listed for the Philadelphia location; availability is seasonal and weather-dependent.",
   },
   {
     id: "double-knot",
@@ -3793,7 +3799,7 @@ export const VENUES: Venue[] = [
     vibes: ["lively_social", "something_different"],
     foodDrinkActivity: ["food", "drinks", "activity"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 2,
@@ -3808,7 +3814,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 4,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 4,
     },
@@ -3819,9 +3825,9 @@ export const VENUES: Venue[] = [
       "festive, high-energy date night",
     ],
     websiteUrl: "https://www.cubalibrerestaurant.com/",
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
     verificationNotes:
-      "Has an enclosed/roofed courtyard plus a separate small terrace; research could not confirm the terrace is genuinely open-air rather than covered, so outdoor seating is marked unknown rather than assumed yes.",
+      "Official venue materials identify both indoor and outdoor dining. Outdoor availability remains seasonal/weather-dependent.",
   },
   {
     id: "forsythia",
@@ -3973,7 +3979,7 @@ export const VENUES: Venue[] = [
     vibes: ["relaxed_casual", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 4,
@@ -3988,7 +3994,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 3,
     },
@@ -3999,8 +4005,8 @@ export const VENUES: Venue[] = [
       "classy but comfortable, not stuffy",
     ],
     websiteUrl: "https://www.panoramawinebar.com/",
-    lastVerified: "2026-09-13",
-    verificationNotes: "Outdoor seating could not be confirmed either way via official sources.",
+    lastVerified: "2026-09-14",
+    verificationNotes: "Outdoor dining is offered in warmer months; mark weather-dependent.",
   },
   {
     id: "vista-peru",
@@ -4018,7 +4024,7 @@ export const VENUES: Venue[] = [
     vibes: ["trendy", "something_different"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 3,
@@ -4033,7 +4039,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 4,
     },
@@ -4045,7 +4051,9 @@ export const VENUES: Venue[] = [
     ],
     reservationUrl: "https://www.exploretock.com/vista-peru---phl-philadelphia",
     websiteUrl: "https://vistaperuphilly.com/",
-    lastVerified: "2026-09-13",
+    lastVerified: "2026-09-14",
+    verificationNotes:
+      "Outdoor seating is currently offered; availability is seasonal/weather-dependent.",
   },
   {
     id: "almanac",
@@ -4176,9 +4184,10 @@ export const VENUES: Venue[] = [
       "warm, personal, ~30-seat room",
       "quiet enough for real conversation",
     ],
-    lastVerified: "2026-09-13",
+    websiteUrl: "https://www.oldcitydistrict.org/business/calandrinos-old-city-vino",
+    lastVerified: "2026-09-14",
     verificationNotes:
-      "No independently confirmed official website found during research (only an Old City District listing and social media) — websiteUrl and reservationUrl omitted rather than guessed. Newly opened (late 2024).",
+      "No independent official venue website was found during research (only social media) — the authoritative Old City District business listing is used as websiteUrl instead. Newly opened (late 2024).",
   },
   {
     id: "khyber-pass-pub",
@@ -4285,7 +4294,7 @@ export const VENUES: Venue[] = [
     vibes: ["lively_social", "fun_playful"],
     foodDrinkActivity: ["food", "drinks", "activity"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 2,
@@ -4300,7 +4309,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "walk_in_friendly",
       novelty: 3,
     },
@@ -4312,8 +4321,8 @@ export const VENUES: Venue[] = [
     ],
     reservationUrl: "https://www.exploretock.com/nationalmechanics",
     websiteUrl: "https://nationalmechanics.com/",
-    lastVerified: "2026-09-13",
-    verificationNotes: "Sources conflict on outdoor seating (some describe a spacious outdoor area, others indoor-only) — marked unknown rather than guessed.",
+    lastVerified: "2026-09-14",
+    verificationNotes: "A very small number of outdoor tables are available. Capacity is limited and weather-dependent.",
   },
   {
     id: "plough-and-the-stars",
@@ -4827,8 +4836,8 @@ export const VENUES: Venue[] = [
     category: "restaurant",
     categoryLabel: "Lebanese Restaurant, Market & Garden",
     neighborhood: "fishtown",
-    priceLevel: 2,
-    pricePerPerson: [25, 45],
+    priceLevel: 3,
+    pricePerPerson: [50, 90],
     address: "1528 Frankford Ave, Philadelphia, PA",
     description:
       "A Lebanese restaurant, market, and lush garden courtyard in one, with the largest Chateau Musar wine list in Philadelphia.",
@@ -4851,7 +4860,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 4,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 3,
     },
@@ -4863,6 +4872,8 @@ export const VENUES: Venue[] = [
     ],
     websiteUrl: "https://www.surayaphilly.com/",
     lastVerified: "2026-09-14",
+    verificationNotes:
+      "The garden is seasonal (April–October). Full restaurant dinner is materially above the prior $25–45 estimate; use $50–90 as a realistic dinner range, with the market/cafe as a cheaper daypart option.",
   },
   {
     id: "elwood",
@@ -4969,7 +4980,7 @@ export const VENUES: Venue[] = [
     vibes: ["romantic", "trendy"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 4,
@@ -4984,7 +4995,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 4,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 3,
     },
@@ -4997,7 +5008,7 @@ export const VENUES: Venue[] = [
     websiteUrl: "https://www.wmmulherinssons.com/fishtown",
     lastVerified: "2026-09-14",
     verificationNotes:
-      "Sits at the corner of Front & Master St, near the transition some sources place closer to Olde Kensington/Northern Liberties — included as Fishtown since every local press and hospitality source describes it that way.",
+      "Sits at the corner of Front & Master St, near the transition some sources place closer to Olde Kensington/Northern Liberties — included as Fishtown since every local press and hospitality source describes it that way. Outdoor seating is offered seasonally.",
   },
   {
     id: "pizzeria-beddia",
@@ -5015,7 +5026,7 @@ export const VENUES: Venue[] = [
     vibes: ["trendy", "relaxed_casual"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 3,
@@ -5030,7 +5041,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 2,
     },
@@ -5042,6 +5053,8 @@ export const VENUES: Venue[] = [
     ],
     websiteUrl: "https://www.pizzeriabeddia.com/",
     lastVerified: "2026-09-14",
+    verificationNotes:
+      "Covered patio/outdoor seating is available; seasonal conditions may affect service.",
   },
   {
     id: "loco-pez-fishtown",
@@ -5105,7 +5118,7 @@ export const VENUES: Venue[] = [
     vibes: ["relaxed_casual", "lively_social"],
     foodDrinkActivity: ["food", "drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 3,
@@ -5120,7 +5133,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "walk_in_friendly",
       novelty: 2,
     },
@@ -5132,6 +5145,8 @@ export const VENUES: Venue[] = [
     ],
     websiteUrl: "https://fettesauphilly.com/",
     lastVerified: "2026-09-14",
+    verificationNotes:
+      "Official venue information identifies both indoor and outdoor seating; outdoor availability is weather-dependent.",
   },
   {
     id: "middle-child-clubhouse",
@@ -5328,7 +5343,7 @@ export const VENUES: Venue[] = [
     vibes: ["cozy_intimate", "relaxed_casual"],
     foodDrinkActivity: ["drinks", "food"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 4,
@@ -5343,7 +5358,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "walk_in_friendly",
       novelty: 2,
     },
@@ -5356,7 +5371,7 @@ export const VENUES: Venue[] = [
     websiteUrl: "https://lloydwhiskeybar.com/",
     lastVerified: "2026-09-14",
     verificationNotes:
-      "Address is on E Girard Ave, Fishtown's defined southern boundary with Northern Liberties — included as Fishtown per local business listings and press.",
+      "Address is on E Girard Ave, Fishtown's defined southern boundary with Northern Liberties — included as Fishtown per local business listings and press. Sidewalk seating is available seasonally at the Girard Avenue location.",
   },
   {
     id: "fishtown-social",
@@ -6617,8 +6632,10 @@ export const VENUES: Venue[] = [
       "good for a short, low-key first meeting",
       "quiet spot to actually talk",
     ],
-    lastVerified: "2026-09-13",
-    verificationNotes: "No official website found; outdoor seating not confirmed.",
+    websiteUrl: "https://soyucoffee.kwickmenu.com/",
+    lastVerified: "2026-09-14",
+    verificationNotes:
+      "No independent official venue website was found — the current ordering/location site is used as websiteUrl instead. Outdoor seating not confirmed.",
   },
   {
     id: "surreal-creamery",
@@ -6901,7 +6918,7 @@ export const VENUES: Venue[] = [
     vibes: ["relaxed_casual", "trendy"],
     foodDrinkActivity: ["drinks"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 4,
@@ -6916,7 +6933,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: true,
       memorable: 3,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "walk_in_friendly",
       novelty: 3,
     },
@@ -6927,8 +6944,9 @@ export const VENUES: Venue[] = [
       "part of the uCity Square innovation district",
     ],
     websiteUrl: "https://www.twolocalsbrewing.com/",
-    lastVerified: "2026-09-13",
-    verificationNotes: "Outdoor seating not confirmed.",
+    lastVerified: "2026-09-14",
+    verificationNotes:
+      "Outdoor seating is available, including a seasonal beer garden at The Lawn across from the taproom.",
   },
   {
     id: "the-board-and-brew",
@@ -7499,7 +7517,7 @@ export const VENUES: Venue[] = [
     vibes: ["romantic", "something_different"],
     foodDrinkActivity: ["food", "drinks", "activity"],
     hasIndoorSeating: true,
-    outdoorSeating: "unknown",
+    outdoorSeating: "yes",
     servesAlcohol: true,
     attributes: {
       conversationFriendly: 2,
@@ -7514,7 +7532,7 @@ export const VENUES: Venue[] = [
       easyToExtend: true,
       goodForFirstMeeting: false,
       memorable: 5,
-      weatherDependent: false,
+      weatherDependent: true,
       reservationDifficulty: "recommended",
       novelty: 5,
     },
@@ -7527,7 +7545,7 @@ export const VENUES: Venue[] = [
     websiteUrl: "https://victorcafe.com/",
     lastVerified: "2026-09-14",
     verificationNotes:
-      "Genuinely a performance-driven, communal experience rather than a private-conversation venue — conversationFriendly scored low on purpose, distinct from its high romantic/memorable/novelty scores. Outdoor seating not confirmed in available sources.",
+      "Outdoor dining is available, although the signature opera performance is best experienced inside. Outdoor availability is weather-dependent.",
   },
   {
     id: "theatre-exile",
