@@ -10,10 +10,9 @@ import {
   Beer,
   IceCreamCone,
   Gamepad2,
-  Flag,
-  Sailboat,
   CircleDot,
   Sparkles,
+  Music,
   ExternalLink,
   type LucideIcon,
 } from "lucide-react";
@@ -51,10 +50,10 @@ const CATEGORY_ICON: Record<VenueCategory, LucideIcon> = {
 
 // A few activity venues get a more specific icon than the category default.
 const VENUE_ICON_OVERRIDE: Record<string, LucideIcon> = {
-  "arch-street-arcade-bar": Gamepad2,
-  "fishtown-fairways": Flag,
-  "schuylkill-banks-picnic-co": Sailboat,
   "mural-alley-bocce": CircleDot,
+  "barcade-fishtown": Gamepad2,
+  "kung-fu-necktie": Music,
+  "the-fillmore-philadelphia": Music,
 };
 
 export function IllustrationFallback({

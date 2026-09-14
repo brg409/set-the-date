@@ -194,6 +194,34 @@ check(
   quickServiceTopPicks.join("; ")
 );
 
+// Fishtown-specific: loud, general-admission live-music/club venues and a
+// German biergarten must never win a cozy/intimate/romantic/conversation
+// search, since their romantic and conversationFriendly attributes were
+// deliberately scored low. This is exactly the failure mode flagged when
+// building this neighborhood — a wrong secondary-attribute mapping could
+// let a loud venue's other strengths (novelty, memorable) outrank a
+// genuinely quiet one.
+section("Fishtown: loud venues never win a cozy/romantic search");
+
+const LOUD_FISHTOWN_IDS = ["kung-fu-necktie", "the-fillmore-philadelphia", "frankford-hall"];
+const cozyRomanticLeaks: string[] = [];
+for (const vibe of ["cozy_intimate", "romantic"] as const) {
+  for (const dateType of ["first_date", "anniversary", "special_occasion", "reconnecting"] as const) {
+    const prefs: DatePreferences = { dateType, vibe, neighborhood: "fishtown", budget: 4 };
+    const results = getRecommendations(prefs, { count: 3 }).results;
+    for (const r of results) {
+      if (LOUD_FISHTOWN_IDS.includes(r.venue.id)) {
+        cozyRomanticLeaks.push(`${dateType}/${vibe} -> ${r.venue.name}`);
+      }
+    }
+  }
+}
+check(
+  "no loud live-music venue or biergarten appears in any Fishtown cozy_intimate/romantic search",
+  cozyRomanticLeaks.length === 0,
+  cozyRomanticLeaks.join("; ")
+);
+
 // ── 4. Fewer-than-3 results is handled honestly (no padding) ───────────
 
 section("Fewer-than-3-results handling");
