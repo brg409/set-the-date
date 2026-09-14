@@ -25,12 +25,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const result = await fetchVenuePhotos(venue, { count, maxWidthPx: width, preferOutdoor });
 
-  // Cache successful AND unavailable results briefly at the edge/browser so
-  // repeat views of the same venue in one session don't re-hit Google or
-  // our own function. Google's photo resource names can expire, so this is
+  // Cache a SUCCESSFUL result briefly at the edge/browser so repeat views
+  // of the same venue in one session don't re-hit Google or our own
+  // function. Google's photo resource names can expire, so this is
   // intentionally short — we re-resolve from the place ID on the next
   // request rather than ever persisting the resolved URL ourselves.
+  //
+  // A FAILURE gets no caching at all. A misconfigured key, a transient
+  // Google-side error, or any other unavailable result must never get
+  // stuck being served back for the next 30 minutes once the underlying
+  // cause is fixed — that's exactly the trap a long cache on failures
+  // would create.
   return NextResponse.json(result, {
-    headers: { "Cache-Control": "public, max-age=1800, s-maxage=1800" },
+    headers: {
+      "Cache-Control": result.available ? "public, max-age=1800, s-maxage=1800" : "no-store",
+    },
   });
 }
