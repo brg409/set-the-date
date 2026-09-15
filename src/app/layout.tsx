@@ -14,10 +14,28 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
+const TITLE = "Set the Date — Every date deserves the right spot";
+const DESCRIPTION =
+  "Set the Date recommends places based on the occasion and experience you want, not just what's popular nearby.";
+
 export const metadata: Metadata = {
-  title: "Set the Date — Every date deserves the right spot",
-  description:
-    "Set the Date recommends places based on the occasion and experience you want, not just what's popular nearby.",
+  // Needed so the auto-detected opengraph-image/twitter-image/apple-icon
+  // files below resolve to absolute URLs for link-preview crawlers (they
+  // can't follow a relative path the way a browser can).
+  metadataBase: new URL("https://set-the-date-two.vercel.app"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    siteName: "Set the Date",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
