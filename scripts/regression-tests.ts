@@ -409,12 +409,24 @@ section("Phase 2B: quality-gated exact-tie hashing");
 
 // No selected slot may ever score lower (raw, pre-penalty) than the venue
 // the OLD (pre-Phase-2B) source-order tie-break would have selected for
-// that same slot. The old behavior is re-derived here — not imported —
-// specifically so this test keeps comparing against the historical
-// baseline even as diversify() itself evolves further.
+// that same slot. The old TIE-BREAK behavior is re-derived here — not
+// imported — specifically so this test keeps comparing against that
+// historical baseline even as diversify() itself evolves further.
+//
+// Eligibility, in contrast, is intentionally NOT frozen to its pre-Phase-2B
+// state: it mirrors whatever isEligible() currently does (as of the budget
+// eligibility fix, the selected price level or one level cheaper, with the
+// top tier kept as a pure ceiling — see isEligible's comment in
+// recommend.ts). This test exists to isolate ONE variable, tie-break
+// behavior, and hold everything else constant at its current, correct
+// state — comparing against a stale eligibility rule would flag every
+// venue a later, deliberate eligibility change correctly excludes as a
+// false "regression."
 {
   function oldIsEligible(venue: Venue, prefs: DatePreferences): boolean {
-    return venue.neighborhood === prefs.neighborhood && venue.priceLevel <= prefs.budget;
+    if (venue.neighborhood !== prefs.neighborhood) return false;
+    if (prefs.budget === 4) return venue.priceLevel <= 4;
+    return venue.priceLevel <= prefs.budget && venue.priceLevel >= prefs.budget - 1;
   }
   function oldGetVenueBucket(category: VenueCategory): string {
     switch (category) {
@@ -516,6 +528,98 @@ section("Phase 2B: quality-gated exact-tie hashing");
   );
 
   console.log(`  (informational: ${combosReordered} / ${combosChecked} combinations reordered vs. the old tie-break)`);
+}
+
+// ── 7. Budget eligibility fix + exact-match bonus ───────────────────────
+//
+// Budget used to be a pure ceiling (any cheaper venue was fully eligible),
+// which let a $ venue's fit on other axes outrank genuinely
+// budget-appropriate venues — e.g. a $ bakery beating a $$ wine bar in a
+// $$$ search purely because "quiet and casual" scored well, despite the
+// bakery being two price levels below what was asked for. Fixed by
+// narrowing eligibility to the selected level or one level cheaper (with
+// the top tier, $$$$, kept as a pure ceiling — see isEligible's comment),
+// plus a small scoring bonus for an exact price-level match over a
+// one-level-cheaper substitute.
+
+section("Budget eligibility fix + exact-match bonus");
+
+// The reported case: a $ bakery must not appear at all for a $$$ search,
+// and the genuinely budget-appropriate wine bar must rank first.
+{
+  const prefs: DatePreferences = { neighborhood: "rittenhouse", dateType: "casual", vibe: "cozy_intimate", budget: 3 };
+  const ids = getRecommendations(prefs, { count: 3 }).results.map((r) => r.venue.id);
+  check(
+    "Rittenhouse casual/cozy_intimate/$$$ excludes The Bakeshop (two levels below budget) and leads with Superfolie",
+    !ids.includes("bakeshop-on-twentieth") && ids[0] === "superfolie",
+    ids.join(", ")
+  );
+}
+
+// General sweep: across the full matrix, a venue two-or-more price levels
+// below the selected budget must never appear in the top-3 UNLESS the
+// user has explicitly expanded the budget filter (not tested here — this
+// checks the default, non-expanded search only).
+{
+  const DATE_TYPES: DateType[] = ["first_date", "casual", "anniversary", "special_occasion", "reconnecting", "surprise_me"];
+  const VIBES: Vibe[] = ["cozy_intimate", "relaxed_casual", "lively_social", "romantic", "fun_playful", "trendy", "something_different"];
+  const NEIGHBORHOODS: Neighborhood[] = ["rittenhouse", "center_city", "old_city", "fishtown", "university_city", "south_philly"];
+  let violations = 0;
+  const violationExamples: string[] = [];
+  for (const neighborhood of NEIGHBORHOODS) {
+    for (const dateType of DATE_TYPES) {
+      for (const vibe of VIBES) {
+        for (const budget of [2, 3] as PriceLevel[]) {
+          // Budget 4 is deliberately exempt (pure ceiling, see above) and
+          // budget 1 has no cheaper tier to violate.
+          const prefs: DatePreferences = { neighborhood, dateType, vibe, budget };
+          const results = getRecommendations(prefs, { count: 3 }).results;
+          for (const r of results) {
+            if (budget - r.venue.priceLevel >= 2) {
+              violations++;
+              if (violationExamples.length < 5) {
+                violationExamples.push(`${neighborhood}/${dateType}/${vibe}/$${budget} -> ${r.venue.name} ($${r.venue.priceLevel})`);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  check(
+    "no venue two-or-more price levels below budget appears in a default (non-expanded) $$ or $$$ search",
+    violations === 0,
+    violationExamples.join("; ")
+  );
+}
+
+// The $$$$ tier is a deliberate exception: still a pure ceiling, so $ and
+// $$ venues remain reachable there (this is what keeps the loud-venue
+// safeguards above passing — narrowing the top tier the same way thinned
+// some neighborhoods' cozy/quiet options enough to force in a loud venue).
+{
+  const prefs: DatePreferences = { neighborhood: "rittenhouse", dateType: "casual", vibe: "relaxed_casual", budget: 4 };
+  const results = getRecommendations(prefs, { count: 3 }).results;
+  check(
+    "the $$$$ tier still admits venues more than one level cheaper (pure ceiling, no floor)",
+    results.some((r) => r.venue.priceLevel <= 2),
+    results.map((r) => `${r.venue.name}($${r.venue.priceLevel})`).join(", ")
+  );
+}
+
+// Exact-match bonus: an exact price-level match must outrank an
+// otherwise-identical-scoring one-level-cheaper venue.
+{
+  const prefs: DatePreferences = { neighborhood: "rittenhouse", dateType: "first_date", vibe: "cozy_intimate", budget: 2 };
+  const jjThai = VENUES.find((v) => v.id === "jj-thai-cuisine")!;
+  const vita = VENUES.find((v) => v.id === "vita-gelato")!;
+  const jjThaiScore = rankVenue(jjThai, prefs);
+  const vitaScore = rankVenue(vita, prefs);
+  check(
+    "an exact price-level match (JJ Thai, $$) outscores a same-raw-fit one-level-cheaper venue (Vita, $) by the exact-match bonus",
+    jjThai.priceLevel === prefs.budget && jjThaiScore > vitaScore,
+    `JJ Thai=${jjThaiScore.toFixed(2)} ($${jjThai.priceLevel}), Vita=${vitaScore.toFixed(2)} ($${vita.priceLevel})`
+  );
 }
 
 // Regeneration must still exclude every currently-displayed venue.

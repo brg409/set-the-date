@@ -18,13 +18,16 @@ import type {
  *
  * 1. ELIGIBILITY (hard filters) — neighborhood and budget are constraints
  *    the user explicitly set, not preferences to be balanced against
- *    everything else. A venue in the wrong neighborhood or above budget is
- *    never shown unless the user is told and opts in to widen the search.
- *    See `isEligible` / `getEligibleVenues`.
+ *    everything else. A venue in the wrong neighborhood, above budget, or
+ *    two-or-more price levels below it is never shown unless the user is
+ *    told and opts in to widen the search. See `isEligible` /
+ *    `getEligibleVenues`.
  *
  * 2. RANKING (soft scoring) — once we know which venues are allowed to
- *    appear at all, occasion (date type) and vibe decide the order between
- *    them. See `rankVenue`.
+ *    appear at all, occasion and vibe decide most of the order between
+ *    them, with a small nudge toward an exact price-level match over a
+ *    one-level-cheaper substitute the budget band also admits. See
+ *    `rankVenue`.
  *
  * Keeping these separate is what makes "Rittenhouse stays Rittenhouse"
  * possible: expanding the pool is an explicit, visible user action
@@ -38,6 +41,8 @@ export const RECOMMENDATION_WEIGHTS = {
   dateTypeMatch: 4,
   /** Exact vibe match (e.g. venue explicitly supports "romantic"). */
   vibeMatch: 3,
+  /** Exact price-level match vs. the one-level-cheaper venues the budget band also admits (see `isEligible`). */
+  exactBudgetMatch: 1,
 };
 
 // ── 1. Eligibility (hard filters) ──────────────────────────────────────
@@ -63,9 +68,27 @@ const NO_EXPANSION: ExpansionState = {
 
 function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState): boolean {
   const neighborhoodOk = expand.neighborhood || venue.neighborhood === prefs.neighborhood;
-  // Budget is a ceiling, not an exact match — a cheaper venue than requested
-  // is fine, a more expensive one is not, unless the user opts to expand.
-  const budgetOk = expand.budget || venue.priceLevel <= prefs.budget;
+  // Budget is a band, not a pure ceiling: the selected level or one level
+  // cheaper, never more expensive. A venue two or more levels cheaper than
+  // requested used to pass this check freely and could out-score genuinely
+  // budget-appropriate venues on fit alone (e.g. a $ bakery beating a $$
+  // wine bar in a $$$ search) — that's a mismatch with what "$$$" means to
+  // the person searching, not a good "deal" worth surfacing by default.
+  // Opting into `expand.budget` (the results-page banner) removes the band
+  // entirely, surfacing both pricier AND much-cheaper venues on request.
+  //
+  // The top tier ($$$$, PriceLevel 4) is the one exception, kept as a pure
+  // ceiling with no floor: there's no more-expensive tier for it to be
+  // "one level below," so picking $$$$ reads as "price isn't the
+  // constraint" rather than "only the priciest venues." Applying the same
+  // floor there measurably hurt quality instead — narrowing straight to
+  // $$$/$$$$ thinned some neighborhoods' genuinely quiet/cozy options
+  // enough that a loud venue (e.g. a concert hall or big theater) became
+  // one of the few remaining candidates for a cozy/romantic search, which
+  // is exactly what the diversity/scoring model is otherwise built to avoid.
+  const budgetOk =
+    expand.budget ||
+    (prefs.budget === 4 ? venue.priceLevel <= 4 : venue.priceLevel <= prefs.budget && venue.priceLevel >= prefs.budget - 1);
 
   const wantedIO = prefs.filters?.indoorOutdoor;
   // "indoor" is satisfied by virtually every venue (see `hasIndoorSeating`).
@@ -185,16 +208,31 @@ function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number 
 }
 
 /**
- * Ranks an already-eligible venue. Neighborhood, budget, indoor/outdoor, and
- * food/drink/activity are NOT scored here — they're hard filters (see
+ * Small preference for an exact price-level match over a merely-eligible
+ * one-level-cheaper venue (see the budget band in `isEligible`). Deliberately
+ * modest relative to `dateTypeMatch`/`vibeMatch` — this should nudge a close
+ * call toward the venue that actually matches what was asked for, never
+ * override a venue that's a genuinely much better occasion/vibe fit.
+ */
+function scoreBudgetFit(venue: Venue, prefs: DatePreferences): number {
+  return venue.priceLevel === prefs.budget ? RECOMMENDATION_WEIGHTS.exactBudgetMatch : 0;
+}
+
+/**
+ * Ranks an already-eligible venue. Neighborhood, indoor/outdoor, and
+ * food/drink/activity are NOT scored here — they're pure hard filters (see
  * `isEligible`), so every venue reaching this function already satisfies
- * them equally; there's nothing left to differentiate on that basis.
+ * them equally; there's nothing left to differentiate on that basis. Budget
+ * is the one exception: it's still a hard filter (a band, not scored as a
+ * spectrum), but within that band an exact price-level match gets a small
+ * preference over a one-level-cheaper substitute — see `scoreBudgetFit`.
  */
 export function rankVenue(venue: Venue, prefs: DatePreferences): number {
   return (
     scoreDateType(venue, prefs.dateType) +
     scoreVibe(venue, prefs.vibe) +
-    scoreSecondaryAttributes(venue, prefs)
+    scoreSecondaryAttributes(venue, prefs) +
+    scoreBudgetFit(venue, prefs)
   );
 }
 
