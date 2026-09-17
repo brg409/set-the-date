@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 // Next.js App Router convention: this file's default export becomes the
 // site's favicon automatically (no <link> tag or public/favicon.ico
 // needed). Kept in sync with the header mark in src/components/Logo.tsx —
-// same coral circle, same cream CalendarHeart glyph (inlined as raw SVG
+// same gold circle, same dark-wine CalendarHeart glyph (inlined as raw SVG
 // paths here since this renders via satori in an edge runtime, not React
 // DOM, so importing the lucide-react component isn't necessary).
 export const size = { width: 32, height: 32 };
@@ -19,7 +19,7 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#e2683f",
+          background: "#d3a76f",
           borderRadius: "50%",
         }}
       >
@@ -28,7 +28,7 @@ export default function Icon() {
           height="20"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#fbf6ee"
+          stroke="#2c1422"
           strokeWidth="2.25"
           strokeLinecap="round"
           strokeLinejoin="round"

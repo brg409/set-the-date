@@ -8,7 +8,7 @@
 // read it with `useSyncExternalStore`, which is the correct primitive for
 // state that lives outside React (here: localStorage).
 
-const STORAGE_KEY = "setthedate:saved-venues";
+const STORAGE_KEY = "knowaplace:saved-venues";
 
 const EMPTY_IDS: string[] = [];
 

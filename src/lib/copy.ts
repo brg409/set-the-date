@@ -2,14 +2,14 @@
 // change messaging across the app without hunting through components.
 
 export const BRAND = {
-  name: "Set the Date",
+  name: "Know a Place",
   tagline: "Every date deserves the right spot.",
   headline: "Find the right spot for your date.",
   subhead:
     "Tell us the occasion, the vibe, the neighborhood, and the budget. We'll match you with three spots that actually fit — not just the highest-rated places nearby.",
   ctaPrimary: "Plan a date",
   ctaSecondary: "See how it works",
-  positioning: "Dating apps help you find the person. Set the Date helps you find the place.",
+  positioning: "Dating apps help you find the person. Know a Place helps you find the place.",
 };
 
 export const LOADING_MESSAGES = [

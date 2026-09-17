@@ -7,7 +7,7 @@
 
 import type { DatePreferences, NotForMeReason, VenueFeedback } from "./types";
 
-const STORAGE_KEY = "setthedate:venue-feedback";
+const STORAGE_KEY = "knowaplace:venue-feedback";
 
 function readAll(): VenueFeedback[] {
   if (typeof window === "undefined") return [];

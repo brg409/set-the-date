@@ -11,7 +11,7 @@ export function Logo({ className = "" }: { className?: string }) {
         <CalendarHeart size={16} strokeWidth={2.25} />
       </span>
       <span className="font-display text-lg tracking-tight text-navy">
-        Set the Date
+        Know a Place
       </span>
     </Link>
   );

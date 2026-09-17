@@ -1,4 +1,4 @@
-// Core domain types for Set the Date.
+// Core domain types for Know a Place.
 // Kept separate from data/logic so a future real data provider (Google Places, etc.)
 // only needs to produce values that satisfy these shapes.
 

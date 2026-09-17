@@ -311,13 +311,13 @@ function EditablePill({
   return (
     <Link
       href={`/plan?${paramsKey}&focus=${step}`}
-      className="group inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-medium text-cream transition-colors hover:bg-navy-light"
+      className="group inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-navy transition-colors hover:bg-sand"
     >
       {label}
       <Pencil
         size={11}
         strokeWidth={2.5}
-        className="text-cream/50 transition-colors group-hover:text-cream"
+        className="text-navy/50 transition-colors group-hover:text-navy"
       />
     </Link>
   );

@@ -14,21 +14,23 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
-const TITLE = "Set the Date — Every date deserves the right spot";
+const TITLE = "Know a Place — Every date deserves the right spot";
 const DESCRIPTION =
-  "Set the Date recommends places based on the occasion and experience you want, not just what's popular nearby.";
+  "Know a Place recommends places based on the occasion and experience you want, not just what's popular nearby.";
 
 export const metadata: Metadata = {
   // Needed so the auto-detected opengraph-image/twitter-image/apple-icon
   // files below resolve to absolute URLs for link-preview crawlers (they
   // can't follow a relative path the way a browser can).
+  // NOTE: still points at the old domain — see rebrand summary re: renaming
+  // the Vercel project / custom domain, a separate decision from this file.
   metadataBase: new URL("https://set-the-date-two.vercel.app"),
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    siteName: "Set the Date",
+    siteName: "Know a Place",
     type: "website",
   },
   twitter: {

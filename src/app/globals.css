@@ -1,18 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand palette — warm, editorial, premium. Edit these to restyle the app. */
-  --color-ink: #23262f;
-  --color-navy: #1f2a44;
-  --color-navy-light: #33436a;
-  --color-coral: #e2683f;
-  --color-coral-dark: #c8552f;
-  --color-cream: #fbf6ee;
-  --color-sand: #f2e8d8;
-  --color-sand-dark: #e7d9c2;
-  --color-gold: #c99a3c;
-  --color-line: #e6dcc9;
-  --color-white: #ffffff;
+  /* Brand palette — wine-bar dark theme (formerly a light cream/navy/coral
+     palette; renamed to "Know a Place"). Variable names are kept as-is so
+     every existing bg- and text- utility class below still resolves —
+     several names (white, cream, navy) no longer describe their literal
+     color, they describe the same ROLE they always did (page background,
+     card surface, primary text) now filled with a dark-theme-appropriate
+     value. Edit these to restyle the app. */
+  --color-ink: #e5d2ba;
+  --color-navy: #f9f0e2;
+  --color-navy-light: #c9a98d;
+  --color-coral: #d3a76f;
+  --color-coral-dark: #b1854c;
+  --color-cream: #40202f;
+  --color-sand: #4f273d;
+  --color-sand-dark: #673a47;
+  --color-gold: #efd8a1;
+  --color-line: #774956;
+  --color-white: #552b3e;
 }
 
 @theme inline {

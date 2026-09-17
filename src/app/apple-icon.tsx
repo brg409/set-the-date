@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 // Next.js App Router convention: generates the <link rel="apple-touch-icon">
 // automatically — what iOS uses for home-screen bookmarks and, on some
-// versions, as a fallback link-preview icon. Same coral-circle/cream-glyph
+// versions, as a fallback link-preview icon. Same gold-circle/dark-wine-glyph
 // mark as the header, favicon, and Open Graph image, just at Apple's
 // standard 180x180 size (no rounding here — iOS applies its own corner
 // mask on top of whatever's supplied).
@@ -19,7 +19,7 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#e2683f",
+          background: "#d3a76f",
         }}
       >
         <svg
@@ -27,7 +27,7 @@ export default function AppleIcon() {
           height="112"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#fbf6ee"
+          stroke="#2c1422"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"

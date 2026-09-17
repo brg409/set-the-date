@@ -3,9 +3,9 @@ import { ImageResponse } from "next/og";
 // Next.js App Router convention: this becomes the site's Open Graph /
 // Twitter card image automatically (no meta tags needed) — what iMessage,
 // WhatsApp, Slack, etc. show as the big preview image when someone shares
-// the site's URL. Same coral-circle/cream-glyph mark as the header and
-// favicon, on the site's cream background, so a shared link actually
-// reads as "Set the Date" instead of falling back to a generic default.
+// the site's URL. Same gold-circle/wine-glyph mark as the header and
+// favicon, on the site's dark wine background, so a shared link actually
+// reads as "Know a Place" instead of falling back to a generic default.
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -20,7 +20,7 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#fbf6ee",
+          background: "#40202f",
         }}
       >
         <div
@@ -29,7 +29,7 @@ export default function OpengraphImage() {
             width: 160,
             height: 160,
             borderRadius: "50%",
-            background: "#e2683f",
+            background: "#d3a76f",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 40,
@@ -40,7 +40,7 @@ export default function OpengraphImage() {
             height="88"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#fbf6ee"
+            stroke="#2c1422"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -57,17 +57,17 @@ export default function OpengraphImage() {
             display: "flex",
             fontSize: 76,
             fontWeight: 600,
-            color: "#1f2a44",
+            color: "#f9f0e2",
             letterSpacing: "-0.02em",
           }}
         >
-          Set the Date
+          Know a Place
         </div>
         <div
           style={{
             display: "flex",
             fontSize: 30,
-            color: "#1f2a44",
+            color: "#f9f0e2",
             opacity: 0.7,
             marginTop: 18,
           }}

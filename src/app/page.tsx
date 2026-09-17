@@ -112,9 +112,9 @@ export default function LandingPage() {
           <VenueResultsGrid results={previewResults} />
         </section>
 
-        <section className="border-t border-line bg-navy">
+        <section className="border-t border-line bg-white">
           <div className="mx-auto max-w-3xl px-5 py-16 text-center">
-            <p className="font-display text-2xl italic leading-snug text-cream sm:text-3xl">
+            <p className="font-display text-2xl italic leading-snug text-navy sm:text-3xl">
               &ldquo;{BRAND.positioning}&rdquo;
             </p>
             <Link href="/plan" className="mt-8 inline-block">
@@ -128,7 +128,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-line px-5 py-8 text-center text-xs text-ink/45">
-        Set the Date is a prototype. Rittenhouse venues are real Philadelphia
+        Know a Place is a prototype. Rittenhouse venues are real Philadelphia
         spots; other neighborhoods use illustrative sample data. Attributes
         like noise and romance are editorial judgment calls, not measured
         data.
