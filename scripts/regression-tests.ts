@@ -415,9 +415,8 @@ section("Phase 2B: quality-gated exact-tie hashing");
 //
 // Eligibility, in contrast, is intentionally NOT frozen to its pre-Phase-2B
 // state: it mirrors whatever isEligible() currently does (as of the budget
-// eligibility fix, the selected price level or one level cheaper, with the
-// top tier kept as a pure ceiling — see isEligible's comment in
-// recommend.ts). This test exists to isolate ONE variable, tie-break
+// eligibility fix, the selected price level or one level cheaper at EVERY
+// tier including $$$$ — see isEligible's comment in recommend.ts). This test exists to isolate ONE variable, tie-break
 // behavior, and hold everything else constant at its current, correct
 // state — comparing against a stale eligibility rule would flag every
 // venue a later, deliberate eligibility change correctly excludes as a
@@ -425,7 +424,6 @@ section("Phase 2B: quality-gated exact-tie hashing");
 {
   function oldIsEligible(venue: Venue, prefs: DatePreferences): boolean {
     if (venue.neighborhood !== prefs.neighborhood) return false;
-    if (prefs.budget === 4) return venue.priceLevel <= 4;
     return venue.priceLevel <= prefs.budget && venue.priceLevel >= prefs.budget - 1;
   }
   function oldGetVenueBucket(category: VenueCategory): string {
@@ -569,9 +567,8 @@ section("Budget eligibility fix + exact-match bonus");
   for (const neighborhood of NEIGHBORHOODS) {
     for (const dateType of DATE_TYPES) {
       for (const vibe of VIBES) {
-        for (const budget of [2, 3] as PriceLevel[]) {
-          // Budget 4 is deliberately exempt (pure ceiling, see above) and
-          // budget 1 has no cheaper tier to violate.
+        for (const budget of [2, 3, 4] as PriceLevel[]) {
+          // Budget 1 has no cheaper tier to violate.
           const prefs: DatePreferences = { neighborhood, dateType, vibe, budget };
           const results = getRecommendations(prefs, { count: 3 }).results;
           for (const r of results) {
@@ -587,23 +584,50 @@ section("Budget eligibility fix + exact-match bonus");
     }
   }
   check(
-    "no venue two-or-more price levels below budget appears in a default (non-expanded) $$ or $$$ search",
+    "no venue two-or-more price levels below budget appears in a default (non-expanded) $$, $$$, or $$$$ search",
     violations === 0,
     violationExamples.join("; ")
   );
 }
 
-// The $$$$ tier is a deliberate exception: still a pure ceiling, so $ and
-// $$ venues remain reachable there (this is what keeps the loud-venue
-// safeguards above passing — narrowing the top tier the same way thinned
-// some neighborhoods' cozy/quiet options enough to force in a loud venue).
+// The $$$$ tier is a floor like every other tier: a highest-budget search
+// is a splurge, so it must never surface a $ bakery or a $$ cafe. (It used
+// to be a pure ceiling, which put a $/$$ venue at #1 in ~48% of $$$$
+// searches.) The Bakeshop case is the reported real-world example.
 {
-  const prefs: DatePreferences = { neighborhood: "rittenhouse", dateType: "casual", vibe: "relaxed_casual", budget: 4 };
+  const prefs: DatePreferences = { neighborhood: "rittenhouse", dateType: "first_date", vibe: "relaxed_casual", budget: 4 };
   const results = getRecommendations(prefs, { count: 3 }).results;
   check(
-    "the $$$$ tier still admits venues more than one level cheaper (pure ceiling, no floor)",
-    results.some((r) => r.venue.priceLevel <= 2),
+    "a $$$$ Rittenhouse search never surfaces The Bakeshop or any $/$$ venue",
+    results.every((r) => r.venue.priceLevel >= 3) && !results.some((r) => r.venue.id.includes("bakeshop")),
     results.map((r) => `${r.venue.name}($${r.venue.priceLevel})`).join(", ")
+  );
+}
+
+// A venue where conversation is essentially impossible (conversationFriendly
+// 1: concert halls, big theaters, loud clubs) must not win a cozy/romantic
+// search even in a thin price tier where diversity would otherwise pull it in.
+{
+  const cannotTalk = VENUES.filter((v) => v.attributes.conversationFriendly <= 1);
+  let bad = 0;
+  const examples: string[] = [];
+  for (const v of cannotTalk) {
+    for (const vibe of ["cozy_intimate", "romantic"] as Vibe[]) {
+      for (const dateType of ["first_date", "anniversary", "special_occasion", "reconnecting"] as DateType[]) {
+        for (const budget of [3, 4] as PriceLevel[]) {
+          const prefs: DatePreferences = { neighborhood: v.neighborhood, dateType, vibe, budget };
+          if (getRecommendations(prefs, { count: 3 }).results.some((r) => r.venue.id === v.id)) {
+            bad++;
+            if (examples.length < 5) examples.push(`${v.name} in ${v.neighborhood}/${dateType}/${vibe}/$${budget}`);
+          }
+        }
+      }
+    }
+  }
+  check(
+    "no can't-hold-a-conversation venue (conversationFriendly 1) appears in a cozy/romantic $$$ or $$$$ search",
+    bad === 0,
+    examples.join("; ")
   );
 }
 

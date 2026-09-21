@@ -77,18 +77,14 @@ function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState
   // Opting into `expand.budget` (the results-page banner) removes the band
   // entirely, surfacing both pricier AND much-cheaper venues on request.
   //
-  // The top tier ($$$$, PriceLevel 4) is the one exception, kept as a pure
-  // ceiling with no floor: there's no more-expensive tier for it to be
-  // "one level below," so picking $$$$ reads as "price isn't the
-  // constraint" rather than "only the priciest venues." Applying the same
-  // floor there measurably hurt quality instead — narrowing straight to
-  // $$$/$$$$ thinned some neighborhoods' genuinely quiet/cozy options
-  // enough that a loud venue (e.g. a concert hall or big theater) became
-  // one of the few remaining candidates for a cozy/romantic search, which
-  // is exactly what the diversity/scoring model is otherwise built to avoid.
+  // The top tier ($$$$) follows the same one-level-cheaper band as every
+  // other tier, so it admits $$$ and $$$$ only. It used to be a pure
+  // ceiling ("price isn't the constraint"), which put $ bakeries and cafes
+  // at #1 for nearly half of all $$$$ searches — someone choosing the
+  // highest budget is looking for a splurge, not a cheap bite.
   const budgetOk =
     expand.budget ||
-    (prefs.budget === 4 ? venue.priceLevel <= 4 : venue.priceLevel <= prefs.budget && venue.priceLevel >= prefs.budget - 1);
+    (venue.priceLevel <= prefs.budget && venue.priceLevel >= prefs.budget - 1);
 
   const wantedIO = prefs.filters?.indoorOutdoor;
   // "indoor" is satisfied by virtually every venue (see `hasIndoorSeating`).
@@ -170,6 +166,16 @@ function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number 
     case "surprise_me":
       bonus += (a.novelty - 3) * 0.5;
       break;
+  }
+
+  // A room where conversation is essentially impossible (a concert hall, a
+  // 1,000-seat theater, a loud club) contradicts "cozy/intimate" and
+  // "romantic" outright — the tagging guidelines define both around being
+  // able to talk. Diversity or a thin price tier can otherwise pull such a
+  // venue in as a "variety" pick, so it's penalized hard enough to stay out
+  // unless nothing else exists.
+  if ((prefs.vibe === "cozy_intimate" || prefs.vibe === "romantic") && a.conversationFriendly <= 1) {
+    bonus -= 6;
   }
 
   switch (prefs.vibe) {

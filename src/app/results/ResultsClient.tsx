@@ -33,6 +33,7 @@ import type {
   DatePreferences,
   ExpansionState,
   NotForMeReason,
+  PriceLevel,
   ScoredVenue,
 } from "@/lib/types";
 
@@ -162,7 +163,7 @@ function ResultsForPrefs({
 
   const limitingFilters = [
     `${neighborhoodLabel}`,
-    `${budgetLabel} or less`,
+    prefs.budget === 1 ? budgetLabel : `${PRICE_LABEL[(prefs.budget - 1) as PriceLevel]}–${budgetLabel}`,
     prefs.filters?.indoorOutdoor ? prefs.filters.indoorOutdoor + " seating" : null,
     prefs.filters?.food ? `${prefs.filters.food} only` : null,
   ].filter((v): v is string => Boolean(v));
