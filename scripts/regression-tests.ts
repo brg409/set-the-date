@@ -635,13 +635,13 @@ section("Budget eligibility fix + exact-match bonus");
   );
 }
 
-// Dataset integrity: Phase 2B must not touch venue data.
-check("all 180 venues remain", VENUES.length === 180, `found ${VENUES.length}`);
+// Dataset integrity: update these when venues are intentionally added.
+check("all 188 venues remain", VENUES.length === 188, `found ${VENUES.length}`);
 {
   const NEIGHBORHOOD_COUNTS: Record<string, number> = {
-    rittenhouse: 49,
-    center_city: 29,
-    old_city: 28,
+    rittenhouse: 54,
+    center_city: 31,
+    old_city: 29,
     fishtown: 26,
     university_city: 23,
     south_philly: 25,
@@ -649,7 +649,7 @@ check("all 180 venues remain", VENUES.length === 180, `found ${VENUES.length}`);
   const actualCounts: Record<string, number> = {};
   for (const v of VENUES) actualCounts[v.neighborhood] = (actualCounts[v.neighborhood] ?? 0) + 1;
   check(
-    "all six neighborhood counts remain unchanged",
+    "neighborhood counts match the expected totals",
     JSON.stringify(actualCounts) === JSON.stringify(NEIGHBORHOOD_COUNTS),
     JSON.stringify(actualCounts)
   );
