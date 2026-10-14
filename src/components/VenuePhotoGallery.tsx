@@ -89,7 +89,7 @@ export function VenuePhotoGallery({ venue }: { venue: Venue }) {
               onClick={() => setActiveIndex(i)}
               aria-label={`Show photo ${i + 1} of ${state.photos.length}`}
               className={`aspect-[16/9] flex-1 overflow-hidden rounded-lg transition-opacity ${
-                i === activeIndex ? "opacity-100 ring-2 ring-coral" : "opacity-70 hover:opacity-100"
+                i === activeIndex ? "opacity-100 ring-2 ring-primary" : "opacity-70 hover:opacity-100"
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

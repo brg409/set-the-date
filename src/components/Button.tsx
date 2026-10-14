@@ -5,16 +5,16 @@ export type ButtonSize = "md" | "lg" | "sm";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "bg-coral text-white hover:bg-coral-dark shadow-sm shadow-coral/20",
-  secondary: "bg-white text-navy hover:bg-sand",
-  outline: "border border-line bg-white text-navy hover:border-navy/40",
-  ghost: "text-navy hover:bg-sand",
+    "bg-primary text-white hover:bg-primary-dark shadow-sm shadow-primary/20",
+  secondary: "bg-tint text-primary-dark hover:bg-tint-strong",
+  outline: "border border-line bg-card text-ink hover:border-primary/40",
+  ghost: "text-ink hover:bg-tint",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: "px-3.5 py-2 text-sm",
-  md: "px-5 py-2.5 text-sm",
-  lg: "px-7 py-3.5 text-base",
+  sm: "min-h-9 px-3.5 py-2 text-sm",
+  md: "min-h-11 px-5 py-2.5 text-sm",
+  lg: "min-h-12 px-7 py-3.5 text-base",
 };
 
 export function getButtonClasses(

@@ -1,36 +1,37 @@
 @import "tailwindcss";
 
+/*
+  KnowaPlace design tokens. Everything visual that might change later
+  (colors, fonts, nav height) lives here — components only use the semantic
+  utility names below (bg-page, bg-card, text-ink, bg-primary, ...).
+*/
 :root {
-  /* Brand palette — wine-bar dark theme (formerly a light cream/navy/coral
-     palette; renamed to "Know a Place"). Variable names are kept as-is so
-     every existing bg- and text- utility class below still resolves —
-     several names (white, cream, navy) no longer describe their literal
-     color, they describe the same ROLE they always did (page background,
-     card surface, primary text) now filled with a dark-theme-appropriate
-     value. Edit these to restyle the app. */
-  --color-ink: #e5d2ba;
-  --color-navy: #f9f0e2;
-  --color-navy-light: #c9a98d;
-  --color-coral: #d3a76f;
-  --color-coral-dark: #b1854c;
-  --color-cream: #40202f;
-  --color-sand: #4f273d;
-  --color-sand-dark: #673a47;
-  --color-gold: #efd8a1;
-  --color-line: #774956;
-  --color-white: #552b3e;
+  --color-primary: #6040b4;
+  --color-primary-dark: #4b3292;
+  --color-lavender: #b7a0e6;
+  --color-accent: #f2b39d;
+  --color-page: #faf9fd;
+  --color-card: #ffffff;
+  --color-ink: #282332;
+  --color-muted: #6b6479;
+  --color-tint: #f2edfb;
+  --color-tint-strong: #e4daf7;
+  --color-line: #e5def2;
+
+  --nav-height: 4rem;
 }
 
 @theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-lavender: var(--color-lavender);
+  --color-accent: var(--color-accent);
+  --color-page: var(--color-page);
+  --color-card: var(--color-card);
   --color-ink: var(--color-ink);
-  --color-navy: var(--color-navy);
-  --color-navy-light: var(--color-navy-light);
-  --color-coral: var(--color-coral);
-  --color-coral-dark: var(--color-coral-dark);
-  --color-cream: var(--color-cream);
-  --color-sand: var(--color-sand);
-  --color-sand-dark: var(--color-sand-dark);
-  --color-gold: var(--color-gold);
+  --color-muted: var(--color-muted);
+  --color-tint: var(--color-tint);
+  --color-tint-strong: var(--color-tint-strong);
   --color-line: var(--color-line);
 
   --font-sans: var(--font-sans);
@@ -42,6 +43,7 @@ body {
   /* Belt-and-suspenders against any element that could force a horizontal
      scrollbar on narrow phones (a fixed-width child, a long unbroken URL, etc.). */
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .font-display {
@@ -49,20 +51,20 @@ body {
 }
 
 ::selection {
-  background: var(--color-coral);
-  color: var(--color-white);
+  background: var(--color-lavender);
+  color: var(--color-ink);
 }
 
 /* Visible keyboard focus everywhere, since several interactive elements use
    custom classes rather than native button/link styling. */
 :focus-visible {
-  outline: 2px solid var(--color-coral);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Sticky header is ~64px tall — anything jumped to via an anchor or focus
-   should land clear of it rather than partially underneath it. */
+/* Anything jumped to via an anchor or focus should land clear of the
+   sticky header rather than partially underneath it. */
 h1,
 section[id] {
   scroll-margin-top: 5rem;

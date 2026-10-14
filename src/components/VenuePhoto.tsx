@@ -127,7 +127,7 @@ function cacheKey(venueId: string, count: number, preferOutdoor: boolean) {
 /** A plain grey pulse shown only while the photo request is in flight. */
 export function PhotoSkeleton({ className = "" }: { className?: string }) {
   return (
-    <div className={`h-full w-full animate-pulse bg-navy/10 ${className}`} aria-hidden />
+    <div className={`h-full w-full animate-pulse bg-tint-strong ${className}`} aria-hidden />
   );
 }
 
@@ -151,7 +151,7 @@ export function AttributionBadge({
   const href = linkable ? photo.attributionUri ?? googleMapsUri : undefined;
   const label = photo.attributionText ?? "Photo: Google";
   const content = (
-    <span className="inline-flex items-center gap-1 rounded-full bg-navy/60 px-2 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm">
+    <span className="inline-flex items-center gap-1 rounded-full bg-ink/65 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
       {label}
       {href && <ExternalLink size={10} strokeWidth={2.5} />}
     </span>

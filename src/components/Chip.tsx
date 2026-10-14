@@ -8,12 +8,12 @@ export function Chip({
 }: {
   icon?: LucideIcon;
   children: ReactNode;
-  tone?: "default" | "navy" | "coral";
+  tone?: "default" | "primary" | "accent";
 }) {
   const toneClasses = {
-    default: "bg-sand text-navy",
-    navy: "bg-navy text-cream",
-    coral: "bg-coral/10 text-coral-dark",
+    default: "bg-tint text-ink",
+    primary: "bg-primary text-white",
+    accent: "bg-accent/40 text-ink",
   }[tone];
 
   return (

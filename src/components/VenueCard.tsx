@@ -1,13 +1,12 @@
-import { MapPin, ExternalLink, Navigation, MapPinOff, DollarSign, TreePine, Utensils } from "lucide-react";
+import { ExternalLink, MapPinOff, DollarSign, TreePine, Utensils } from "lucide-react";
 import type { DatePreferences, NotForMeReason, ScoredVenue } from "@/lib/types";
 import { PRICE_LABEL, findOption, NEIGHBORHOOD_OPTIONS } from "@/lib/options";
-import { getKeyAttributeChips } from "@/lib/attributeLabels";
-import { getDirectionsUrl, getReserveUrl } from "@/lib/externalLinks";
+import { RESULTS_COPY } from "@/lib/copy";
 import { VenuePhoto } from "./VenuePhoto";
 import { WhyItFits } from "./WhyItFits";
 import { Chip } from "./Chip";
-import { Button } from "./Button";
 import { SaveButton } from "./SaveButton";
+import { BeenHereButton } from "./BeenHereButton";
 import { NotForMeControl } from "./NotForMeControl";
 
 export function VenueCard({
@@ -15,6 +14,8 @@ export function VenueCard({
   rank,
   onViewDetails,
   prefs,
+  fromSearch,
+  whyHeading,
   onNotForMe,
 }: {
   scored: ScoredVenue;
@@ -22,13 +23,20 @@ export function VenueCard({
   onViewDetails: (venueId: string) => void;
   /** When provided, shows why a result is outside the user's exact filters. */
   prefs?: DatePreferences;
+  /** The search (URL params) this card was shown for. */
+  fromSearch?: string;
+  /** Overrides the "Why we picked it for you" heading when there is no search context. */
+  whyHeading?: string;
   /** When provided, shows the "Not for me" action (results context only). */
   onNotForMe?: (venueId: string, reason: NotForMeReason | null) => void;
 }) {
   const { venue, whyItFits } = scored;
   const neighborhood = findOption(NEIGHBORHOOD_OPTIONS, venue.neighborhood);
-  const chips = getKeyAttributeChips(venue);
-  const reserveUrl = getReserveUrl(venue);
+
+  // "Reserve" only where a verified reservation link is on file. Everything
+  // else with a website gets an honestly-labeled "Website" link instead.
+  const reservationUrl = venue.reservationUrl;
+  const websiteUrl = venue.websiteUrl;
 
   const outsideNeighborhood = prefs && venue.neighborhood !== prefs.neighborhood;
   const outsideBudget = prefs && venue.priceLevel > prefs.budget;
@@ -40,11 +48,12 @@ export function VenueCard({
   const outsideFood = wantedFood && !venue.foodDrinkActivity.includes(wantedFood);
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-sm shadow-navy/[0.03] transition-shadow hover:shadow-md hover:shadow-navy/[0.06]">
+    <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-sm shadow-ink/[0.04]">
       <button
         type="button"
         onClick={() => onViewDetails(venue.id)}
-        className="relative block aspect-[16/10] w-full overflow-hidden text-left sm:aspect-[4/3]"
+        aria-label={`View details for ${venue.name}`}
+        className="relative block aspect-[16/10] w-full overflow-hidden text-left"
       >
         {/*
           `aspect-ratio` alone only sets a *preferred* size — a normal-flow
@@ -58,35 +67,35 @@ export function VenueCard({
           <VenuePhoto venue={venue} preferOutdoor={wantedIO === "outdoor"} linkAttribution={false} />
         </div>
         {rank && (
-          <span className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm font-semibold text-navy shadow-sm">
+          <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/95 text-sm font-semibold text-ink shadow-sm">
             {rank}
           </span>
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-navy shadow-sm">
+        <span className="absolute right-3 top-3 rounded-full bg-card/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm">
           {PRICE_LABEL[venue.priceLevel]}
         </span>
       </button>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className="flex flex-1 flex-col gap-3.5 p-4 sm:p-5">
         {(outsideNeighborhood || outsideBudget || outsideIndoorOutdoor || outsideFood) && (
           <div className="flex flex-wrap gap-1.5">
             {outsideNeighborhood && (
-              <Chip icon={MapPinOff} tone="coral">
+              <Chip icon={MapPinOff} tone="accent">
                 Outside {findOption(NEIGHBORHOOD_OPTIONS, prefs!.neighborhood).label}
               </Chip>
             )}
             {outsideBudget && (
-              <Chip icon={DollarSign} tone="coral">
+              <Chip icon={DollarSign} tone="accent">
                 Above your {PRICE_LABEL[prefs!.budget]} budget
               </Chip>
             )}
             {outsideIndoorOutdoor && (
-              <Chip icon={TreePine} tone="coral">
+              <Chip icon={TreePine} tone="accent">
                 No verified {wantedIO} seating
               </Chip>
             )}
             {outsideFood && (
-              <Chip icon={Utensils} tone="coral">
+              <Chip icon={Utensils} tone="accent">
                 Not tagged as {wantedFood}
               </Chip>
             )}
@@ -94,67 +103,51 @@ export function VenueCard({
         )}
 
         <div>
-          <div className="mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-navy/60">
-            <span>{venue.categoryLabel}</span>
-            <span aria-hidden>&middot;</span>
-            <span>{neighborhood.label}</span>
-          </div>
           <button
             type="button"
             onClick={() => onViewDetails(venue.id)}
-            className="text-left font-display text-xl text-navy hover:text-coral-dark"
+            className="text-left font-display text-xl leading-snug text-ink hover:text-primary"
           >
             {venue.name}
           </button>
-          <p className="mt-1.5 text-sm leading-relaxed text-ink/75">
-            {venue.description}
+          <p className="mt-1 text-sm text-muted">
+            {venue.categoryLabel} &middot; {neighborhood.label} &middot;{" "}
+            {PRICE_LABEL[venue.priceLevel]}
           </p>
         </div>
 
-        <WhyItFits text={whyItFits} compact />
+        <WhyItFits text={whyItFits} heading={whyHeading ?? RESULTS_COPY.whyItFitsLabel} compact />
 
-        <div className="flex flex-wrap gap-1.5">
-          {chips.map((chip) => (
-            <Chip key={chip.label} icon={chip.icon}>
-              {chip.label}
-            </Chip>
-          ))}
-        </div>
-
-        <p className="flex items-center gap-1.5 text-xs text-ink/60">
-          <MapPin size={13} strokeWidth={2.25} />
-          {venue.address}
-        </p>
-
-        <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-          <Button size="sm" onClick={() => onViewDetails(venue.id)}>
-            View details
-          </Button>
-          <SaveButton venueId={venue.id} size="sm" />
-          {reserveUrl && (
+        <div className="mt-auto flex flex-wrap items-center gap-2">
+          <SaveButton venueId={venue.id} fromSearch={fromSearch} size="sm" />
+          <BeenHereButton venueId={venue.id} fromSearch={fromSearch} size="sm" />
+          {reservationUrl ? (
             <a
-              href={reserveUrl}
+              href={reservationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-navy transition-colors hover:border-navy/40"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
             >
-              <ExternalLink size={13} strokeWidth={2.25} />
+              <ExternalLink size={14} strokeWidth={2.25} />
               Reserve
             </a>
+          ) : (
+            websiteUrl && (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-primary/40 hover:bg-tint"
+              >
+                <ExternalLink size={14} strokeWidth={2.25} />
+                Website
+              </a>
+            )
           )}
-          <a
-            href={getDirectionsUrl(venue)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-navy transition-colors hover:border-navy/40"
-          >
-            <Navigation size={13} strokeWidth={2.25} />
-            Directions
-          </a>
         </div>
 
         {onNotForMe && (
-          <div className="-mb-1 flex flex-wrap items-start pt-1">
+          <div className="-mb-1 flex flex-wrap items-start">
             <NotForMeControl onDismiss={(reason) => onNotForMe(venue.id, reason)} />
           </div>
         )}
