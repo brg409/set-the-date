@@ -1,12 +1,19 @@
-import { Suspense } from "react";
-import FindScreen from "./FindScreen";
+import { HomeHero } from "@/components/home/HomeHero";
+import { QuickStart } from "@/components/home/QuickStart";
+import { FeaturedPlaces } from "@/components/home/FeaturedPlaces";
+import { HowItWorks } from "@/components/home/HowItWorks";
+import { FinalCta } from "@/components/home/FinalCta";
 
-// `/` is the Find tab: criteria selection. (The old marketing landing page
-// was retired; /plan and /saved redirect — see next.config.ts.)
-export default function FindPage() {
+// `/` is the homepage: an introduction that leads into Find (`/find`). The
+// Find tab always goes straight to the filters; nobody is forced through here.
+export default function HomePage() {
   return (
-    <Suspense fallback={null}>
-      <FindScreen />
-    </Suspense>
+    <main className="flex-1">
+      <HomeHero />
+      <QuickStart />
+      <FeaturedPlaces />
+      <HowItWorks />
+      <FinalCta />
+    </main>
   );
 }

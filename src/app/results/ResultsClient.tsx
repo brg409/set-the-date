@@ -68,7 +68,7 @@ export default function ResultsClient() {
           title="Something's missing"
           body="We couldn't read your preferences from the link. Head back and choose again."
           action={
-            <Link href="/" className={getButtonClasses("primary", "md")}>
+            <Link href="/find" className={getButtonClasses("primary", "md")}>
               Find a place
             </Link>
           }
@@ -252,7 +252,7 @@ function ResultsForPrefs({
           <p className="mt-1 text-sm text-muted">{RESULTS_COPY.subheading}</p>
         </div>
         <Link
-          href={`/?${paramsKey}`}
+          href={`/find?${paramsKey}`}
           className={`${getButtonClasses("outline", "sm")} shrink-0`}
         >
           <SlidersHorizontal size={15} strokeWidth={2.25} />

@@ -202,6 +202,30 @@ async function main() {
     check("found a 4-5 venue search to test leftovers", false, "none found");
   }
 
+  console.log("\nHomepage content");
+  const home = await import("../src/lib/homeContent");
+  const { DATE_TYPE_OPTIONS } = await import("../src/lib/options");
+  const shown = home.venuesFromIds([...home.HERO_VENUE_IDS, ...home.FEATURED_VENUE_IDS]);
+  check(
+    "every hero and featured venue exists in the database",
+    shown.length === home.HERO_VENUE_IDS.length + home.FEATURED_VENUE_IDS.length
+  );
+  check("every one has a Google place id (so a real photo can load)", shown.every((v) => Boolean(v.googlePlaceId)));
+  check("every featured venue has an official website to link to", home.venuesFromIds(home.FEATURED_VENUE_IDS).every((v) => Boolean(v.websiteUrl)));
+  check(
+    "featured places are a restaurant, a cocktail bar, and an activity bar",
+    home.venuesFromIds(home.FEATURED_VENUE_IDS).map((v) => v.id).join() ===
+      "wm-mulherins-sons,franklin-mortgage-investment-co,barcade-fishtown"
+  );
+  check(
+    "every quick-start occasion is an existing occasion option",
+    home.QUICK_START_OCCASIONS.every((o) => DATE_TYPE_OPTIONS.some((opt) => opt.value === o))
+  );
+  const quickStartPrefill = home.QUICK_START_OCCASIONS.every(
+    (o) => criteriaFromParams(new URLSearchParams(`dateType=${o}`)).dateType === o
+  );
+  check("each quick-start link pre-fills the Find screen's occasion", quickStartPrefill);
+
   console.log(`\n${passed} passed, ${failed} failed.`);
   process.exit(failed === 0 ? 0 : 1);
 }

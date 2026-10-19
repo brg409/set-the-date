@@ -10,10 +10,10 @@ export interface TabDef {
 
 export const TABS: TabDef[] = [
   {
-    href: "/",
+    href: "/find",
     label: "Find",
     icon: Search,
-    isActive: (p) => p === "/" || p.startsWith("/results") || p.startsWith("/place"),
+    isActive: (p) => p.startsWith("/find") || p.startsWith("/results") || p.startsWith("/place"),
   },
   {
     href: "/friends",

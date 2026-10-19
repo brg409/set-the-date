@@ -37,7 +37,7 @@ export default function OpengraphImage() {
             color: "#6b6479",
           }}
         >
-          Every date deserves the right spot
+          Know the place. Love the night.
         </div>
       </div>
     ),

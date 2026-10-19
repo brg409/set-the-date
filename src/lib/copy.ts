@@ -3,7 +3,7 @@
 
 export const BRAND = {
   name: "KnowaPlace",
-  tagline: "Every date deserves the right spot.",
+  tagline: "Know the place. Love the night.",
   about:
     "KnowaPlace helps you discover great restaurants, bars, and experiences that fit your occasion, preferences, and vibe — without spending hours searching.",
 };

@@ -16,7 +16,7 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
-const TITLE = "KnowaPlace — Every date deserves the right spot";
+const TITLE = "KnowaPlace — Know the place. Love the night.";
 const DESCRIPTION =
   "KnowaPlace helps you discover great restaurants, bars, and experiences that fit your occasion, preferences, and vibe — without spending hours searching.";
 

@@ -182,6 +182,7 @@ export function VenuePhoto({
   sizePx = 800,
   preferOutdoor = false,
   linkAttribution = true,
+  eager = false,
 }: {
   venue: Venue;
   className?: string;
@@ -192,6 +193,8 @@ export function VenuePhoto({
   preferOutdoor?: boolean;
   /** False when this is rendered inside a native `<button>` (e.g. the recommendation card), where a nested link isn't valid HTML. */
   linkAttribution?: boolean;
+  /** Load the image immediately instead of lazily — for photos visible on first paint. */
+  eager?: boolean;
 }) {
   const key = cacheKey(venue.id, 1, preferOutdoor);
   const initialState = (): PhotoState => {
@@ -261,7 +264,7 @@ export function VenuePhoto({
         <img
           src={photo.url}
           alt={`${venue.categoryLabel} interior at ${venue.name}`}
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           className="h-full w-full object-cover object-center"
           onError={() => setState({ status: "unavailable" })}
         />

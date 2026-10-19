@@ -131,7 +131,7 @@ export default function MyPlacesPage() {
             title={`Nothing in ${active.label} yet`}
             body={active.empty}
             action={
-              <Link href="/" className={getButtonClasses("primary", "md")}>
+              <Link href="/find" className={getButtonClasses("primary", "md")}>
                 Find a place
               </Link>
             }
