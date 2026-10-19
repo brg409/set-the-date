@@ -35,6 +35,16 @@ export const FEATURED_VENUE_IDS = [
   "barcade-fishtown",
 ];
 
+/**
+ * A shorter line for a featured card, used only where the venue's own
+ * description would make the three cards uneven. Each one is a clause-boundary
+ * trim of that description (checked in the tests) — nothing is added.
+ */
+export const FEATURED_BLURBS: Record<string, string> = {
+  "franklin-mortgage-investment-co":
+    "An unmarked, award-winning speakeasy behind an anonymous door just off Rittenhouse Square.",
+};
+
 /** Existing occasion values only; labels and icons come from options.ts. */
 export const QUICK_START_OCCASIONS: DateType[] = [
   "first_date",

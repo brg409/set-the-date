@@ -4,16 +4,12 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Bookmark, CheckCircle2, Heart } from "lucide-react";
 import { VenueCard } from "@/components/VenueCard";
-import { VenueDetailModal } from "@/components/VenueDetailModal";
 import { EmptyState } from "@/components/EmptyState";
 import { getButtonClasses } from "@/components/Button";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
 import { getVenueById } from "@/data/venues";
-import {
-  generateConciseWhyItFits,
-  generateWhyItFits,
-  getDefaultWhyItFits,
-} from "@/lib/recommend";
+import { generateConciseWhyItFits, getDefaultWhyItFits } from "@/lib/recommend";
+import { placeHref } from "@/lib/placeLinks";
 import { paramsToPreferences } from "@/lib/queryParams";
 import { MY_PLACES_COPY } from "@/lib/copy";
 import type { PlaceEntry } from "@/lib/myPlaces";
@@ -51,7 +47,6 @@ function inSection(entry: PlaceEntry, section: Section): boolean {
 export default function MyPlacesPage() {
   const { entries } = useMyPlaces();
   const [section, setSection] = useState<Section>("want");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const counts = useMemo(() => {
     const all = Object.values(entries);
@@ -81,17 +76,14 @@ export default function MyPlacesPage() {
         const scored: ScoredVenue = {
           venue,
           score: 0,
-          whyItFits: prefs ? generateConciseWhyItFits(venue, prefs) : getDefaultWhyItFits(venue, 55),
+          whyItFits: prefs ? generateConciseWhyItFits(venue, prefs) : getDefaultWhyItFits(venue, 40),
           matchedTags: venue.tags.slice(0, 3),
         };
-        // Full-length text for the detail view; the card shows the short one.
-        const fullWhy = prefs ? generateWhyItFits(venue, prefs) : getDefaultWhyItFits(venue);
-        return { scored, fullWhy, hasContext: Boolean(prefs), fromSearch: entry.fromSearch };
+        return { scored, hasContext: Boolean(prefs), fromSearch: entry.fromSearch };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
   }, [entries, section]);
 
-  const selected = items.find((i) => i.scored.venue.id === selectedId) ?? null;
   const active = SECTIONS.find((s) => s.key === section)!;
 
   return (
@@ -142,7 +134,7 @@ export default function MyPlacesPage() {
               <VenueCard
                 key={scored.venue.id}
                 scored={scored}
-                onViewDetails={setSelectedId}
+                detailHref={placeHref(scored.venue.id, { search: fromSearch, from: "my-places" })}
                 fromSearch={fromSearch}
                 whyHeading={hasContext ? undefined : "About this place"}
               />
@@ -151,14 +143,6 @@ export default function MyPlacesPage() {
         )}
       </div>
 
-      {selected && (
-        <VenueDetailModal
-          venue={selected.scored.venue}
-          whyItFits={selected.fullWhy}
-          fromSearch={selected.hasContext ? selected.fromSearch : undefined}
-          onClose={() => setSelectedId(null)}
-        />
-      )}
     </main>
   );
 }

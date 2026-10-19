@@ -136,20 +136,31 @@ async function main() {
     "card text is the concise form of the engine's own explanation",
     rebuilt.every((r) => r.whyItFits === generateConciseWhyItFits(r.venue, prefs))
   );
-  let tooLong = 0, notPrefix = 0, changedShort = 0, total = 0;
+  // Every occasion x vibe combination for every venue.
+  const occasions = ["first_date", "casual", "anniversary", "special_occasion", "reconnecting", "surprise_me"] as const;
+  const vibeList = ["cozy_intimate", "relaxed_casual", "lively_social", "romantic", "fun_playful", "trendy", "something_different"] as const;
+  const counts: number[] = [];
+  let noOwnTag = 0, fullLostTag = 0;
   for (const v of VENUES) {
-    const full = generateWhyItFits(v, prefs);
-    const short = generateConciseWhyItFits(v, prefs);
-    total++;
-    // Venue's own first tag must lead the sentence, and nothing may be added.
-    if (!short.startsWith(v.tags[0].charAt(0).toUpperCase() + v.tags[0].slice(1))) notPrefix++;
-    if (words(full) <= 55 && short !== full) changedShort++;
-    const tagsInUse = v.tags.slice(0, 3).filter((t) => short.includes(t)).length;
-    if (words(short) > 55 && tagsInUse > 1) tooLong++;
+    const top3 = v.tags.slice(0, 3);
+    for (const dateType of occasions) {
+      for (const vibe of vibeList) {
+        const p = { dateType, vibe, neighborhood: v.neighborhood, budget: v.priceLevel } as DatePreferences;
+        const short = generateConciseWhyItFits(v, p);
+        counts.push(words(short));
+        // Only the venue's own tags may be used, and at least one must be.
+        if (!top3.some((t) => short.startsWith(t.charAt(0).toUpperCase() + t.slice(1)))) noOwnTag++;
+        // The full explanation (detail page) keeps all three tags.
+        if (!top3.every((t) => generateWhyItFits(v, p).toLowerCase().includes(t.toLowerCase()))) fullLostTag++;
+      }
+    }
   }
-  check(`every venue's concise text leads with its own first tag (${total} venues)`, notPrefix === 0, `${notPrefix} differ`);
-  check("an explanation already within 55 words is left exactly as the engine wrote it", changedShort === 0, `${changedShort} changed`);
-  check("a concise explanation only exceeds 55 words when a single tag is all that is left", tooLong === 0, `${tooLong} over`);
+  counts.sort((a, b) => a - b);
+  const median = counts[Math.floor(counts.length / 2)];
+  const within40 = counts.filter((n) => n <= 40).length / counts.length;
+  check(`card text leads with one of the venue's own tags (${counts.length} combinations)`, noOwnTag === 0, `${noOwnTag} differ`);
+  check(`card text is about 30-40 words (median ${median}, ${Math.round(within40 * 1000) / 10}% within 40, max ${counts[counts.length - 1]})`, median >= 33 && median <= 40 && within40 >= 0.98 && counts[counts.length - 1] <= 50 && counts[0] >= 25);
+  check("the full explanation on the detail page still includes all three tags", fullLostTag === 0, `${fullLostTag} lost a tag`);
 
   const seen: string[] = [...first.sets[0]];
   let repeats = false;
@@ -225,6 +236,35 @@ async function main() {
     (o) => criteriaFromParams(new URLSearchParams(`dateType=${o}`)).dateType === o
   );
   check("each quick-start link pre-fills the Find screen's occasion", quickStartPrefill);
+
+  check(
+    "every shortened featured line is the start of that venue's own description",
+    Object.entries(home.FEATURED_BLURBS).every(([id, blurb]) => {
+      const v = VENUES.find((x) => x.id === id);
+      return Boolean(v) && v!.description.startsWith(blurb.replace(/\.$/, ""));
+    })
+  );
+
+  console.log("\nPlace pages");
+  const { placeHref, parsePlaceContext, backTarget } = await import("../src/lib/placeLinks");
+  const search = "dateType=first_date&vibe=cozy_intimate&neighborhood=rittenhouse&budget=3&io=outdoor";
+  check("a place opened from results carries the exact search", placeHref("parc", { search }) === `/place/parc?${search}`);
+  check("a place with no context has a plain link", placeHref("parc") === "/place/parc");
+  const ctxSearch = parsePlaceContext(new URLSearchParams(search));
+  check("a search in the link gives the 'Why we picked it for you' context", ctxSearch.prefs?.vibe === "cozy_intimate" && ctxSearch.prefs?.filters?.indoorOutdoor === "outdoor");
+  check("Back goes to the very same results", backTarget(ctxSearch).href === `/results?${search}` && backTarget(ctxSearch).label === "Back to results");
+  const ctxNone = parsePlaceContext(new URLSearchParams(""));
+  check("no search means no context ('About this place')", ctxNone.prefs === null && backTarget(ctxNone).href === "/find");
+  const ctxHome = parsePlaceContext(new URLSearchParams("from=home"));
+  check("opened from the homepage: no context, Back goes home", ctxHome.prefs === null && backTarget(ctxHome).href === "/");
+  const ctxMine = parsePlaceContext(new URLSearchParams(placeHref("parc", { search, from: "my-places" }).split("?")[1]));
+  check("opened from My Places: Back goes to My Places and the saved search is kept", backTarget(ctxMine).href === "/my-places" && ctxMine.search === search);
+  check("a garbage search is treated as no context", parsePlaceContext(new URLSearchParams("dateType=nope&vibe=x")).prefs === null);
+
+  console.log("\nBooking links");
+  const withRes = VENUES.filter((v) => v.reservationUrl);
+  check("only venues with a stored reservation URL can show Reserve a Table", withRes.length > 0 && withRes.every((v) => /^https?:\/\//.test(v.reservationUrl as string)));
+  check("every stored website and reservation link is a real http(s) URL", VENUES.every((v) => [v.websiteUrl, v.reservationUrl].every((u) => !u || /^https?:\/\/[^\s]+$/.test(u))));
 
   console.log(`\n${passed} passed, ${failed} failed.`);
   process.exit(failed === 0 ? 0 : 1);

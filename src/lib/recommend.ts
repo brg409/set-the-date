@@ -281,32 +281,50 @@ function capitalize(text: string): string {
  * identical. Every branch only fires when the underlying attribute
  * actually supports the claim.
  */
-function buildSpecificClaim(venue: Venue, prefs: DatePreferences): string {
+function buildSpecificClaim(venue: Venue, prefs: DatePreferences, short = false): string {
   const a = venue.attributes;
 
+  // `short` is the same claim in a trimmed wording for recommendation cards;
+  // the detail pages keep the full wording.
   if (a.builtInActivity) {
-    return "The built-in activity means you're never just sitting across a table with nothing to do.";
+    return short
+      ? "The built-in activity means you're never just sitting across a table."
+      : "The built-in activity means you're never just sitting across a table with nothing to do.";
   }
   if (a.conversationFriendly >= 4 && a.noiseLevel === "quiet") {
-    return "It's quiet enough that conversation never has to compete with the room.";
+    return short
+      ? "It's quiet enough that conversation never has to compete."
+      : "It's quiet enough that conversation never has to compete with the room.";
   }
   if (a.noiseLevel === "lively" && a.energy >= 4) {
-    return "Expect real energy in the room — good if you want the date to feel a little electric rather than hushed.";
+    return short
+      ? "Expect real energy in the room, a little electric rather than hushed."
+      : "Expect real energy in the room — good if you want the date to feel a little electric rather than hushed.";
   }
   if (a.formality === "upscale") {
-    return "It's dressier than most spots on this list, so it fits best when the occasion actually calls for it.";
+    return short
+      ? "It's dressier than most spots on this list, so it fits best when the occasion calls for it."
+      : "It's dressier than most spots on this list, so it fits best when the occasion actually calls for it.";
   }
   if (a.romantic >= 4) {
-    return "It reads as romantic without tipping into stiff or overly formal.";
+    return short
+      ? "It reads as romantic without tipping into stiff."
+      : "It reads as romantic without tipping into stiff or overly formal.";
   }
   if (a.reservationDifficulty === "walk_in_friendly" && prefs.dateType === "casual") {
-    return "No reservation needed, so it stays low-pressure if plans change.";
+    return short
+      ? "No reservation needed, so it stays low-pressure."
+      : "No reservation needed, so it stays low-pressure if plans change.";
   }
   if (a.easyToExtend) {
-    return "It's easy to extend the night somewhere else afterward if things are going well.";
+    return short
+      ? "It's easy to extend the night somewhere else afterward."
+      : "It's easy to extend the night somewhere else afterward if things are going well.";
   }
   if (a.memorable >= 4) {
-    return "It's the kind of place that's genuinely memorable, not just convenient.";
+    return short
+      ? "It's genuinely memorable, not just convenient."
+      : "It's the kind of place that's genuinely memorable, not just convenient.";
   }
   return "It fits the vibe you're going for without overselling it.";
 }
@@ -324,25 +342,31 @@ export function generateWhyItFits(venue: Venue, prefs: DatePreferences): string 
 }
 
 /**
- * The same explanation, shortened to scan quickly on a recommendation card.
- * It never writes new text: it keeps the venue's own most important tags
- * (they are stored in priority order) and drops the least important ones
- * until the whole explanation fits `maxWords`. The attribute-based second
- * sentence is always kept, and at least one tag always remains.
+ * The same explanation, shortened to scan quickly on a recommendation card
+ * (about 30-40 words). It never writes new facts: it uses the venue's own
+ * tags (stored in priority order) and the same attribute-based claim in a
+ * trimmed wording. It keeps as many of the top tags as fit `maxWords`; if
+ * even the top tag alone is too long, it leads with the highest-priority
+ * tag that does fit, and only if none do does it keep the top tag anyway.
  */
-export function generateConciseWhyItFits(venue: Venue, prefs: DatePreferences, maxWords = 55): string {
+export function generateConciseWhyItFits(venue: Venue, prefs: DatePreferences, maxWords = 40): string {
   const tags = venue.tags.slice(0, 3);
+  const fits = (text: string) => text.trim().split(/\s+/).length <= maxWords;
   for (let n = tags.length; n >= 1; n--) {
-    const text = composeWhyItFits(venue, prefs, tags.slice(0, n));
-    if (n === 1 || text.trim().split(/\s+/).length <= maxWords) return text;
+    const text = composeWhyItFits(venue, prefs, tags.slice(0, n), true);
+    if (fits(text)) return text;
   }
-  return composeWhyItFits(venue, prefs, tags);
+  for (let i = 1; i < tags.length; i++) {
+    const text = composeWhyItFits(venue, prefs, [tags[i]], true);
+    if (fits(text)) return text;
+  }
+  return composeWhyItFits(venue, prefs, tags.slice(0, 1), true);
 }
 
-function composeWhyItFits(venue: Venue, prefs: DatePreferences, tags: string[]): string {
+function composeWhyItFits(venue: Venue, prefs: DatePreferences, tags: string[], short = false): string {
   const tagSentence = capitalize(joinWithAnd(tags));
   const dateTypeLabel = DATE_TYPE_LABEL[prefs.dateType];
-  const claim = buildSpecificClaim(venue, prefs);
+  const claim = buildSpecificClaim(venue, prefs, short);
 
   // Both the "[dateType] option" framing and the "when you want [vibe]"
   // clause assert the venue actually delivers on that occasion/vibe. Only
@@ -362,12 +386,18 @@ function composeWhyItFits(venue: Venue, prefs: DatePreferences, tags: string[]):
     return `${tagSentence} make ${venue.name} a strong ${dateTypeLabel} option when you want ${wantPhrase}. ${claim}`;
   }
   if (dateTypeGenuine && !vibeGenuine) {
-    return `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option here, even if it's not a classic pick for that vibe. ${claim}`;
+    return short
+      ? `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option, though not a classic pick for that vibe. ${claim}`
+      : `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option here, even if it's not a classic pick for that vibe. ${claim}`;
   }
   if (!dateTypeGenuine && vibeGenuine) {
-    return `${tagSentence} make ${venue.name} a solid pick here for ${wantPhrase}, even if it's not the most traditional choice for a ${dateTypeLabel}. ${claim}`;
+    return short
+      ? `${tagSentence} make ${venue.name} a solid pick for ${wantPhrase}, though not the classic ${dateTypeLabel} choice. ${claim}`
+      : `${tagSentence} make ${venue.name} a solid pick here for ${wantPhrase}, even if it's not the most traditional choice for a ${dateTypeLabel}. ${claim}`;
   }
-  return `${tagSentence} make ${venue.name} worth considering here, even if it's not a classic ${dateTypeLabel} pick or vibe match. ${claim}`;
+  return short
+    ? `${tagSentence} make ${venue.name} worth considering, though not a classic ${dateTypeLabel} or vibe match. ${claim}`
+    : `${tagSentence} make ${venue.name} worth considering here, even if it's not a classic ${dateTypeLabel} pick or vibe match. ${claim}`;
 }
 
 function scoreAndExplain(venue: Venue, prefs: DatePreferences, isExpandedMatch: boolean): ScoredVenue {

@@ -14,20 +14,19 @@ import {
   Utensils,
 } from "lucide-react";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { VenueDetailModal } from "@/components/VenueDetailModal";
 import { VenueCard } from "@/components/VenueCard";
 import { EmptyState } from "@/components/EmptyState";
 import { Button, getButtonClasses } from "@/components/Button";
 import { Chip } from "@/components/Chip";
 import { paramsToPreferences } from "@/lib/queryParams";
 import {
-  generateWhyItFits,
   getRecommendations,
   getReplacementVenue,
   getDateTypeLabel,
 } from "@/lib/recommend";
 import { recordNotForMe } from "@/lib/feedback";
 import { RESULTS_COPY } from "@/lib/copy";
+import { placeHref } from "@/lib/placeLinks";
 import {
   freshSession,
   hydrateSet,
@@ -97,7 +96,6 @@ function ResultsForPrefs({
     () => restored ?? freshSession(prefs)
   );
   const [loading, setLoading] = useState(() => restored === null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const didMount = useRef(false);
 
@@ -171,8 +169,6 @@ function ResultsForPrefs({
       sets: sets.map((set, i) => (i === cursor ? nextCurrent : set)),
     });
   }
-
-  const selected = results.find((r) => r.venue.id === selectedId) ?? null;
 
   if (loading) {
     return <LoadingScreen />;
@@ -249,7 +245,7 @@ function ResultsForPrefs({
           <h1 ref={headingRef} className="font-display text-2xl text-ink sm:text-3xl">
             {RESULTS_COPY.heading}
           </h1>
-          <p className="mt-1 text-sm text-muted">{RESULTS_COPY.subheading}</p>
+          <p className="mt-1 text-sm text-muted">{results.length === 3 ? RESULTS_COPY.subheading : RESULTS_COPY.subheadingFew}</p>
         </div>
         <Link
           href={`/find?${paramsKey}`}
@@ -298,7 +294,7 @@ function ResultsForPrefs({
               key={scored.venue.id}
               scored={scored}
               rank={i + 1}
-              onViewDetails={setSelectedId}
+              detailHref={placeHref(scored.venue.id, { search: paramsKey })}
               prefs={prefs}
               fromSearch={paramsKey}
               onNotForMe={handleNotForMe}
@@ -345,14 +341,6 @@ function ResultsForPrefs({
         Venue details and availability can change — double check before you go.
       </p>
 
-      {selected && (
-        <VenueDetailModal
-          venue={selected.venue}
-          whyItFits={generateWhyItFits(selected.venue, prefs)}
-          fromSearch={paramsKey}
-          onClose={() => setSelectedId(null)}
-        />
-      )}
     </main>
   );
 }

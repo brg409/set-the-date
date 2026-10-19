@@ -1,4 +1,5 @@
-import { ExternalLink, MapPinOff, DollarSign, TreePine, Utensils } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ExternalLink, MapPinOff, DollarSign, TreePine, Utensils } from "lucide-react";
 import type { DatePreferences, NotForMeReason, ScoredVenue } from "@/lib/types";
 import { PRICE_LABEL, findOption, NEIGHBORHOOD_OPTIONS } from "@/lib/options";
 import { RESULTS_COPY } from "@/lib/copy";
@@ -12,7 +13,7 @@ import { NotForMeControl } from "./NotForMeControl";
 export function VenueCard({
   scored,
   rank,
-  onViewDetails,
+  detailHref,
   prefs,
   fromSearch,
   whyHeading,
@@ -20,7 +21,8 @@ export function VenueCard({
 }: {
   scored: ScoredVenue;
   rank?: number;
-  onViewDetails: (venueId: string) => void;
+  /** The place's own page; the photo, the name, and "View details" all lead there. */
+  detailHref: string;
   /** When provided, shows why a result is outside the user's exact filters. */
   prefs?: DatePreferences;
   /** The search (URL params) this card was shown for. */
@@ -49,9 +51,8 @@ export function VenueCard({
 
   return (
     <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-sm shadow-ink/[0.04]">
-      <button
-        type="button"
-        onClick={() => onViewDetails(venue.id)}
+      <Link
+        href={detailHref}
         aria-label={`View details for ${venue.name}`}
         className="relative block aspect-[16/10] w-full overflow-hidden text-left"
       >
@@ -74,7 +75,7 @@ export function VenueCard({
         <span className="absolute right-3 top-3 rounded-full bg-card/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm">
           {PRICE_LABEL[venue.priceLevel]}
         </span>
-      </button>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-3.5 p-4 sm:p-5">
         {(outsideNeighborhood || outsideBudget || outsideIndoorOutdoor || outsideFood) && (
@@ -103,13 +104,12 @@ export function VenueCard({
         )}
 
         <div>
-          <button
-            type="button"
-            onClick={() => onViewDetails(venue.id)}
-            className="text-left font-display text-xl leading-snug text-ink hover:text-primary"
+          <Link
+            href={detailHref}
+            className="font-display text-xl leading-snug text-ink hover:text-primary"
           >
             {venue.name}
-          </button>
+          </Link>
           <p className="mt-1 text-sm text-muted">
             {venue.categoryLabel} &middot; {neighborhood.label} &middot;{" "}
             {PRICE_LABEL[venue.priceLevel]}
@@ -148,11 +148,16 @@ export function VenueCard({
           )}
         </div>
 
-        {onNotForMe && (
-          <div className="-mb-1 flex flex-wrap items-start">
-            <NotForMeControl onDismiss={(reason) => onNotForMe(venue.id, reason)} />
-          </div>
-        )}
+        <div className="-mb-1 flex flex-wrap items-center justify-between gap-x-2">
+          <Link
+            href={detailHref}
+            className="inline-flex min-h-9 items-center gap-1 rounded-full px-1 text-sm font-medium text-primary hover:text-primary-dark"
+          >
+            View details
+            <ArrowRight size={14} strokeWidth={2.25} aria-hidden />
+          </Link>
+          {onNotForMe && <NotForMeControl onDismiss={(reason) => onNotForMe(venue.id, reason)} />}
+        </div>
       </div>
     </article>
   );

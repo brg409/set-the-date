@@ -23,7 +23,9 @@ export const LOADING_MESSAGES = [
 
 export const RESULTS_COPY = {
   heading: "Your Places",
-  subheading: "Ranked for this date, not just Philadelphia in general.",
+  subheading: "Three spots picked just for you.",
+  // When fewer than three places fit, the subtitle shouldn't promise three.
+  subheadingFew: "Spots picked just for you.",
   showMore: "Show Me 3 More",
   previous: "Previous three",
   editFilters: "Edit Filters",

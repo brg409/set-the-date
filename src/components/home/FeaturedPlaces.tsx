@@ -1,13 +1,24 @@
-import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { VenuePhoto } from "@/components/VenuePhoto";
 import { findOption, NEIGHBORHOOD_OPTIONS, PRICE_LABEL } from "@/lib/options";
-import { FEATURED_VENUE_IDS, HOME_COPY, venuesFromIds } from "@/lib/homeContent";
+import {
+  FEATURED_BLURBS,
+  FEATURED_VENUE_IDS,
+  HOME_COPY,
+  venuesFromIds,
+} from "@/lib/homeContent";
+import { placeHref } from "@/lib/placeLinks";
 import type { Venue } from "@/lib/types";
 
 function FeaturedCard({ venue }: { venue: Venue }) {
   const neighborhood = findOption(NEIGHBORHOOD_OPTIONS, venue.neighborhood).label;
-  const body = (
-    <>
+
+  return (
+    <Link
+      href={placeHref(venue.id, { from: "home" })}
+      className="flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-card transition-colors hover:border-primary/50"
+    >
       <div className="relative aspect-[4/3] overflow-hidden bg-tint-strong">
         <div className="absolute inset-0">
           <VenuePhoto venue={venue} sizePx={800} linkAttribution={false} />
@@ -18,31 +29,15 @@ function FeaturedCard({ venue }: { venue: Venue }) {
           {venue.categoryLabel} &middot; {neighborhood} &middot; {PRICE_LABEL[venue.priceLevel]}
         </p>
         <h3 className="font-display text-xl text-ink">{venue.name}</h3>
-        <p className="text-sm leading-relaxed text-ink/75">{venue.description}</p>
-        {venue.websiteUrl && (
-          <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium text-primary">
-            Visit website
-            <ExternalLink size={14} strokeWidth={2.25} aria-hidden />
-          </span>
-        )}
+        <p className="text-sm leading-relaxed text-ink/75">
+          {FEATURED_BLURBS[venue.id] ?? venue.description}
+        </p>
+        <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium text-primary">
+          View details
+          <ArrowRight size={14} strokeWidth={2.25} aria-hidden />
+        </span>
       </div>
-    </>
-  );
-  const classes =
-    "flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-card transition-colors";
-
-  // Until each place has its own page, the card opens the venue's own site.
-  return venue.websiteUrl ? (
-    <a
-      href={venue.websiteUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`${classes} hover:border-primary/50`}
-    >
-      {body}
-    </a>
-  ) : (
-    <div className={classes}>{body}</div>
+    </Link>
   );
 }
 

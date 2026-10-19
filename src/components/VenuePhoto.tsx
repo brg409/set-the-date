@@ -183,6 +183,7 @@ export function VenuePhoto({
   preferOutdoor = false,
   linkAttribution = true,
   eager = false,
+  creditBelowOnMobile = false,
 }: {
   venue: Venue;
   className?: string;
@@ -195,6 +196,11 @@ export function VenuePhoto({
   linkAttribution?: boolean;
   /** Load the image immediately instead of lazily — for photos visible on first paint. */
   eager?: boolean;
+  /**
+   * On phones, show Google's photo credit on its own line under the photo
+   * instead of over it — for small tiles where an overlay would cover the picture.
+   */
+  creditBelowOnMobile?: boolean;
 }) {
   const key = cacheKey(venue.id, 1, preferOutdoor);
   const initialState = (): PhotoState => {
@@ -258,6 +264,28 @@ export function VenuePhoto({
 
   if (state.status === "ready" && state.photos[0]) {
     const photo = state.photos[0];
+    if (creditBelowOnMobile) {
+      return (
+        <div className={`flex h-full w-full flex-col ${className}`}>
+          <div className="relative min-h-0 flex-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo.url}
+              alt={`${venue.categoryLabel} interior at ${venue.name}`}
+              loading={eager ? "eager" : "lazy"}
+              className="h-full w-full object-cover object-center"
+              onError={() => setState({ status: "unavailable" })}
+            />
+            <div className="hidden sm:block">
+              <AttributionBadge photo={photo} googleMapsUri={state.googleMapsUri} linkable={linkAttribution} />
+            </div>
+          </div>
+          <p className="shrink-0 bg-card px-2 py-1 text-[10px] font-medium leading-snug text-muted sm:hidden">
+            {photo.attributionText ?? "Photo: Google"}
+          </p>
+        </div>
+      );
+    }
     return (
       <div className={`relative h-full w-full ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -23,11 +23,11 @@ export function HomeHero() {
             className={`relative overflow-hidden rounded-2xl bg-tint-strong md:aspect-auto ${
               i === 0
                 ? "col-span-2 aspect-[16/9] md:col-span-1 md:row-span-2"
-                : "aspect-[16/10]"
+                : "aspect-[4/3]"
             }`}
           >
             <div className="absolute inset-0">
-              <VenuePhoto venue={venue} sizePx={i === 0 ? 1000 : 700} eager />
+              <VenuePhoto venue={venue} sizePx={i === 0 ? 1000 : 700} eager creditBelowOnMobile />
             </div>
             <span className="absolute left-2 top-2 rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium text-ink shadow-sm">
               {venue.name}
