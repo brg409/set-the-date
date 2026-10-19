@@ -123,10 +123,33 @@ async function main() {
   const rebuilt = hydrateSet(first.sets[0], prefs);
   const engine = getRecommendations(prefs).results;
   check(
-    "rebuilt cards match the engine's scores and copy exactly",
+    "rebuilt cards keep the engine's venues, order and scores",
     rebuilt.length === engine.length &&
-      rebuilt.every((r, i) => r.venue.id === engine[i].venue.id && r.score === engine[i].score && r.whyItFits === engine[i].whyItFits)
+      rebuilt.every((r, i) => r.venue.id === engine[i].venue.id && r.score === engine[i].score)
   );
+
+  console.log("\nConcise explanations");
+  const { generateWhyItFits, generateConciseWhyItFits } = await import("../src/lib/recommend");
+  const { VENUES } = await import("../src/data/venues");
+  const words = (s: string) => s.trim().split(/\s+/).length;
+  check(
+    "card text is the concise form of the engine's own explanation",
+    rebuilt.every((r) => r.whyItFits === generateConciseWhyItFits(r.venue, prefs))
+  );
+  let tooLong = 0, notPrefix = 0, changedShort = 0, total = 0;
+  for (const v of VENUES) {
+    const full = generateWhyItFits(v, prefs);
+    const short = generateConciseWhyItFits(v, prefs);
+    total++;
+    // Venue's own first tag must lead the sentence, and nothing may be added.
+    if (!short.startsWith(v.tags[0].charAt(0).toUpperCase() + v.tags[0].slice(1))) notPrefix++;
+    if (words(full) <= 55 && short !== full) changedShort++;
+    const tagsInUse = v.tags.slice(0, 3).filter((t) => short.includes(t)).length;
+    if (words(short) > 55 && tagsInUse > 1) tooLong++;
+  }
+  check(`every venue's concise text leads with its own first tag (${total} venues)`, notPrefix === 0, `${notPrefix} differ`);
+  check("an explanation already within 55 words is left exactly as the engine wrote it", changedShort === 0, `${changedShort} changed`);
+  check("a concise explanation only exceeds 55 words when a single tag is all that is left", tooLong === 0, `${tooLong} over`);
 
   const seen: string[] = [...first.sets[0]];
   let repeats = false;

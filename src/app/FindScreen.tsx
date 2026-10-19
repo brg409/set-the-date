@@ -44,7 +44,7 @@ export default function FindScreen() {
 function Heading() {
   return (
     <div>
-      <h1 className="font-display text-3xl leading-tight text-ink sm:text-4xl">
+      <h1 className="font-display text-2xl leading-tight text-ink sm:text-3xl">
         {FIND_COPY.heading}
       </h1>
       <p className="mt-1.5 text-base text-muted">{FIND_COPY.subheading}</p>
@@ -111,7 +111,7 @@ function FindForm() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 pb-44 pt-7 md:pb-12">
+    <main className="mx-auto w-full max-w-2xl px-5 pb-40 pt-5 md:max-w-3xl md:pb-10 md:pt-6">
       <div className="flex items-start justify-between gap-4">
         <Heading />
         {hasAnyCriteria(criteria) && (
@@ -128,7 +128,7 @@ function FindForm() {
         )}
       </div>
 
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="mt-4 flex flex-col gap-3">
         <Group icon={CalendarHeart} title="Occasion">
           {DATE_TYPE_OPTIONS.map((opt) => (
             <OptionChip
@@ -153,6 +153,7 @@ function FindForm() {
           ))}
         </Group>
 
+        <div className="grid gap-3 md:grid-cols-2">
         <Group icon={MapPin} title="Neighborhood">
           {NEIGHBORHOOD_OPTIONS.map((opt) => (
             <OptionChip
@@ -165,27 +166,31 @@ function FindForm() {
           ))}
         </Group>
 
-        <Group icon={DollarSign} title="Budget">
+        <Group
+          icon={DollarSign}
+          title="Budget"
+          caption={
+            BUDGET_OPTIONS.find((o) => o.value === budget)?.description ?? "Estimated cost per person"
+          }
+        >
           {BUDGET_OPTIONS.map((opt) => (
             <OptionChip
               key={opt.value}
               selected={budget === opt.value}
               onClick={() => toggle("budget", opt.value)}
             >
-              <span className="font-semibold">{opt.label}</span>{" "}
-              <span className="ml-1 hidden text-xs opacity-80 sm:inline">
-                {opt.description}
-              </span>
+              <span className="font-semibold">{opt.label}</span>
             </OptionChip>
           ))}
         </Group>
+        </div>
 
         <section className="rounded-3xl border border-line bg-card">
           <button
             type="button"
             onClick={() => setMoreOpen((v) => !v)}
             aria-expanded={moreOpen}
-            className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left sm:px-5"
+            className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left sm:px-4"
           >
             <span className="flex items-center gap-2.5 text-sm font-semibold text-ink">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-tint text-primary">
@@ -205,7 +210,7 @@ function FindForm() {
             />
           </button>
           {moreOpen && (
-            <div className="flex flex-col gap-4 border-t border-line px-4 py-4 sm:px-5">
+            <div className="flex flex-col gap-3 border-t border-line px-3.5 py-3 sm:px-4">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   Food, drinks, or activity
@@ -271,21 +276,24 @@ function FindForm() {
 function Group({
   icon: Icon,
   title,
+  caption,
   children,
 }: {
   icon: LucideIcon;
   title: string;
+  caption?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-line bg-card p-4 sm:p-5">
-      <div className="mb-3 flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-tint text-primary">
-          <Icon size={16} strokeWidth={2.25} />
+    <section className="rounded-3xl border border-line bg-card p-3.5 sm:p-4">
+      <div className="mb-2.5 flex items-center gap-2.5">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-tint text-primary">
+          <Icon size={15} strokeWidth={2.25} />
         </span>
         <h2 className="text-sm font-semibold text-ink">{title}</h2>
       </div>
       <div className="flex flex-wrap gap-2">{children}</div>
+      {caption && <p className="mt-2 text-xs text-muted">{caption}</p>}
     </section>
   );
 }
@@ -304,7 +312,7 @@ function OptionChip({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`inline-flex min-h-10 items-center rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
+      className={`inline-flex min-h-10 items-center rounded-full border px-3.5 py-1.5 text-sm md:min-h-9 font-medium transition-colors ${
         selected
           ? "border-primary bg-primary text-white"
           : "border-line bg-card text-ink hover:border-primary/40 hover:bg-tint"

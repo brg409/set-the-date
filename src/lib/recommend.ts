@@ -320,7 +320,26 @@ function buildSpecificClaim(venue: Venue, prefs: DatePreferences): string {
  * that receives the same `(venue, prefs)` inputs; nothing upstream changes.
  */
 export function generateWhyItFits(venue: Venue, prefs: DatePreferences): string {
+  return composeWhyItFits(venue, prefs, venue.tags.slice(0, 3));
+}
+
+/**
+ * The same explanation, shortened to scan quickly on a recommendation card.
+ * It never writes new text: it keeps the venue's own most important tags
+ * (they are stored in priority order) and drops the least important ones
+ * until the whole explanation fits `maxWords`. The attribute-based second
+ * sentence is always kept, and at least one tag always remains.
+ */
+export function generateConciseWhyItFits(venue: Venue, prefs: DatePreferences, maxWords = 55): string {
   const tags = venue.tags.slice(0, 3);
+  for (let n = tags.length; n >= 1; n--) {
+    const text = composeWhyItFits(venue, prefs, tags.slice(0, n));
+    if (n === 1 || text.trim().split(/\s+/).length <= maxWords) return text;
+  }
+  return composeWhyItFits(venue, prefs, tags);
+}
+
+function composeWhyItFits(venue: Venue, prefs: DatePreferences, tags: string[]): string {
   const tagSentence = capitalize(joinWithAnd(tags));
   const dateTypeLabel = DATE_TYPE_LABEL[prefs.dateType];
   const claim = buildSpecificClaim(venue, prefs);
@@ -366,14 +385,14 @@ function scoreAndExplain(venue: Venue, prefs: DatePreferences, isExpandedMatch: 
  * Saved page) — builds a plausible preference set from the venue's own
  * strongest-supported date type and vibe.
  */
-export function getDefaultWhyItFits(venue: Venue): string {
+export function getDefaultWhyItFits(venue: Venue, maxWords?: number): string {
   const prefs: DatePreferences = {
     dateType: venue.dateTypes[0],
     vibe: venue.vibes[0],
     neighborhood: venue.neighborhood,
     budget: venue.priceLevel,
   };
-  return generateWhyItFits(venue, prefs);
+  return maxWords ? generateConciseWhyItFits(venue, prefs, maxWords) : generateWhyItFits(venue, prefs);
 }
 
 // ── 4. Variety ───────────────────────────────────────────────────────────

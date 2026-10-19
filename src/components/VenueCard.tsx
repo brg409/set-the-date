@@ -118,18 +118,20 @@ export function VenueCard({
 
         <WhyItFits text={whyItFits} heading={whyHeading ?? RESULTS_COPY.whyItFitsLabel} compact />
 
-        <div className="mt-auto flex flex-wrap items-center gap-2">
-          <SaveButton venueId={venue.id} fromSearch={fromSearch} size="sm" />
-          <BeenHereButton venueId={venue.id} fromSearch={fromSearch} size="sm" />
+        {/* Same two-row structure on every card so the three line up: Save and
+            Been Here side by side, then one full-width link. */}
+        <div className="mt-auto grid grid-cols-2 gap-2">
+          <SaveButton venueId={venue.id} fromSearch={fromSearch} size="sm" fullWidth />
+          <BeenHereButton venueId={venue.id} fromSearch={fromSearch} size="sm" fullWidth />
           {reservationUrl ? (
             <a
               href={reservationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
+              className="col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
             >
-              <ExternalLink size={14} strokeWidth={2.25} />
-              Reserve
+              <ExternalLink size={15} strokeWidth={2.25} />
+              Reserve a Table
             </a>
           ) : (
             websiteUrl && (
@@ -137,10 +139,10 @@ export function VenueCard({
                 href={websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-primary/40 hover:bg-tint"
+                className="col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary/40 hover:bg-tint"
               >
-                <ExternalLink size={14} strokeWidth={2.25} />
-                Website
+                <ExternalLink size={15} strokeWidth={2.25} />
+                Visit Website
               </a>
             )
           )}

@@ -1,6 +1,6 @@
 import { getVenueById } from "@/data/venues";
 import {
-  generateWhyItFits,
+  generateConciseWhyItFits,
   getRecommendations,
   getReplacementVenue,
   rankVenue,
@@ -72,7 +72,12 @@ export function freshSession(prefs: DatePreferences, expand: ExpansionState = NO
   return { sets: [first.map((r) => r.venue.id)], cursor: 0, excluded: [], expand };
 }
 
-/** Rebuilds display objects from ids using the engine's own scoring and copy. */
+/**
+ * Rebuilds display objects from ids using the engine's own scoring and copy.
+ * `whyItFits` here is the shortened card version (see
+ * `generateConciseWhyItFits`); the full explanation is generated on demand
+ * for the detail view.
+ */
 export function hydrateSet(ids: string[], prefs: DatePreferences): ScoredVenue[] {
   const out: ScoredVenue[] = [];
   for (const id of ids) {
@@ -81,7 +86,7 @@ export function hydrateSet(ids: string[], prefs: DatePreferences): ScoredVenue[]
     out.push({
       venue,
       score: rankVenue(venue, prefs),
-      whyItFits: generateWhyItFits(venue, prefs),
+      whyItFits: generateConciseWhyItFits(venue, prefs),
       matchedTags: venue.tags.slice(0, 3),
     });
   }

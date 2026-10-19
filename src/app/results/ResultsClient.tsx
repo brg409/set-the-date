@@ -20,7 +20,12 @@ import { EmptyState } from "@/components/EmptyState";
 import { Button, getButtonClasses } from "@/components/Button";
 import { Chip } from "@/components/Chip";
 import { paramsToPreferences } from "@/lib/queryParams";
-import { getRecommendations, getReplacementVenue, getDateTypeLabel } from "@/lib/recommend";
+import {
+  generateWhyItFits,
+  getRecommendations,
+  getReplacementVenue,
+  getDateTypeLabel,
+} from "@/lib/recommend";
 import { recordNotForMe } from "@/lib/feedback";
 import { RESULTS_COPY } from "@/lib/copy";
 import {
@@ -343,7 +348,7 @@ function ResultsForPrefs({
       {selected && (
         <VenueDetailModal
           venue={selected.venue}
-          whyItFits={selected.whyItFits}
+          whyItFits={generateWhyItFits(selected.venue, prefs)}
           fromSearch={paramsKey}
           onClose={() => setSelectedId(null)}
         />

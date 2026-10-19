@@ -118,7 +118,7 @@ export function VenueDetailModal({
             {venue.reservationUrl && (
               <LinkButton href={venue.reservationUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink size={15} strokeWidth={2.25} />
-                Reserve
+                Reserve a Table
               </LinkButton>
             )}
             {!venue.reservationUrl && venue.websiteUrl && (
@@ -129,7 +129,7 @@ export function VenueDetailModal({
                 variant="outline"
               >
                 <ExternalLink size={15} strokeWidth={2.25} />
-                Website
+                Visit Website
               </LinkButton>
             )}
             <LinkButton

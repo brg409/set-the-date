@@ -9,7 +9,11 @@ import { EmptyState } from "@/components/EmptyState";
 import { getButtonClasses } from "@/components/Button";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
 import { getVenueById } from "@/data/venues";
-import { generateWhyItFits, getDefaultWhyItFits } from "@/lib/recommend";
+import {
+  generateConciseWhyItFits,
+  generateWhyItFits,
+  getDefaultWhyItFits,
+} from "@/lib/recommend";
 import { paramsToPreferences } from "@/lib/queryParams";
 import { MY_PLACES_COPY } from "@/lib/copy";
 import type { PlaceEntry } from "@/lib/myPlaces";
@@ -77,10 +81,12 @@ export default function MyPlacesPage() {
         const scored: ScoredVenue = {
           venue,
           score: 0,
-          whyItFits: prefs ? generateWhyItFits(venue, prefs) : getDefaultWhyItFits(venue),
+          whyItFits: prefs ? generateConciseWhyItFits(venue, prefs) : getDefaultWhyItFits(venue, 55),
           matchedTags: venue.tags.slice(0, 3),
         };
-        return { scored, hasContext: Boolean(prefs), fromSearch: entry.fromSearch };
+        // Full-length text for the detail view; the card shows the short one.
+        const fullWhy = prefs ? generateWhyItFits(venue, prefs) : getDefaultWhyItFits(venue);
+        return { scored, fullWhy, hasContext: Boolean(prefs), fromSearch: entry.fromSearch };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
   }, [entries, section]);
@@ -148,7 +154,7 @@ export default function MyPlacesPage() {
       {selected && (
         <VenueDetailModal
           venue={selected.scored.venue}
-          whyItFits={selected.scored.whyItFits}
+          whyItFits={selected.fullWhy}
           fromSearch={selected.hasContext ? selected.fromSearch : undefined}
           onClose={() => setSelectedId(null)}
         />
