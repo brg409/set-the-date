@@ -41,6 +41,8 @@ function check(name: string, ok: boolean, detail = "") {
 
 async function main() {
   // Legacy saved ids must exist BEFORE the store is first read.
+  // The first version of the app used "setthedate:", the rebrand "knowaplace:".
+  local.setItem("setthedate:saved-venues", JSON.stringify(["beta", "omega"]));
   local.setItem("knowaplace:saved-venues", JSON.stringify(["alpha", "beta"]));
 
   const places = await import("../src/lib/myPlaces");
@@ -55,8 +57,13 @@ async function main() {
     "legacy saved ids migrate to Want to Go",
     snap.entries.alpha?.wantToGo === true && snap.entries.beta?.wantToGo === true
   );
+  check("places saved under the original 'Set the Date' key are carried over too", snap.entries.omega?.wantToGo === true);
+  check("a place in both old lists appears once", Object.keys(snap.entries).filter((k) => k === "beta").length === 1);
   check("migration persists the new key", local.getItem("knowaplace:my-places") !== null);
-  check("legacy key is left untouched", local.getItem("knowaplace:saved-venues") !== null);
+  check(
+    "legacy keys are left untouched",
+    local.getItem("knowaplace:saved-venues") !== null && local.getItem("setthedate:saved-venues") !== null
+  );
 
   places.toggleWantToGo("gamma", "dateType=first_date");
   check("saving adds to Want to Go", places.getMyPlacesSnapshot().entries.gamma?.wantToGo === true);
@@ -87,6 +94,24 @@ async function main() {
   check("review is capped at 500 characters", places.getMyPlacesSnapshot().entries.zeta?.review?.length === 500);
   places.setReview("zeta", "   ");
   check("blank review clears it", places.getMyPlacesSnapshot().entries.zeta === undefined);
+
+  places.toggleWantToGo("kappa");
+  places.toggleVisited("kappa");
+  places.setRating("kappa", 4);
+  places.setReview("kappa", "Great pasta");
+  places.toggleFavorite("kappa");
+  const k = places.getMyPlacesSnapshot().entries.kappa;
+  check("a visited place keeps its rating, note and favorite together", k?.visited === true && k?.rating === 4 && k?.review === "Great pasta" && k?.favorite === true);
+  places.toggleVisited("kappa");
+  const k2 = places.getMyPlacesSnapshot().entries.kappa;
+  check("un-marking Been Here does not throw away the rating or note", k2?.rating === 4 && k2?.review === "Great pasta");
+  places.toggleFavorite("kappa");
+  places.setRating("kappa", undefined);
+  places.setReview("kappa", "");
+  check("a place with nothing left on it is removed", places.getMyPlacesSnapshot().entries.kappa === undefined);
+  places.toggleFavorite("lambda");
+  check("a favorite alone is kept", places.getMyPlacesSnapshot().entries.lambda?.favorite === true);
+  places.toggleFavorite("lambda");
 
   check(
     "state survives a reload (persisted JSON round-trips)",
@@ -140,27 +165,35 @@ async function main() {
   const occasions = ["first_date", "casual", "anniversary", "special_occasion", "reconnecting", "surprise_me"] as const;
   const vibeList = ["cozy_intimate", "relaxed_casual", "lively_social", "romantic", "fun_playful", "trendy", "something_different"] as const;
   const counts: number[] = [];
-  let noOwnTag = 0, fullLostTag = 0;
+  let notVerbatim = 0, defects = 0, calmNoise = 0, quietForLively = 0, noTags = 0;
   for (const v of VENUES) {
-    const top3 = v.tags.slice(0, 3);
     for (const dateType of occasions) {
       for (const vibe of vibeList) {
         const p = { dateType, vibe, neighborhood: v.neighborhood, budget: v.priceLevel } as DatePreferences;
         const short = generateConciseWhyItFits(v, p);
+        const full = generateWhyItFits(v, p);
         counts.push(words(short));
-        // Only the venue's own tags may be used, and at least one must be.
-        if (!top3.some((t) => short.startsWith(t.charAt(0).toUpperCase() + t.slice(1)))) noOwnTag++;
-        // The full explanation (detail page) keeps all three tags.
-        if (!top3.every((t) => generateWhyItFits(v, p).toLowerCase().includes(t.toLowerCase()))) fullLostTag++;
+        for (const text of [short, full]) {
+          // The tags after "What stands out:" must be the venue's own, word for word.
+          const listed = text.match(/What stands out: (.*?)\.(?: |$)/);
+          if (!listed) noTags++;
+          else for (const tag of listed[1].split("; ")) if (!v.tags.some((t) => t === tag || t.includes(tag))) notVerbatim++;
+          if (/ {2}|\.\.|;\./.test(text)) defects++;
+        }
+        if (["cozy_intimate", "romantic", "relaxed_casual"].includes(vibe) && /\b(loud|noisy|chaotic|shouting)\b/i.test(full)) calmNoise++;
+        if (["lively_social", "fun_playful", "trendy"].includes(vibe) && /never has to compete/.test(full)) quietForLively++;
       }
     }
   }
   counts.sort((a, b) => a - b);
   const median = counts[Math.floor(counts.length / 2)];
-  const within40 = counts.filter((n) => n <= 40).length / counts.length;
-  check(`card text leads with one of the venue's own tags (${counts.length} combinations)`, noOwnTag === 0, `${noOwnTag} differ`);
-  check(`card text is about 30-40 words (median ${median}, ${Math.round(within40 * 1000) / 10}% within 40, max ${counts[counts.length - 1]})`, median >= 33 && median <= 40 && within40 >= 0.98 && counts[counts.length - 1] <= 50 && counts[0] >= 25);
-  check("the full explanation on the detail page still includes all three tags", fullLostTag === 0, `${fullLostTag} lost a tag`);
+  check(`every explanation lists the venue's own tags verbatim (${counts.length} combinations)`, notVerbatim === 0 && noTags === 0, `${notVerbatim} altered, ${noTags} without tags`);
+  check(`card text is about 30-40 words (median ${median}, max ${counts[counts.length - 1]})`, median >= 33 && median <= 40 && counts[counts.length - 1] <= 40 && counts[0] >= 25);
+  check("no explanation has a double space, double period, or dangling semicolon", defects === 0, `${defects} found`);
+  check("a calm search (cozy, romantic, low-key) never cites noise or crowding as a plus", calmNoise === 0, `${calmNoise} found`);
+  check("a lively search never says the room is quiet enough to talk", quietForLively === 0, `${quietForLively} found`);
+  const surprise = generateWhyItFits(VENUES[0], { dateType: "surprise_me", vibe: "romantic", neighborhood: VENUES[0].neighborhood, budget: VENUES[0].priceLevel } as DatePreferences);
+  check("a surprise-me search doesn't call anything a surprise-me date", !/surprise-me/.test(surprise));
 
   const seen: string[] = [...first.sets[0]];
   let repeats = false;

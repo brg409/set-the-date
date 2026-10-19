@@ -16,6 +16,9 @@ import { Chip } from "./Chip";
 import { getButtonClasses } from "./Button";
 import { SaveButton } from "./SaveButton";
 import { BeenHereButton } from "./BeenHereButton";
+import { FavoriteButton } from "./FavoriteButton";
+import { PlaceNotes } from "./PlaceNotes";
+import { useMyPlaces } from "@/hooks/useMyPlaces";
 
 /**
  * A place's own page. Everything shown comes from the venue's record. When the
@@ -30,6 +33,7 @@ export function PlaceDetail({ venue }: { venue: Venue }) {
   const neighborhood = findOption(NEIGHBORHOOD_OPTIONS, venue.neighborhood);
   const attributes = getFullAttributeList(venue);
   const fromSearch = ctx.prefs ? ctx.search : undefined;
+  const { isVisited } = useMyPlaces();
 
   const { reservationUrl, websiteUrl } = venue;
 
@@ -99,11 +103,14 @@ export function PlaceDetail({ venue }: { venue: Venue }) {
               Directions
             </a>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <SaveButton venueId={venue.id} fromSearch={fromSearch} fullWidth />
             <BeenHereButton venueId={venue.id} fromSearch={fromSearch} fullWidth />
+            <FavoriteButton venueId={venue.id} fullWidth />
           </div>
         </div>
+
+        {isVisited(venue.id) && <PlaceNotes venueId={venue.id} />}
 
         {ctx.prefs ? (
           <WhyItFits text={generateWhyItFits(venue, ctx.prefs)} />

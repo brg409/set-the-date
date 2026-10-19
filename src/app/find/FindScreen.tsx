@@ -44,10 +44,10 @@ export default function FindScreen() {
 function Heading() {
   return (
     <div>
-      <h1 className="font-display text-2xl leading-tight text-ink sm:text-3xl">
+      <h1 className="font-display text-[1.4rem] leading-tight text-ink sm:text-3xl">
         {FIND_COPY.heading}
       </h1>
-      <p className="mt-1.5 text-base text-muted">{FIND_COPY.subheading}</p>
+      <p className="mt-1 text-sm text-muted sm:mt-1.5 sm:text-base">{FIND_COPY.subheading}</p>
     </div>
   );
 }
@@ -129,7 +129,7 @@ function FindForm() {
       </div>
 
       <div className="mt-4 flex flex-col gap-3">
-        <Group icon={CalendarHeart} title="Occasion">
+        <Group icon={CalendarHeart} title="Occasion" grid="grid-cols-2 sm:grid-cols-3">
           {DATE_TYPE_OPTIONS.map((opt) => (
             <OptionChip
               key={opt.value}
@@ -141,7 +141,7 @@ function FindForm() {
           ))}
         </Group>
 
-        <Group icon={Sparkles} title="Vibe">
+        <Group icon={Sparkles} title="Vibe" grid="grid-cols-2 sm:grid-cols-4 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
           {VIBE_OPTIONS.map((opt) => (
             <OptionChip
               key={opt.value}
@@ -153,8 +153,8 @@ function FindForm() {
           ))}
         </Group>
 
-        <div className="grid gap-3 md:grid-cols-2">
-        <Group icon={MapPin} title="Neighborhood">
+        <div className="grid gap-3 md:grid-cols-[3fr_2fr]">
+        <Group icon={MapPin} title="Neighborhood" grid="grid-cols-2 sm:grid-cols-3">
           {NEIGHBORHOOD_OPTIONS.map((opt) => (
             <OptionChip
               key={opt.value}
@@ -169,6 +169,7 @@ function FindForm() {
         <Group
           icon={DollarSign}
           title="Budget"
+          grid="grid-cols-4 md:grid-cols-2"
           caption={
             BUDGET_OPTIONS.find((o) => o.value === budget)?.description ?? "Estimated cost per person"
           }
@@ -215,7 +216,7 @@ function FindForm() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   Food, drinks, or activity
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:max-w-md">
                   <OptionChip selected={food === "food"} onClick={() => toggle("food", "food")}>
                     Food
                   </OptionChip>
@@ -234,7 +235,7 @@ function FindForm() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   Indoor or outdoor
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:max-w-xs">
                   <OptionChip
                     selected={indoorOutdoor === "indoor"}
                     onClick={() => toggle("indoorOutdoor", "indoor")}
@@ -277,11 +278,14 @@ function Group({
   icon: Icon,
   title,
   caption,
+  grid,
   children,
 }: {
   icon: LucideIcon;
   title: string;
   caption?: string;
+  /** Column layout for the chips, so every row is the same width. */
+  grid: string;
   children: React.ReactNode;
 }) {
   return (
@@ -292,7 +296,7 @@ function Group({
         </span>
         <h2 className="text-sm font-semibold text-ink">{title}</h2>
       </div>
-      <div className="flex flex-wrap gap-2">{children}</div>
+      <div className={`grid gap-2 ${grid}`}>{children}</div>
       {caption && <p className="mt-2 text-xs text-muted">{caption}</p>}
     </section>
   );
@@ -312,7 +316,7 @@ function OptionChip({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`inline-flex min-h-10 items-center rounded-full border px-3.5 py-1.5 text-sm md:min-h-9 font-medium transition-colors ${
+      className={`inline-flex min-h-10 w-full items-center justify-center rounded-full border px-2.5 py-1.5 text-center text-sm font-medium leading-tight transition-colors md:min-h-9 ${
         selected
           ? "border-primary bg-primary text-white"
           : "border-line bg-card text-ink hover:border-primary/40 hover:bg-tint"

@@ -34,7 +34,11 @@ export interface MyPlacesState {
 }
 
 const STORAGE_KEY = "knowaplace:my-places";
-const LEGACY_SAVED_KEY = "knowaplace:saved-venues";
+// Places saved before My Places existed lived in a plain list of venue ids.
+// The very first version of the app ("Set the Date") used the first key, and
+// the rebrand switched to the second without carrying the list over, so a
+// person can have places under either; both are read.
+const LEGACY_SAVED_KEYS = ["setthedate:saved-venues", "knowaplace:saved-venues"];
 
 const EMPTY_STATE: MyPlacesState = { version: 1, entries: {} };
 
@@ -72,22 +76,29 @@ function load(): MyPlacesState {
       }
     }
     // First run on this store: carry over places saved before My Places
-    // existed (a plain JSON array of venue ids) as "want to go". The old key
-    // is left in place untouched.
-    const legacy = window.localStorage.getItem(LEGACY_SAVED_KEY);
-    if (legacy) {
-      const ids = JSON.parse(legacy);
-      if (Array.isArray(ids)) {
-        const entries: Record<string, PlaceEntry> = {};
+    // existed (plain JSON arrays of venue ids) as "want to go". The old keys
+    // are left in place untouched.
+    const entries: Record<string, PlaceEntry> = {};
+    let foundLegacy = false;
+    for (const key of LEGACY_SAVED_KEYS) {
+      try {
+        const legacy = window.localStorage.getItem(key);
+        const ids = legacy ? JSON.parse(legacy) : null;
+        if (!Array.isArray(ids)) continue;
+        foundLegacy = true;
         for (const id of ids) {
-          if (typeof id === "string") {
+          if (typeof id === "string" && !entries[id]) {
             entries[id] = { venueId: id, wantToGo: true, visited: false, favorite: false };
           }
         }
-        const migrated: MyPlacesState = { version: 1, entries };
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-        return migrated;
+      } catch {
+        // One unreadable old list must not block the other.
       }
+    }
+    if (foundLegacy) {
+      const migrated: MyPlacesState = { version: 1, entries };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      return migrated;
     }
   } catch {
     // Corrupt or unavailable storage: start empty rather than crash.

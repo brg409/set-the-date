@@ -263,50 +263,94 @@ const VIBE_WANT_PHRASE: Record<Vibe, string> = {
   something_different: "something outside the usual dinner-and-drinks script",
 };
 
-function joinWithAnd(items: string[]): string {
-  if (items.length === 0) return "";
-  if (items.length === 1) return items[0];
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+// Words that carry no meaning when checking whether two phrases repeat each other.
+const FILLER_WORDS = new Set([
+  "that", "this", "with", "when", "into", "than", "them", "they", "your", "just", "even", "have",
+  "what", "while", "where", "which", "there", "their", "about", "every", "never", "always", "more",
+  "most", "much", "very", "really", "some", "something", "someone", "feels", "feel", "from", "make",
+  "makes", "spot", "place",
+]);
+
+/** The meaningful words of a phrase, cut to a stem so "energy"/"energetic" match. */
+function contentStems(text: string): Set<string> {
+  const stems = new Set<string>();
+  for (const word of text.toLowerCase().match(/[a-z']+/g) ?? []) {
+    if (word.length > 3 && !FILLER_WORDS.has(word)) stems.add(word.slice(0, 5));
+  }
+  return stems;
 }
 
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
+/** True when `claim` mostly repeats words already said in `said` (two or more in common). */
+function repeatsWhatWasSaid(claim: string, said: string[]): boolean {
+  const claimStems = contentStems(claim);
+  const saidStems = contentStems(said.join(" "));
+  let shared = 0;
+  for (const stem of claimStems) if (saidStems.has(stem)) shared++;
+  return shared >= 2;
+}
+
+const QUIET_VIBES: Vibe[] = ["cozy_intimate", "romantic"];
+const ENERGETIC_VIBES: Vibe[] = ["lively_social", "fun_playful", "trendy"];
+
+// Tags that describe noise or crowding. Fine for a lively search, but a
+// contradiction in an explanation for a quiet one - and the reverse for tags
+// that praise quiet when the search wants energy.
+// Vibes whose explanations shouldn't cite noise or crowding as a plus.
+const CALM_VIBES: Vibe[] = ["cozy_intimate", "romantic", "relaxed_casual"];
+const NOISY_TAG = /\b(loud|noisy|crowded|chaotic|packed|shouting)\b|not a quiet/i;
+const QUIET_TAG = /\b(quiet|hushed|whisper)\b/i;
+
+/**
+ * The venue's own tags (all of them are venue facts, stored in priority
+ * order), minus any that would contradict what this search is asking for,
+ * and minus ones that just repeat the venue's name. Never reorders or edits.
+ */
+function usableTags(venue: Venue, prefs: DatePreferences): string[] {
+  const firstWord = venue.name.toLowerCase().replace(/^the\s+/, "").split(/[\s,&.']+/)[0];
+  const keep = (tag: string) => {
+    if (CALM_VIBES.includes(prefs.vibe) && NOISY_TAG.test(tag)) return false;
+    if (ENERGETIC_VIBES.includes(prefs.vibe) && QUIET_TAG.test(tag)) return false;
+    return true;
+  };
+  const usable = venue.tags.filter(keep);
+  const withoutName = usable.filter((tag) => firstWord.length < 4 || !tag.toLowerCase().includes(firstWord));
+  return (withoutName.length > 0 ? withoutName : usable).slice(0, 3);
 }
 
 /**
- * The second sentence of a "why it fits" explanation. Picks ONE concrete,
- * verified comparison based on the venue's actual attributes — never a
- * generic filler line — so two venues sharing a vibe don't read as
- * identical. Every branch only fires when the underlying attribute
- * actually supports the claim.
+ * The closing sentence of a "why it fits" explanation: ONE concrete claim
+ * drawn from the venue's actual attributes, or nothing. Every branch only
+ * fires when the attribute supports it AND it doesn't contradict what the
+ * search asked for (no "quiet enough to talk" for a lively search). There is
+ * deliberately no generic filler fallback - if nothing specific applies, the
+ * explanation just ends after the tags.
  */
-function buildSpecificClaim(venue: Venue, prefs: DatePreferences, short = false): string {
+function buildSpecificClaim(venue: Venue, prefs: DatePreferences, short = false): string | null {
   const a = venue.attributes;
+  const wantsQuiet = QUIET_VIBES.includes(prefs.vibe);
+  const wantsEnergy = ENERGETIC_VIBES.includes(prefs.vibe);
 
-  // `short` is the same claim in a trimmed wording for recommendation cards;
-  // the detail pages keep the full wording.
   if (a.builtInActivity) {
     return short
       ? "The built-in activity means you're never just sitting across a table."
       : "The built-in activity means you're never just sitting across a table with nothing to do.";
   }
-  if (a.conversationFriendly >= 4 && a.noiseLevel === "quiet") {
+  if (a.conversationFriendly >= 4 && a.noiseLevel === "quiet" && !wantsEnergy) {
     return short
       ? "It's quiet enough that conversation never has to compete."
       : "It's quiet enough that conversation never has to compete with the room.";
   }
-  if (a.noiseLevel === "lively" && a.energy >= 4) {
+  if (a.noiseLevel === "lively" && a.energy >= 4 && !wantsQuiet) {
     return short
       ? "Expect real energy in the room, a little electric rather than hushed."
-      : "Expect real energy in the room — good if you want the date to feel a little electric rather than hushed.";
+      : "Expect real energy in the room, good if you want the night to feel a little electric rather than hushed.";
   }
   if (a.formality === "upscale") {
     return short
       ? "It's dressier than most spots on this list, so it fits best when the occasion calls for it."
       : "It's dressier than most spots on this list, so it fits best when the occasion actually calls for it.";
   }
-  if (a.romantic >= 4) {
+  if (a.romantic >= 4 && (wantsQuiet || prefs.dateType === "anniversary" || prefs.dateType === "first_date")) {
     return short
       ? "It reads as romantic without tipping into stiff."
       : "It reads as romantic without tipping into stiff or overly formal.";
@@ -326,31 +370,34 @@ function buildSpecificClaim(venue: Venue, prefs: DatePreferences, short = false)
       ? "It's genuinely memorable, not just convenient."
       : "It's the kind of place that's genuinely memorable, not just convenient.";
   }
-  return "It fits the vibe you're going for without overselling it.";
+  return null;
 }
 
 /**
  * Builds the "why it fits" copy from a venue's own tags + attributes and the
- * user's selections. Template-based on purpose — fully deterministic and
- * easy to debug — but structured so each sentence only ever states things
+ * user's selections. Template-based on purpose - fully deterministic and
+ * easy to debug - but structured so each sentence only ever states things
  * the venue's data actually supports. Swapping this for an AI-generated
  * explanation later means replacing this function's body with a model call
  * that receives the same `(venue, prefs)` inputs; nothing upstream changes.
+ *
+ * Shape: one sentence of fit, then "What stands out:" and the venue's own
+ * tags as a list (so a tag never has to agree grammatically with a
+ * sentence), then at most one attribute-based claim.
  */
 export function generateWhyItFits(venue: Venue, prefs: DatePreferences): string {
-  return composeWhyItFits(venue, prefs, venue.tags.slice(0, 3));
+  return composeWhyItFits(venue, prefs, usableTags(venue, prefs));
 }
 
 /**
  * The same explanation, shortened to scan quickly on a recommendation card
- * (about 30-40 words). It never writes new facts: it uses the venue's own
- * tags (stored in priority order) and the same attribute-based claim in a
- * trimmed wording. It keeps as many of the top tags as fit `maxWords`; if
- * even the top tag alone is too long, it leads with the highest-priority
- * tag that does fit, and only if none do does it keep the top tag anyway.
+ * (about 30-40 words). It never writes new facts: it keeps as many of the
+ * venue's own tags as fit `maxWords`, using the same claim in a trimmed
+ * wording. If even the first tag alone is too long it tries the others, and
+ * only if none fit does it keep the first anyway.
  */
 export function generateConciseWhyItFits(venue: Venue, prefs: DatePreferences, maxWords = 40): string {
-  const tags = venue.tags.slice(0, 3);
+  const tags = usableTags(venue, prefs);
   const fits = (text: string) => text.trim().split(/\s+/).length <= maxWords;
   for (let n = tags.length; n >= 1; n--) {
     const text = composeWhyItFits(venue, prefs, tags.slice(0, n), true);
@@ -360,44 +407,55 @@ export function generateConciseWhyItFits(venue: Venue, prefs: DatePreferences, m
     const text = composeWhyItFits(venue, prefs, [tags[i]], true);
     if (fits(text)) return text;
   }
-  return composeWhyItFits(venue, prefs, tags.slice(0, 1), true);
+  // A very long venue name or tag: drop the closing claim before dropping tags.
+  for (let n = tags.length; n >= 1; n--) {
+    const text = composeWhyItFits(venue, prefs, tags.slice(0, n), true, false);
+    if (fits(text)) return text;
+  }
+  return composeWhyItFits(venue, prefs, tags.slice(0, 1), true, false);
 }
 
-function composeWhyItFits(venue: Venue, prefs: DatePreferences, tags: string[], short = false): string {
-  const tagSentence = capitalize(joinWithAnd(tags));
+function composeWhyItFits(
+  venue: Venue,
+  prefs: DatePreferences,
+  tags: string[],
+  short = false,
+  withClaim = true
+): string {
   const dateTypeLabel = DATE_TYPE_LABEL[prefs.dateType];
-  const claim = buildSpecificClaim(venue, prefs, short);
+  const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
 
   // Both the "[dateType] option" framing and the "when you want [vibe]"
   // clause assert the venue actually delivers on that occasion/vibe. Only
-  // make each claim when the venue is genuinely tagged for it — neither
+  // make each claim when the venue is genuinely tagged for it - neither
   // dateType nor vibe is a hard filter, so a venue can reach the top 3
   // purely because the eligible pool for the selected hard filters was
   // small, with no real evidence it suits the occasion or vibe asked for
   // (e.g. a coffee shop shown for "special occasion" purely because it was
   // one of the only outdoor-seating options left at that budget).
-  // "surprise_me" has no hard requirement by design (see scoreDateType) —
+  // "surprise_me" has no hard requirement by design (see scoreDateType) -
   // every eligible venue is fair game, so it always counts as genuine.
   const dateTypeGenuine = prefs.dateType === "surprise_me" || venue.dateTypes.includes(prefs.dateType);
   const vibeGenuine = venue.vibes.includes(prefs.vibe);
-  const wantPhrase = VIBE_WANT_PHRASE[prefs.vibe];
+  const occasion = prefs.dateType === "surprise_me" ? "" : `${dateTypeLabel} `;
 
+  let fit: string;
   if (dateTypeGenuine && vibeGenuine) {
-    return `${tagSentence} make ${venue.name} a strong ${dateTypeLabel} option when you want ${wantPhrase}. ${claim}`;
+    fit = `${venue.name} is a strong ${occasion}pick when you want ${wantPhrase}.`.replace("  ", " ");
+  } else if (dateTypeGenuine) {
+    fit = `${venue.name} is a solid ${occasion}pick, though not a classic one for that vibe.`.replace("  ", " ");
+  } else if (vibeGenuine) {
+    fit = `${venue.name} is a solid pick for ${wantPhrase}, though not the classic ${dateTypeLabel} choice.`;
+  } else {
+    fit = `${venue.name} is worth considering, though not a classic ${dateTypeLabel} or vibe match.`;
   }
-  if (dateTypeGenuine && !vibeGenuine) {
-    return short
-      ? `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option, though not a classic pick for that vibe. ${claim}`
-      : `${tagSentence} make ${venue.name} a solid ${dateTypeLabel} option here, even if it's not a classic pick for that vibe. ${claim}`;
-  }
-  if (!dateTypeGenuine && vibeGenuine) {
-    return short
-      ? `${tagSentence} make ${venue.name} a solid pick for ${wantPhrase}, though not the classic ${dateTypeLabel} choice. ${claim}`
-      : `${tagSentence} make ${venue.name} a solid pick here for ${wantPhrase}, even if it's not the most traditional choice for a ${dateTypeLabel}. ${claim}`;
-  }
-  return short
-    ? `${tagSentence} make ${venue.name} worth considering, though not a classic ${dateTypeLabel} or vibe match. ${claim}`
-    : `${tagSentence} make ${venue.name} worth considering here, even if it's not a classic ${dateTypeLabel} pick or vibe match. ${claim}`;
+
+  const standout = tags.length > 0 ? `What stands out: ${tags.join("; ")}.` : "";
+  const claim = withClaim ? buildSpecificClaim(venue, prefs, short) : null;
+  const said = [dateTypeGenuine && vibeGenuine ? wantPhrase : "", ...tags];
+  const closing = claim && !repeatsWhatWasSaid(claim, said) ? claim : "";
+
+  return [fit, standout, closing].filter(Boolean).join(" ");
 }
 
 function scoreAndExplain(venue: Venue, prefs: DatePreferences, isExpandedMatch: boolean): ScoredVenue {

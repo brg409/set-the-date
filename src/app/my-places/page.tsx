@@ -3,17 +3,16 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Bookmark, CheckCircle2, Heart } from "lucide-react";
-import { VenueCard } from "@/components/VenueCard";
+import { SavedPlaceCard } from "@/components/SavedPlaceCard";
 import { EmptyState } from "@/components/EmptyState";
 import { getButtonClasses } from "@/components/Button";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
 import { getVenueById } from "@/data/venues";
-import { generateConciseWhyItFits, getDefaultWhyItFits } from "@/lib/recommend";
-import { placeHref } from "@/lib/placeLinks";
+import { generateConciseWhyItFits } from "@/lib/recommend";
 import { paramsToPreferences } from "@/lib/queryParams";
+import { placeHref } from "@/lib/placeLinks";
 import { MY_PLACES_COPY } from "@/lib/copy";
 import type { PlaceEntry } from "@/lib/myPlaces";
-import type { ScoredVenue } from "@/lib/types";
 
 type Section = "want" | "been" | "favorites";
 
@@ -22,19 +21,19 @@ const SECTIONS: { key: Section; label: string; icon: typeof Bookmark; empty: str
     key: "want",
     label: "Want to Go",
     icon: Bookmark,
-    empty: "Tap Save on any recommendation and it will show up here.",
+    empty: "Tap Save on any place and it will show up here.",
   },
   {
     key: "been",
     label: "Been There",
     icon: CheckCircle2,
-    empty: "Mark a place Been Here and it will show up here.",
+    empty: "Mark a place Been Here and it will show up here, where you can rate it and add a note.",
   },
   {
     key: "favorites",
     label: "Favorites",
     icon: Heart,
-    empty: "Places you mark as favorites will show up here.",
+    empty: "Tap Favorite on a place and it will show up here.",
   },
 ];
 
@@ -49,7 +48,7 @@ export default function MyPlacesPage() {
   const [section, setSection] = useState<Section>("want");
 
   const counts = useMemo(() => {
-    const all = Object.values(entries);
+    const all = Object.values(entries).filter((e) => getVenueById(e.venueId));
     return {
       want: all.filter((e) => e.wantToGo).length,
       been: all.filter((e) => e.visited).length,
@@ -61,25 +60,24 @@ export default function MyPlacesPage() {
     return Object.values(entries)
       .filter((entry) => inSection(entry, section))
       .sort((a, b) => {
-        const at = a.visitedAt ?? a.savedAt ?? "";
-        const bt = b.visitedAt ?? b.savedAt ?? "";
+        const at = (section === "been" ? a.visitedAt : a.savedAt) ?? a.visitedAt ?? a.savedAt ?? "";
+        const bt = (section === "been" ? b.visitedAt : b.savedAt) ?? b.visitedAt ?? b.savedAt ?? "";
         return bt.localeCompare(at);
       })
       .map((entry) => {
         const venue = getVenueById(entry.venueId);
         if (!venue) return null;
-        // Use the search the place was saved from when we have it; otherwise
-        // there is no search context, so the card says "About this place".
+        // Saved from a search: that search's explanation. Saved without one:
+        // there is nothing to personalise, so the venue's own description.
         const prefs = entry.fromSearch
           ? paramsToPreferences(new URLSearchParams(entry.fromSearch))
           : null;
-        const scored: ScoredVenue = {
+        return {
           venue,
-          score: 0,
-          whyItFits: prefs ? generateConciseWhyItFits(venue, prefs) : getDefaultWhyItFits(venue, 40),
-          matchedTags: venue.tags.slice(0, 3),
+          text: prefs ? generateConciseWhyItFits(venue, prefs) : venue.description,
+          hasSearchContext: Boolean(prefs),
+          fromSearch: prefs ? entry.fromSearch : undefined,
         };
-        return { scored, hasContext: Boolean(prefs), fromSearch: entry.fromSearch };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
   }, [entries, section]);
@@ -105,7 +103,7 @@ export default function MyPlacesPage() {
               role="tab"
               aria-selected={isActive}
               onClick={() => setSection(s.key)}
-              className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors sm:flex-none ${
+              className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors sm:flex-none sm:px-4 ${
                 isActive ? "bg-card text-primary shadow-sm" : "text-ink/70 hover:text-ink"
               }`}
             >
@@ -130,19 +128,23 @@ export default function MyPlacesPage() {
           />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map(({ scored, hasContext, fromSearch }) => (
-              <VenueCard
-                key={scored.venue.id}
-                scored={scored}
-                detailHref={placeHref(scored.venue.id, { search: fromSearch, from: "my-places" })}
+            {items.map(({ venue, text, hasSearchContext, fromSearch }) => (
+              <SavedPlaceCard
+                key={venue.id}
+                venue={venue}
+                text={text}
+                hasSearchContext={hasSearchContext}
                 fromSearch={fromSearch}
-                whyHeading={hasContext ? undefined : "About this place"}
+                detailHref={placeHref(venue.id, { search: fromSearch, from: "my-places" })}
               />
             ))}
           </div>
         )}
       </div>
 
+      <p className="mt-8 text-center text-xs text-muted">
+        Your places, ratings, and notes are kept on this device, in this browser.
+      </p>
     </main>
   );
 }
