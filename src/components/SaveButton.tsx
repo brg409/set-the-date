@@ -2,6 +2,9 @@
 
 import { Bookmark } from "lucide-react";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
+import { restoreWantToGo } from "@/lib/myPlaces";
+import { getVenueById } from "@/data/venues";
+import { showToast } from "@/lib/toast";
 
 /** Save / unsave to "Want to Go" in My Places. */
 export function SaveButton({
@@ -16,7 +19,7 @@ export function SaveButton({
   size?: "sm" | "md";
   fullWidth?: boolean;
 }) {
-  const { isSaved, toggleSaved } = useMyPlaces();
+  const { isSaved, toggleSaved, getEntry } = useMyPlaces();
   const saved = isSaved(venueId);
 
   return (
@@ -25,7 +28,16 @@ export function SaveButton({
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        const before = getEntry(venueId);
         toggleSaved(venueId, fromSearch);
+        // Removing a saved place is easy to do by accident, so offer Undo.
+        if (before?.wantToGo) {
+          const name = getVenueById(venueId)?.name;
+          showToast(name ? `Removed ${name} from Want to Go` : "Removed from Want to Go", {
+            label: "Undo",
+            run: () => restoreWantToGo(venueId, { savedAt: before.savedAt, fromSearch: before.fromSearch }),
+          });
+        }
       }}
       aria-pressed={saved}
       aria-label={saved ? "Remove from Want to Go" : "Save to Want to Go"}

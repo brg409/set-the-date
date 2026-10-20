@@ -74,6 +74,31 @@ async function main() {
   places.toggleWantToGo("gamma");
   check("unsaving the only flag removes the entry", places.getMyPlacesSnapshot().entries.gamma === undefined);
 
+  places.toggleWantToGo("mu", "dateType=casual");
+  const muBefore = places.getMyPlacesSnapshot().entries.mu;
+  places.toggleWantToGo("mu");
+  check("removing a saved place removes it", places.getMyPlacesSnapshot().entries.mu === undefined);
+  places.restoreWantToGo("mu", { savedAt: muBefore.savedAt, fromSearch: muBefore.fromSearch });
+  const muAfter = places.getMyPlacesSnapshot().entries.mu;
+  check("Undo puts it back exactly as it was (save date and search)", muAfter?.wantToGo === true && muAfter.savedAt === muBefore.savedAt && muAfter.fromSearch === "dateType=casual");
+  places.toggleWantToGo("mu");
+  places.toggleWantToGo("nu");
+  places.toggleFavorite("nu");
+  const nuBefore = places.getMyPlacesSnapshot().entries.nu;
+  places.toggleWantToGo("nu");
+  places.restoreWantToGo("nu", { savedAt: nuBefore.savedAt });
+  check("Undo keeps a place's favorite flag", places.getMyPlacesSnapshot().entries.nu?.favorite === true && places.getMyPlacesSnapshot().entries.nu?.wantToGo === true);
+  places.toggleWantToGo("nu");
+  places.toggleFavorite("nu");
+  const toast = await import("../src/lib/toast");
+  let undone = false;
+  toast.showToast("Removed", { label: "Undo", run: () => { undone = true; } });
+  const toastShown = toast.getToastSnapshot();
+  check("a toast with an Undo action is shown", toastShown?.message === "Removed" && toastShown?.actionLabel === "Undo");
+  toastShown?.onAction?.();
+  toast.dismissToast();
+  check("Undo runs its action and the toast goes away", undone && toast.getToastSnapshot() === null);
+
   places.toggleWantToGo("delta");
   places.toggleVisited("delta");
   const d = places.getMyPlacesSnapshot().entries.delta;

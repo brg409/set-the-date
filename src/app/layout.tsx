@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { ToastHost } from "@/components/ToastHost";
+import { preconnect } from "react-dom";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,6 +52,10 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // Place photos are served from Google's image host; opening the connection
+  // early shaves the handshake off the first photo.
+  preconnect("https://lh3.googleusercontent.com");
+
   return (
     <html
       lang="en"
@@ -61,6 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </div>
         <BottomNav />
+        <ToastHost />
       </body>
     </html>
   );

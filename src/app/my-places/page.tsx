@@ -103,7 +103,7 @@ export default function MyPlacesPage() {
               role="tab"
               aria-selected={isActive}
               onClick={() => setSection(s.key)}
-              className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors sm:flex-none sm:px-4 ${
+              className={`flex min-h-10 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full px-1.5 text-[13px] font-medium transition-colors sm:flex-none sm:gap-1.5 sm:px-4 sm:text-sm ${
                 isActive ? "bg-card text-primary shadow-sm" : "text-ink/70 hover:text-ink"
               }`}
             >

@@ -194,6 +194,19 @@ export function toggleWantToGo(venueId: string, fromSearch?: string): boolean {
   return now;
 }
 
+/**
+ * Put a place back in "want to go" exactly as it was (its save date and the
+ * search it came from), for Undo after removing it.
+ */
+export function restoreWantToGo(venueId: string, previous: { savedAt?: string; fromSearch?: string }): void {
+  update(venueId, (e) => ({
+    ...e,
+    wantToGo: true,
+    savedAt: previous.savedAt ?? e.savedAt ?? new Date().toISOString(),
+    fromSearch: previous.fromSearch ?? e.fromSearch,
+  }));
+}
+
 /** Mark / unmark "Been here". Marking visited moves it out of "want to go". */
 export function toggleVisited(venueId: string, fromSearch?: string): boolean {
   let now = false;
