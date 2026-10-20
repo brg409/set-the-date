@@ -10,6 +10,7 @@ import {
   MapPin,
   SlidersHorizontal,
   Sparkles,
+  UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/Button";
@@ -27,6 +28,8 @@ import {
   type Criteria,
 } from "@/lib/criteria";
 import { preferencesToParams } from "@/lib/queryParams";
+import { ANYTHING_LABEL, OUTING_OPTIONS } from "@/lib/outing";
+import { budgetCaption } from "@/lib/budget";
 import { useIsClient } from "@/hooks/useIsClient";
 import { FIND_COPY } from "@/lib/copy";
 
@@ -74,7 +77,7 @@ function FindForm() {
     return hasAnyCriteria(fromUrl) ? fromUrl : loadCriteria();
   });
   const [moreOpen, setMoreOpen] = useState(() =>
-    Boolean(criteria.food || criteria.indoorOutdoor)
+    Boolean(criteria.indoorOutdoor)
   );
 
   // Keep selections for this tab session so switching tabs and coming back
@@ -87,9 +90,9 @@ function FindForm() {
     setCriteria((c) => ({ ...c, [key]: c[key] === value ? undefined : value }));
   }
 
-  const { dateType, vibe, neighborhood, budget, food, indoorOutdoor } = criteria;
+  const { dateType, vibe, neighborhood, budget, outing, indoorOutdoor } = criteria;
   const complete = Boolean(dateType && vibe && neighborhood && budget);
-  const moreCount = [food, indoorOutdoor].filter(Boolean).length;
+  const moreCount = indoorOutdoor ? 1 : 0;
 
   const missing = [
     !dateType && "an occasion",
@@ -105,7 +108,7 @@ function FindForm() {
       vibe,
       neighborhood,
       budget,
-      filters: food || indoorOutdoor ? { food, indoorOutdoor } : undefined,
+      filters: outing || indoorOutdoor ? { outing, indoorOutdoor } : undefined,
     });
     router.push(`/results?${params.toString()}`);
   }
@@ -129,6 +132,21 @@ function FindForm() {
       </div>
 
       <div className="mt-4 flex flex-col gap-3">
+        <Group icon={UtensilsCrossed} title="What are you in the mood for?" grid="grid-cols-3 sm:grid-cols-6">
+          <OptionChip selected={!outing} onClick={() => toggle("outing", undefined)}>
+            {ANYTHING_LABEL}
+          </OptionChip>
+          {OUTING_OPTIONS.map((opt) => (
+            <OptionChip
+              key={opt.value}
+              selected={outing === opt.value}
+              onClick={() => toggle("outing", opt.value)}
+            >
+              {opt.label}
+            </OptionChip>
+          ))}
+        </Group>
+
         <Group icon={CalendarHeart} title="Occasion" grid="grid-cols-2 sm:grid-cols-3">
           {DATE_TYPE_OPTIONS.map((opt) => (
             <OptionChip
@@ -170,9 +188,7 @@ function FindForm() {
           icon={DollarSign}
           title="Budget"
           grid="grid-cols-4 md:grid-cols-2"
-          caption={
-            BUDGET_OPTIONS.find((o) => o.value === budget)?.description ?? "Estimated cost per person"
-          }
+          caption={budgetCaption(budget, outing)}
         >
           {BUDGET_OPTIONS.map((opt) => (
             <OptionChip
@@ -212,25 +228,6 @@ function FindForm() {
           </button>
           {moreOpen && (
             <div className="flex flex-col gap-3 border-t border-line px-3.5 py-3 sm:px-4">
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                  Food, drinks, or activity
-                </p>
-                <div className="grid grid-cols-3 gap-2 sm:max-w-md">
-                  <OptionChip selected={food === "food"} onClick={() => toggle("food", "food")}>
-                    Food
-                  </OptionChip>
-                  <OptionChip selected={food === "drinks"} onClick={() => toggle("food", "drinks")}>
-                    Drinks
-                  </OptionChip>
-                  <OptionChip
-                    selected={food === "activity"}
-                    onClick={() => toggle("food", "activity")}
-                  >
-                    Activity
-                  </OptionChip>
-                </div>
-              </div>
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   Indoor or outdoor

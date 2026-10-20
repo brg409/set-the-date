@@ -3,6 +3,7 @@ import { ArrowRight, ExternalLink, MapPinOff, DollarSign, TreePine, Utensils } f
 import type { DatePreferences, NotForMeReason, ScoredVenue } from "@/lib/types";
 import { PRICE_LABEL, findOption, NEIGHBORHOOD_OPTIONS } from "@/lib/options";
 import { RESULTS_COPY } from "@/lib/copy";
+import { outingLabel, venueHasOutingType } from "@/lib/outing";
 import { VenuePhoto } from "./VenuePhoto";
 import { WhyItFits } from "./WhyItFits";
 import { Chip } from "./Chip";
@@ -48,6 +49,9 @@ export function VenueCard({
     !(wantedIO === "indoor" ? venue.hasIndoorSeating : venue.outdoorSeating === "yes");
   const wantedFood = prefs?.filters?.food;
   const outsideFood = wantedFood && !venue.foodDrinkActivity.includes(wantedFood);
+  // Only possible after the person chose to show all kinds of places.
+  const wantedOuting = prefs?.filters?.outing;
+  const outsideOuting = wantedOuting && !venueHasOutingType(venue.id, wantedOuting);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-sm shadow-ink/[0.04]">
@@ -78,7 +82,7 @@ export function VenueCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-3.5 p-4 sm:p-5">
-        {(outsideNeighborhood || outsideBudget || outsideIndoorOutdoor || outsideFood) && (
+        {(outsideNeighborhood || outsideBudget || outsideIndoorOutdoor || outsideFood || outsideOuting) && (
           <div className="flex flex-wrap gap-1.5">
             {outsideNeighborhood && (
               <Chip icon={MapPinOff} tone="accent">
@@ -93,6 +97,11 @@ export function VenueCard({
             {outsideIndoorOutdoor && (
               <Chip icon={TreePine} tone="accent">
                 No verified {wantedIO} seating
+              </Chip>
+            )}
+            {outsideOuting && wantedOuting && (
+              <Chip icon={Utensils} tone="accent">
+                Not a {outingLabel(wantedOuting)} pick
               </Chip>
             )}
             {outsideFood && (

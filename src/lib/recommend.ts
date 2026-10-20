@@ -1,5 +1,7 @@
 import { VENUES } from "@/data/venues";
 import { findOption, DATE_TYPE_OPTIONS } from "./options";
+import { budgetAllows, effectiveBudget } from "./budget";
+import { venueHasOutingType } from "./outing";
 import type {
   DatePreferences,
   DateType,
@@ -64,6 +66,7 @@ const NO_EXPANSION: ExpansionState = {
   budget: false,
   indoorOutdoor: false,
   food: false,
+  outing: false,
 };
 
 function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState): boolean {
@@ -82,9 +85,18 @@ function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState
   // ceiling ("price isn't the constraint"), which put $ bakeries and cafes
   // at #1 for nearly half of all $$$$ searches — someone choosing the
   // highest budget is looking for a splurge, not a cheap bite.
-  const budgetOk =
-    expand.budget ||
-    (venue.priceLevel <= prefs.budget && venue.priceLevel >= prefs.budget - 1);
+  //
+  // With no outing ("Anything") that band is exactly the rule above. A chosen
+  // outing can relax it for the kinds of places whose prices don't reach the
+  // top (Coffee and Dessert: a pure ceiling; Drinks: $$ behaves as $$);
+  // see lib/budget.ts.
+  const wantedOuting = prefs.filters?.outing;
+  const budgetOk = expand.budget || budgetAllows(venue.priceLevel, prefs.budget, wantedOuting);
+
+  // The "mood" filter: a hard filter like the others, using the reviewed
+  // per-venue classification in src/data/outingTypes.ts. No outing selected
+  // means no filtering at all, so every venue stays eligible.
+  const outingOk = expand.outing || !wantedOuting || venueHasOutingType(venue.id, wantedOuting);
 
   const wantedIO = prefs.filters?.indoorOutdoor;
   // "indoor" is satisfied by virtually every venue (see `hasIndoorSeating`).
@@ -100,7 +112,7 @@ function isEligible(venue: Venue, prefs: DatePreferences, expand: ExpansionState
   const foodOk =
     expand.food || !wantedFood || venue.foodDrinkActivity.includes(wantedFood);
 
-  return neighborhoodOk && budgetOk && indoorOutdoorOk && foodOk;
+  return neighborhoodOk && budgetOk && indoorOutdoorOk && foodOk && outingOk;
 }
 
 function getEligibleVenues(prefs: DatePreferences, expand: ExpansionState): Venue[] {
@@ -221,7 +233,10 @@ function scoreSecondaryAttributes(venue: Venue, prefs: DatePreferences): number 
  * override a venue that's a genuinely much better occasion/vibe fit.
  */
 function scoreBudgetFit(venue: Venue, prefs: DatePreferences): number {
-  return venue.priceLevel === prefs.budget ? RECOMMENDATION_WEIGHTS.exactBudgetMatch : 0;
+  // For Drinks, $$ is treated as the top level that exists ($$), so those
+  // venues still get the exact-match nudge. Identical to before otherwise.
+  const budget = effectiveBudget(prefs.budget, prefs.filters?.outing);
+  return venue.priceLevel === budget ? RECOMMENDATION_WEIGHTS.exactBudgetMatch : 0;
 }
 
 /**
@@ -246,7 +261,7 @@ export function rankVenue(venue: Venue, prefs: DatePreferences): number {
 
 const DATE_TYPE_LABEL: Record<DateType, string> = {
   first_date: "first date",
-  casual: "casual date",
+  casual: "casual hangout",
   anniversary: "anniversary",
   special_occasion: "special occasion",
   reconnecting: "catch-up",
@@ -572,6 +587,9 @@ function preferencesKey(prefs: DatePreferences): string {
     prefs.budget,
     prefs.filters?.food ?? "",
     prefs.filters?.indoorOutdoor ?? "",
+    // Added only when a mood is chosen, so every Anything search hashes
+    // exactly as it always did.
+    ...(prefs.filters?.outing ? [prefs.filters.outing] : []),
   ].join("|");
 }
 
@@ -673,6 +691,7 @@ export function getRecommendations(
   const canExpandBudget = canExpand("budget");
   const canExpandIndoorOutdoor = canExpand("indoorOutdoor");
   const canExpandFood = canExpand("food");
+  const canExpandOuting = canExpand("outing");
 
   let pool = getEligibleVenues(prefs, expand).filter((v) => !excludeSet.has(v.id));
   if (pool.length < count) {
@@ -694,6 +713,7 @@ export function getRecommendations(
     canExpandBudget,
     canExpandIndoorOutdoor,
     canExpandFood,
+    canExpandOuting,
     expanded: expand,
   };
 }

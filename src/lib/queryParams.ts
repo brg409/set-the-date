@@ -1,8 +1,8 @@
+import { isOutingType, outingFromLegacyFood } from "./outing";
 import type {
   DateFilters,
   DatePreferences,
   DateType,
-  FoodDrinkActivity,
   IndoorOutdoorPreference,
   Neighborhood,
   PriceLevel,
@@ -41,6 +41,8 @@ export function preferencesToParams(prefs: DatePreferences): URLSearchParams {
   params.set("vibe", prefs.vibe);
   params.set("neighborhood", prefs.neighborhood);
   params.set("budget", String(prefs.budget));
+  // "mood" (Dinner, Drinks, ...). Anything is the absence of the parameter.
+  if (prefs.filters?.outing) params.set("mood", prefs.filters.outing);
   if (prefs.filters?.food) params.set("food", prefs.filters.food);
   if (prefs.filters?.indoorOutdoor) params.set("io", prefs.filters.indoorOutdoor);
   return params;
@@ -70,8 +72,10 @@ export function paramsToPreferences(
   if (![1, 2, 3, 4].includes(budget)) return null;
 
   const filters: DateFilters = {};
-  const food = params.get("food") as FoodDrinkActivity | null;
-  if (food) filters.food = food;
+  // Old links carried food=food|drinks|activity; they now mean the matching mood.
+  const mood = params.get("mood");
+  const outing = isOutingType(mood) ? mood : outingFromLegacyFood(params.get("food"));
+  if (outing) filters.outing = outing;
   const io = params.get("io") as IndoorOutdoorPreference | null;
   if (io === "indoor" || io === "outdoor") filters.indoorOutdoor = io;
 

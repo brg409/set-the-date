@@ -28,6 +28,7 @@ export const NO_EXPANSION: ExpansionState = {
   budget: false,
   indoorOutdoor: false,
   food: false,
+  outing: false,
 };
 
 const keyFor = (paramsKey: string) => `knowaplace:results:${paramsKey}`;

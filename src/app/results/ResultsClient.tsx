@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   TreePine,
   Utensils,
+  UtensilsCrossed,
 } from "lucide-react";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { VenueCard } from "@/components/VenueCard";
@@ -27,6 +28,7 @@ import {
 import { recordNotForMe } from "@/lib/feedback";
 import { RESULTS_COPY } from "@/lib/copy";
 import { placeHref } from "@/lib/placeLinks";
+import { outingLabel } from "@/lib/outing";
 import {
   freshSession,
   hydrateSet,
@@ -178,6 +180,10 @@ function ResultsForPrefs({
   const vibeLabel = findOption(VIBE_OPTIONS, prefs.vibe).label;
   const neighborhoodLabel = findOption(NEIGHBORHOOD_OPTIONS, prefs.neighborhood).label;
   const budgetLabel = PRICE_LABEL[prefs.budget];
+  const wantedOuting = prefs.filters?.outing;
+  const moodLabel = wantedOuting ? outingLabel(wantedOuting) : null;
+  // Coffee and Dessert show at any budget, so there's no budget limit to name.
+  const budgetIsALimit = wantedOuting !== "coffee" && wantedOuting !== "dessert";
   const foodLabel = prefs.filters?.food
     ? prefs.filters.food.charAt(0).toUpperCase() + prefs.filters.food.slice(1) + " only"
     : null;
@@ -189,13 +195,20 @@ function ResultsForPrefs({
     meta.canExpandNeighborhood ||
     meta.canExpandBudget ||
     meta.canExpandIndoorOutdoor ||
-    meta.canExpandFood;
-  const anyExpansionActive = expand.neighborhood || expand.budget || expand.indoorOutdoor || expand.food;
+    meta.canExpandFood ||
+    meta.canExpandOuting;
+  const anyExpansionActive =
+    expand.neighborhood || expand.budget || expand.indoorOutdoor || expand.food || expand.outing;
   const needsExpansionChoice = meta.exactMatchCount < 3 && anyExpansionAvailable;
 
   const limitingFilters = [
+    moodLabel,
     `${neighborhoodLabel}`,
-    prefs.budget === 1 ? budgetLabel : `${PRICE_LABEL[(prefs.budget - 1) as PriceLevel]}–${budgetLabel}`,
+    budgetIsALimit
+      ? prefs.budget === 1
+        ? budgetLabel
+        : `${PRICE_LABEL[(prefs.budget - 1) as PriceLevel]}–${budgetLabel}`
+      : null,
     prefs.filters?.indoorOutdoor ? prefs.filters.indoorOutdoor + " seating" : null,
     prefs.filters?.food ? `${prefs.filters.food} only` : null,
   ].filter((v): v is string => Boolean(v));
@@ -222,6 +235,12 @@ function ResultsForPrefs({
         >
           <TreePine size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
           Include {prefs.filters?.indoorOutdoor === "outdoor" ? "indoor" : "outdoor"} spots too
+        </Button>
+      )}
+      {meta.canExpandOuting && (
+        <Button variant="outline" size={size} onClick={() => applyExpansion({ ...expand, outing: true })}>
+          <UtensilsCrossed size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
+          Show all kinds of places
         </Button>
       )}
       {meta.canExpandFood && (
@@ -259,6 +278,7 @@ function ResultsForPrefs({
       <div className="mb-5 mt-4 flex flex-wrap gap-1.5">
         <Chip>{dateTypeLabel}</Chip>
         <Chip>{vibeLabel}</Chip>
+        {moodLabel && <Chip>{moodLabel}</Chip>}
         <Chip>{neighborhoodLabel}</Chip>
         <Chip>{budgetLabel}</Chip>
         {foodLabel && <Chip>{foodLabel}</Chip>}
@@ -279,7 +299,7 @@ function ResultsForPrefs({
           <p className="text-sm text-ink">
             Only <strong>{meta.exactMatchCount}</strong>{" "}
             {meta.exactMatchCount === 1 ? "spot matches" : "spots match"} every filter exactly
-            ({limitingFilters.join(", ")}) for a {dateTypeLabel}. Showing
+            ({limitingFilters.join(", ")}) for {dateTypeLabel}. Showing
             {meta.exactMatchCount === 1 ? " that one" : " those"} below — widen the search for
             more:
           </p>

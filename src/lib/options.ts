@@ -35,7 +35,7 @@ export const DATE_TYPE_OPTIONS: OptionMeta<DateType>[] = [
   },
   {
     value: "casual",
-    label: "Casual date",
+    label: "Casual hangout",
     description: "Relaxed, no big occasion",
     icon: Wind,
   },
@@ -53,7 +53,7 @@ export const DATE_TYPE_OPTIONS: OptionMeta<DateType>[] = [
   },
   {
     value: "reconnecting",
-    label: "Reconnecting",
+    label: "Catching up",
     description: "It's been a while",
     icon: RotateCcw,
   },

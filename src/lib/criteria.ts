@@ -4,11 +4,12 @@ import {
   NEIGHBORHOOD_OPTIONS,
   VIBE_OPTIONS,
 } from "./options";
+import { isOutingType, outingFromLegacyFood } from "./outing";
 import type {
   DateType,
-  FoodDrinkActivity,
   IndoorOutdoorPreference,
   Neighborhood,
+  OutingType,
   PriceLevel,
   Vibe,
 } from "./types";
@@ -24,7 +25,8 @@ export interface Criteria {
   vibe?: Vibe;
   neighborhood?: Neighborhood;
   budget?: PriceLevel;
-  food?: FoodDrinkActivity;
+  /** "What are you in the mood for?" Undefined is Anything. */
+  outing?: OutingType;
   indoorOutdoor?: IndoorOutdoorPreference;
 }
 
@@ -34,7 +36,6 @@ const DATE_TYPES = DATE_TYPE_OPTIONS.map((o) => o.value as string);
 const VIBES = VIBE_OPTIONS.map((o) => o.value as string);
 const NEIGHBORHOODS = NEIGHBORHOOD_OPTIONS.map((o) => o.value as string);
 const BUDGETS = BUDGET_OPTIONS.map((o) => String(o.value));
-const FOODS = ["food", "drinks", "activity"];
 const IO = ["indoor", "outdoor"];
 
 /** Validates each field independently, so a partial or stale URL still pre-fills what it can. */
@@ -50,8 +51,10 @@ export function sanitizeCriteria(input: Record<string, unknown>): Criteria {
   if ((typeof bg === "string" || typeof bg === "number") && BUDGETS.includes(String(bg))) {
     out.budget = Number(bg) as PriceLevel;
   }
-  const food = input.food;
-  if (typeof food === "string" && FOODS.includes(food)) out.food = food as FoodDrinkActivity;
+  // `outing` is current; `food` is the old name for the same choice (older
+  // links and tabs), mapped onto the matching mood.
+  const outing = isOutingType(input.outing) ? input.outing : outingFromLegacyFood(input.food);
+  if (outing) out.outing = outing;
   const io = input.indoorOutdoor;
   if (typeof io === "string" && IO.includes(io)) out.indoorOutdoor = io as IndoorOutdoorPreference;
   return out;
@@ -64,6 +67,7 @@ export function criteriaFromParams(params: URLSearchParams): Criteria {
     vibe: params.get("vibe"),
     neighborhood: params.get("neighborhood"),
     budget: params.get("budget"),
+    outing: params.get("mood"),
     food: params.get("food"),
     indoorOutdoor: params.get("io"),
   });

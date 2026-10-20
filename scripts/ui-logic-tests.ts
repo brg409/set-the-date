@@ -154,12 +154,12 @@ async function main() {
     new URLSearchParams("dateType=first_date&vibe=cozy_intimate&neighborhood=fishtown&budget=3&food=drinks&io=outdoor")
   );
   check(
-    "URL params (including food and io) pre-fill every field",
+    "URL params (including an old food link, which now means that mood, and io) pre-fill every field",
     fromUrl.dateType === "first_date" &&
       fromUrl.vibe === "cozy_intimate" &&
       fromUrl.neighborhood === "fishtown" &&
       fromUrl.budget === 3 &&
-      fromUrl.food === "drinks" &&
+      fromUrl.outing === "drinks" &&
       fromUrl.indoorOutdoor === "outdoor"
   );
   check("a partial old /plan link still pre-fills what it has", criteriaFromParams(new URLSearchParams("vibe=trendy")).vibe === "trendy");
