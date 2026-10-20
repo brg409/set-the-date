@@ -324,6 +324,68 @@ async function main() {
   check("only venues with a stored reservation URL can show Reserve a Table", withRes.length > 0 && withRes.every((v) => /^https?:\/\//.test(v.reservationUrl as string)));
   check("every stored website and reservation link is a real http(s) URL", VENUES.every((v) => [v.websiteUrl, v.reservationUrl].every((u) => !u || /^https?:\/\/[^\s]+$/.test(u))));
 
+  console.log("\nMore-tab forms");
+  const sub = await import("../src/lib/submissions");
+  const okSuggest = sub.validateSubmission("suggest", { name: " Cafe X ", where: "123 Main St" });
+  check("a suggestion needs only a name and where it is", okSuggest.ok && okSuggest.value.fields.name === "Cafe X");
+  check("a suggestion without a name is refused", !sub.validateSubmission("suggest", { where: "x" }).ok);
+  check("contact needs a valid email", !sub.validateSubmission("contact", { message: "hello there" }).ok && !sub.validateSubmission("contact", { email: "nope", message: "hello there" }).ok);
+  check("contact with email and message is accepted", sub.validateSubmission("contact", { email: "a@b.co", message: "hello there" }).ok);
+  check("feedback is too short under 5 characters", !sub.validateSubmission("feedback", { message: "hey" }).ok);
+  check("over-long text is refused", !sub.validateSubmission("feedback", { message: "x".repeat(2001) }).ok);
+  check("an unknown choice is refused", !sub.validateSubmission("suggest", { name: "A", where: "B", placeKind: "spaceship" }).ok);
+  check("a hidden-field bot is caught and a quick submit is flagged", sub.spamVerdict({ company: "x", startedAt: 0 }, 99999) === "bot" && sub.spamVerdict({ startedAt: 1000 }, 2000) === "too_fast" && sub.spamVerdict({ startedAt: 1000 }, 9000) === "ok");
+  const mail = sub.composeEmail({ kind: "suggest", fields: { name: "Bad\r\nBcc: x@y.z <b>", where: "w", email: "me@x.co" } });
+  check("an email subject can't carry extra header lines", !/[\r\n]/.test(mail.subject));
+  check("submitted text is escaped in the HTML email", mail.html.includes("&lt;b&gt;") && !mail.html.includes("<b>"));
+  check("the visitor's email becomes the reply-to", mail.replyTo === "me@x.co");
+
+  const route = await import("../src/app/api/submit/route");
+  const realFetch = globalThis.fetch;
+  let sent: { url: string; body: Record<string, unknown>; auth: string | null }[] = [];
+  const mockFetch = (status: number) => {
+    sent = [];
+    globalThis.fetch = (async (url: string, init: RequestInit) => {
+      sent.push({ url, body: JSON.parse(init.body as string), auth: new Headers(init.headers).get("Authorization") });
+      return new Response(JSON.stringify({ id: "x" }), { status });
+    }) as typeof fetch;
+  };
+  const post = (body: unknown, ip: string, headers: Record<string, string> = {}) =>
+    route.POST(new Request("https://site.test/api/submit", { method: "POST", headers: { host: "site.test", "x-forwarded-for": ip, ...headers }, body: JSON.stringify(body) }));
+  const good = () => ({ kind: "contact", email: "a@b.co", message: "Hello there", startedAt: Date.now() - 10000, company: "" });
+  delete process.env.RESEND_API_KEY;
+  delete process.env.SUBMISSIONS_TO_EMAIL;
+  mockFetch(200);
+  const r1 = await post(good(), "1.1.1.1");
+  check("with no Resend keys it says so and sends nothing", r1.status === 503 && sent.length === 0);
+  process.env.RESEND_API_KEY = "re_test";
+  process.env.SUBMISSIONS_TO_EMAIL = "owner@example.com";
+  mockFetch(200);
+  const r2 = await post(good(), "1.1.1.2");
+  check("with keys it sends one email through Resend and reports success", r2.status === 200 && sent.length === 1 && sent[0].url === "https://api.resend.com/emails" && sent[0].auth === "Bearer re_test" && (sent[0].body.to as string[])[0] === "owner@example.com" && sent[0].body.reply_to === "a@b.co");
+  mockFetch(500);
+  const r3 = await post(good(), "1.1.1.3");
+  check("if Resend refuses, the form is told it failed", r3.status === 502);
+  mockFetch(200);
+  const r4 = await post({ ...good(), company: "spam" }, "1.1.1.4");
+  check("a bot gets a quiet OK and nothing is sent", r4.status === 200 && sent.length === 0);
+  const r5 = await post({ ...good(), startedAt: Date.now() }, "1.1.1.5");
+  check("an instant submit is turned away", r5.status === 400 && sent.length === 0);
+  const r6 = await post({ ...good(), email: "bad" }, "1.1.1.6");
+  check("an invalid form is refused with field errors", r6.status === 422 && Boolean(((await r6.json()) as { errors?: Record<string, string> }).errors?.email));
+  const r7 = await post(good(), "1.1.1.7", { origin: "https://evil.test" });
+  check("a post from another website is refused", r7.status === 403 && sent.length === 0);
+  let limited = 0;
+  for (let i = 0; i < 8; i++) if ((await post(good(), "9.9.9.9")).status === 429) limited++;
+  check("one visitor can't send an unlimited stream", limited >= 2);
+  mockFetch(200);
+  const fullSuggest = await post({ kind: "suggest", name: "Test Cafe", where: "123 Test St", area: "fishtown", placeKind: "restaurant", why: "Great", email: "a@b.co", startedAt: Date.now() - 10000, company: "" }, "2.2.2.2");
+  check("a complete suggestion (every field the form sends) goes through with its details", fullSuggest.status === 200 && sent.length === 1 && String(sent[0].body.text).includes("Fishtown") && String(sent[0].body.text).includes("Restaurant"));
+  globalThis.fetch = realFetch;
+  delete process.env.RESEND_API_KEY;
+  delete process.env.SUBMISSIONS_TO_EMAIL;
+
+
   console.log(`\n${passed} passed, ${failed} failed.`);
   process.exit(failed === 0 ? 0 : 1);
 }

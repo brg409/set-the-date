@@ -1,12 +1,43 @@
-import { Info, Lightbulb, Mail, MessageSquare, Settings, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  ChevronRight,
+  Info,
+  Lightbulb,
+  Mail,
+  MessageSquare,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 import { BRAND } from "@/lib/copy";
 
-const ROWS: { icon: LucideIcon; title: string; body: string }[] = [
-  { icon: Lightbulb, title: "Suggest a Place", body: "Know a place we should add?" },
-  { icon: MessageSquare, title: "Give Feedback", body: "We'd love to hear from you." },
-  { icon: Mail, title: "Contact Us", body: "Questions? Ideas? Reach out." },
+const ROWS: { icon: LucideIcon; title: string; body: string; href?: string }[] = [
+  { icon: Lightbulb, title: "Suggest a Place", body: "Know a place we should add?", href: "/more/suggest" },
+  { icon: MessageSquare, title: "Give Feedback", body: "We'd love to hear from you.", href: "/more/feedback" },
+  { icon: Mail, title: "Contact Us", body: "Questions? Ideas? Reach out.", href: "/more/contact" },
   { icon: Settings, title: "Settings", body: "Manage your preferences." },
 ];
+
+const ROW_CLASSES = "flex items-center gap-4 rounded-2xl border border-line bg-card px-4 py-4";
+
+function RowBody({ icon: Icon, title, body, href }: (typeof ROWS)[number]) {
+  return (
+    <>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint text-primary">
+        <Icon size={20} strokeWidth={2} aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-ink">{title}</span>
+        <span className="block text-sm text-muted">{body}</span>
+        {!href && (
+          <span className="mt-2 inline-block rounded-full bg-tint px-2.5 py-0.5 text-xs font-medium text-muted">
+            Coming soon
+          </span>
+        )}
+      </span>
+      {href && <ChevronRight size={18} strokeWidth={2.25} className="shrink-0 text-muted" aria-hidden />}
+    </>
+  );
+}
 
 export default function MorePage() {
   return (
@@ -15,21 +46,17 @@ export default function MorePage() {
       <p className="mt-1 text-sm text-muted">Help make KnowaPlace even better.</p>
 
       <ul className="mt-6 flex flex-col gap-3">
-        {ROWS.map(({ icon: Icon, title, body }) => (
-          <li
-            key={title}
-            className="flex items-center gap-4 rounded-2xl border border-line bg-card px-4 py-4 opacity-70"
-          >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint text-primary">
-              <Icon size={20} strokeWidth={2} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-ink">{title}</span>
-              <span className="block text-sm text-muted">{body}</span>
-              <span className="mt-2 inline-block rounded-full bg-tint px-2.5 py-0.5 text-xs font-medium text-muted">
-                Coming soon
-              </span>
-            </span>
+        {ROWS.map((row) => (
+          <li key={row.title}>
+            {row.href ? (
+              <Link href={row.href} className={`${ROW_CLASSES} transition-colors hover:border-primary/50 hover:bg-tint`}>
+                <RowBody {...row} />
+              </Link>
+            ) : (
+              <div className={`${ROW_CLASSES} opacity-70`}>
+                <RowBody {...row} />
+              </div>
+            )}
           </li>
         ))}
       </ul>
