@@ -4,6 +4,7 @@ import type { DatePreferences, NotForMeReason, ScoredVenue } from "@/lib/types";
 import { PRICE_LABEL, findOption, NEIGHBORHOOD_OPTIONS } from "@/lib/options";
 import { RESULTS_COPY } from "@/lib/copy";
 import { outingLabel, venueHasOutingType } from "@/lib/outing";
+import { isBelowBudget } from "@/lib/budget";
 import { VenuePhoto } from "./VenuePhoto";
 import { WhyItFits } from "./WhyItFits";
 import { Chip } from "./Chip";
@@ -43,6 +44,8 @@ export function VenueCard({
 
   const outsideNeighborhood = prefs && venue.neighborhood !== prefs.neighborhood;
   const outsideBudget = prefs && venue.priceLevel > prefs.budget;
+  // Cheaper than the budget's range: only shown once the budget was widened.
+  const belowBudget = prefs && isBelowBudget(venue.priceLevel, prefs.budget, prefs.filters?.outing);
   const wantedIO = prefs?.filters?.indoorOutdoor;
   const outsideIndoorOutdoor =
     wantedIO &&
@@ -82,7 +85,7 @@ export function VenueCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-3.5 p-4 sm:p-5">
-        {(outsideNeighborhood || outsideBudget || outsideIndoorOutdoor || outsideFood || outsideOuting) && (
+        {(outsideNeighborhood || outsideBudget || belowBudget || outsideIndoorOutdoor || outsideFood || outsideOuting) && (
           <div className="flex flex-wrap gap-1.5">
             {outsideNeighborhood && (
               <Chip icon={MapPinOff} tone="accent">
@@ -92,6 +95,11 @@ export function VenueCard({
             {outsideBudget && (
               <Chip icon={DollarSign} tone="accent">
                 Above your {PRICE_LABEL[prefs!.budget]} budget
+              </Chip>
+            )}
+            {belowBudget && (
+              <Chip icon={DollarSign} tone="accent">
+                Priced well under your {PRICE_LABEL[prefs!.budget]} budget
               </Chip>
             )}
             {outsideIndoorOutdoor && (

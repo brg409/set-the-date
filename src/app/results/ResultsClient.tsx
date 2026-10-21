@@ -32,6 +32,7 @@ import { outingLabel } from "@/lib/outing";
 import {
   freshSession,
   hydrateSet,
+  NO_EXPANSION,
   loadResultSession,
   nextSet,
   saveResultSession,
@@ -218,13 +219,13 @@ function ResultsForPrefs({
       {meta.canExpandNeighborhood && (
         <Button variant="outline" size={size} onClick={() => applyExpansion({ ...expand, neighborhood: true })}>
           <MapPin size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
-          Include nearby neighborhoods
+          Include other neighborhoods
         </Button>
       )}
       {meta.canExpandBudget && (
         <Button variant="outline" size={size} onClick={() => applyExpansion({ ...expand, budget: true })}>
           <DollarSign size={size === "sm" ? 14 : 15} strokeWidth={2.25} />
-          Allow a higher budget
+          Widen the budget
         </Button>
       )}
       {meta.canExpandIndoorOutdoor && (
@@ -294,7 +295,23 @@ function ResultsForPrefs({
         />
       )}
 
-      {meta.exactMatchCount > 0 && needsExpansionChoice && (
+      {anyExpansionActive && results.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-accent bg-accent/20 p-4">
+          <p className="text-sm text-ink">
+            This search was widened, so some places below are outside your original filters.
+            Each one is labelled.
+          </p>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {expansionButtons("sm")}
+            <Button variant="outline" size="sm" onClick={() => applyExpansion(NO_EXPANSION)}>
+              <ArrowLeft size={14} strokeWidth={2.25} />
+              Back to exact matches
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {!anyExpansionActive && meta.exactMatchCount > 0 && needsExpansionChoice && (
         <div className="mb-6 rounded-2xl border border-accent bg-accent/20 p-4">
           <p className="text-sm text-ink">
             Only <strong>{meta.exactMatchCount}</strong>{" "}

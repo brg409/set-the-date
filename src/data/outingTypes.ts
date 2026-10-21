@@ -8,6 +8,11 @@
 //   "reviewed: ..."  a person read the record and decided
 // A venue can have several types, or none (see ANYTHING_ONLY).
 //
+// A type means the place is a good answer when someone picks that mood, i.e.
+// it is a primary reason to go, not merely something the venue also serves.
+// (A gelato shop that also pours coffee is Dessert, not Coffee.) Real overlaps
+// are welcome, e.g. a coffee house that is also a gelateria.
+//
 // Every venue is always found by "Anything" (the default). These types only
 // matter when someone picks a specific mood on the Find page. Nothing here
 // changes the venue database or how places are ranked. Tests check that
@@ -33,7 +38,8 @@ export const OUTING_CLASSIFICATION: Record<string, Partial<Record<OutingType, st
   // La Colombe Coffee Roasters
   "la-colombe-rittenhouse": { coffee: "data: café whose record centers on coffee" },
   // Vita
-  "vita-gelato": { coffee: "reviewed: description: 'gelato, pastry, and coffee counter'", dessert: "data: dessert/bakery shop" },
+  // Coffee reviewed and removed: coffee is one of three items at the counter; the reason to go is the gelato and pastry.
+  "vita-gelato": { dessert: "data: dessert/bakery shop" },
   // Escape The Room Philadelphia
   "escape-the-room-rittenhouse": { activity: "data: activity venue; the experience is the draw" },
   // Tria Cafe Rittenhouse
@@ -109,7 +115,8 @@ export const OUTING_CLASSIFICATION: Record<string, Partial<Record<OutingType, st
   // Bluestone Lane
   "bluestone-lane": { coffee: "data: café whose record centers on coffee" },
   // Weckerly's Ice Cream
-  "weckerlys-ice-cream": { coffee: "reviewed: description: 'ice cream and coffee shop'", dessert: "data: dessert/bakery shop" },
+  // Coffee reviewed and removed: it serves coffee, but the reason to go is the small-batch ice cream.
+  "weckerlys-ice-cream": { dessert: "data: dessert/bakery shop" },
   // Malai
   "malai": { dessert: "data: dessert/bakery shop" },
   // The Bakeshop on Twentieth
@@ -285,7 +292,8 @@ export const OUTING_CLASSIFICATION: Record<string, Partial<Record<OutingType, st
   // ReAnimator Coffee
   "reanimator-coffee": { coffee: "data: café whose record centers on coffee" },
   // Gilda Café & Market
-  "gilda-cafe-and-market": { coffee: "reviewed: record note: treated as a coffee/food-focused cafe (no alcohol found)", dessert: "reviewed: known for pastéis de nata" },
+  // Coffee reviewed and removed: the record never mentions coffee; it is known for pastéis de nata and sandwiches.
+  "gilda-cafe-and-market": { dessert: "reviewed: known for pastéis de nata" },
   // Cake Life Bake Shop
   "cake-life-bake-shop": { dessert: "data: dessert/bakery shop" },
   // Weckerly's Ice Cream

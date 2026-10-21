@@ -72,7 +72,7 @@ const anyRealVenue = VENUES.find((v) => v.lastVerified)!;
 
   section("Schema sanity");
   const realVenues = VENUES.filter((v) => v.lastVerified);
-  check(`${realVenues.length} real (lastVerified) venues found`, realVenues.length === 180, `expected 180, got ${realVenues.length}`);
+  check(`${realVenues.length} real (lastVerified) venues found`, realVenues.length === VENUES.length, `expected all ${VENUES.length}, got ${realVenues.length}`);
   check(
     "no fictional (non-lastVerified) venue has a googlePlaceId set",
     VENUES.filter((v) => !v.lastVerified).every((v) => !v.googlePlaceId)
@@ -80,8 +80,8 @@ const anyRealVenue = VENUES.find((v) => v.lastVerified)!;
   const withId = realVenues.filter((v) => v.googlePlaceId);
   const withoutId = realVenues.filter((v) => !v.googlePlaceId);
   check(
-    `179 real venues have a verified googlePlaceId, 1 pending manual verification`,
-    withId.length === 179 && withoutId.length === 1,
+    `all but one real venue has a verified googlePlaceId (Upstairs at Abyssinia is pending manual verification)`,
+    withId.length === VENUES.length - 1 && withoutId.length === 1 && withoutId[0].id === "upstairs-at-abyssinia",
     `${withId.length} with, ${withoutId.length} without: ${withoutId.map((v) => v.id).join(", ")}`
   );
   check(

@@ -33,6 +33,15 @@ export function budgetAllows(priceLevel: number, budget: number, outing?: Outing
   return priceLevel <= b && priceLevel >= b - 1;
 }
 
+/**
+ * True for a place cheaper than the budget's range. Only reachable after
+ * someone widens the budget; the results then label it so it's clear it falls
+ * outside what they asked for.
+ */
+export function isBelowBudget(priceLevel: number, budget: number, outing?: OutingType): boolean {
+  return !budgetAllows(priceLevel, budget, outing) && priceLevel < effectiveBudget(budget, outing);
+}
+
 /** The levels a budget choice shows, e.g. $$$ -> [2, 3]. */
 export function levelsShown(budget: number, outing?: OutingType): number[] {
   return ([1, 2, 3, 4] as PriceLevel[]).filter((level) => budgetAllows(level, budget, outing));

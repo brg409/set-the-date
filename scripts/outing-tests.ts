@@ -10,7 +10,7 @@ import { VENUES, getVenueById } from "../src/data/venues";
 import { ANYTHING_ONLY, OUTING_CLASSIFICATION } from "../src/data/outingTypes";
 import { getRecommendations } from "../src/lib/recommend";
 import { getOutingTypes, outingFromLegacyFood, OUTING_TYPES, venueHasOutingType } from "../src/lib/outing";
-import { budgetAllows, budgetCaption, budgetRangeText, DRINKS_TOP_LEVEL, levelsShown } from "../src/lib/budget";
+import { budgetAllows, budgetCaption, budgetRangeText, DRINKS_TOP_LEVEL, isBelowBudget, levelsShown } from "../src/lib/budget";
 import { paramsToPreferences, preferencesToParams } from "../src/lib/queryParams";
 import { criteriaFromParams } from "../src/lib/criteria";
 import { NO_EXPANSION, nextSet } from "../src/lib/resultSession";
@@ -56,11 +56,11 @@ check(
 );
 const countOf = (t: OutingType) => VENUES.filter((v) => venueHasOutingType(v.id, t)).length;
 check(
-  "approved counts: Dinner 83, Drinks 65, Coffee 19, Dessert 19, Activity 31",
-  countOf("dinner") === 83 && countOf("drinks") === 65 && countOf("coffee") === 19 && countOf("dessert") === 19 && countOf("activity") === 31,
+  "approved counts: Dinner 83, Drinks 65, Coffee 16, Dessert 19, Activity 31",
+  countOf("dinner") === 83 && countOf("drinks") === 65 && countOf("coffee") === 16 && countOf("dessert") === 19 && countOf("activity") === 31,
   OUTING_TYPES.map((t) => `${t} ${countOf(t)}`).join(", ")
 );
-check("32 venues fit more than one type", VENUES.filter((v) => getOutingTypes(v.id).length > 1).length === 32);
+check("29 venues fit more than one type", VENUES.filter((v) => getOutingTypes(v.id).length > 1).length === 29);
 check(
   "every classification carries a reason that says whether data or a review decided it",
   Object.values(OUTING_CLASSIFICATION).every((e) => Object.values(e).every((why) => /^(data|reviewed): .{6,}/.test(why as string)))
@@ -69,6 +69,10 @@ const dinnerCats = VENUES.filter((v) => venueHasOutingType(v.id, "dinner")).map(
 check("Dinner never includes a café or dessert shop", dinnerCats.every((c) => c !== "cafe" && c !== "dessert"));
 const drinksCats = VENUES.filter((v) => venueHasOutingType(v.id, "drinks")).map((v) => v.category);
 check("Drinks never includes a café or dessert shop", drinksCats.every((c) => c !== "cafe" && c !== "dessert"));
+check(
+  "Coffee is only for places where coffee is the reason to go (cafés, plus Enswell), never an ice cream or gelato shop",
+  VENUES.filter((v) => venueHasOutingType(v.id, "coffee")).every((v) => v.category === "cafe" || v.id === "enswell")
+);
 check("every Drinks venue serves alcohol", VENUES.filter((v) => venueHasOutingType(v.id, "drinks")).every((v) => v.servesAlcohol));
 
 console.log("\nAnything is unchanged");
@@ -174,6 +178,34 @@ check(
   })
 );
 
+console.log("\nBroadened results are always labelled");
+{
+  const none = { neighborhood: false, budget: false, indoorOutdoor: false, food: false, outing: false };
+  let broadenedTotal = 0;
+  const unlabelled: string[] = [];
+  for (const outing of [undefined, ...OUTING_TYPES] as (OutingType | undefined)[]) {
+    for (const hood of HOODS) {
+      for (const budget of BUDGETS) {
+        for (const dim of ["neighborhood", "budget", "outing"] as const) {
+          if (dim === "outing" && !outing) continue;
+          const prefs: DatePreferences = { dateType: "casual", vibe: "relaxed_casual", neighborhood: hood, budget, ...(outing ? { filters: { outing } } : {}) };
+          for (const r of getRecommendations(prefs, { expand: { ...none, [dim]: true } }).results) {
+            if (!r.isExpandedMatch) continue;
+            broadenedTotal++;
+            const v = r.venue;
+            // The same reasons the result card shows as chips.
+            const labelled =
+              v.neighborhood !== hood || v.priceLevel > budget || isBelowBudget(v.priceLevel, budget, outing) || (outing !== undefined && !venueHasOutingType(v.id, outing));
+            if (!labelled) unlabelled.push(`${outing ?? "any"}/${hood}/${budget}/${dim}: ${v.name}`);
+          }
+        }
+      }
+    }
+  }
+  check(`${broadenedTotal} broadened results: each one says why it's outside the original search`, unlabelled.length === 0, unlabelled.slice(0, 3).join(" | "));
+  check("the original search's own matches are never marked as outside it", getRecommendations({ dateType: "casual", vibe: "trendy", neighborhood: "fishtown", budget: 2, filters: { outing: "drinks" } }).results.every((r) => !r.isExpandedMatch));
+}
+
 console.log("\nShow Me 3 More stays inside the mood");
 let leaks = 0;
 for (const outing of OUTING_TYPES) {
@@ -199,7 +231,7 @@ for (const outing of ["dinner", "drinks", "coffee", "dessert"] as const) {
         const c = x.venue.category;
         if (outing === "dinner" && (c === "cafe" || c === "dessert" || c === "activity" && x.venue.id !== "the-victor-cafe")) wrongKind.push(`dinner: ${x.venue.name} (${c})`);
         if (outing === "drinks" && (c === "cafe" || c === "dessert" || c === "restaurant" && !getVenueById(x.venue.id)?.servesAlcohol)) wrongKind.push(`drinks: ${x.venue.name} (${c})`);
-        if (outing === "coffee" && c !== "cafe" && c !== "dessert" && c !== "cocktail_bar") wrongKind.push(`coffee: ${x.venue.name} (${c})`);
+        if (outing === "coffee" && c !== "cafe" && c !== "cocktail_bar") wrongKind.push(`coffee: ${x.venue.name} (${c})`);
         if (outing === "dessert" && c !== "dessert" && c !== "cafe") wrongKind.push(`dessert: ${x.venue.name} (${c})`);
       }
     }
