@@ -534,6 +534,17 @@ const DIVERSITY_PENALTY = {
   sameCategory: 1.5, // additional penalty for the exact same category, not just the same bucket
 };
 
+/**
+ * Match first, variety second: at each pick, only venues within this many
+ * points of the best remaining match are candidates; the variety penalties
+ * above choose among them. So variety can swap in a near-equal alternative
+ * (a cocktail bar 1 point behind a third restaurant) but never a clearly
+ * worse match. For scale, a vibe match is worth 3 points and an occasion
+ * match 4. Without this limit the penalties (up to 4 points per repeat)
+ * put a pick 2+ points worse than an available venue into 13% of searches.
+ */
+const MATCH_TOLERANCE = 1.5;
+
 // ── Tie-breaking (Phase 2B) ──────────────────────────────────────────────
 //
 // Before this, a tie in adjusted score (common: many venues share the same
@@ -615,15 +626,18 @@ function diversify(sorted: ScoredVenue[], count: number, prefs: DatePreferences)
   const remaining = [...sorted];
 
   while (result.length < count && remaining.length > 0) {
-    const candidates = remaining.map((candidate, index) => {
+    // Only near-equal matches compete on variety (see MATCH_TOLERANCE).
+    const bestRemaining = Math.max(...remaining.map((c) => c.score));
+    const candidates = remaining.flatMap((candidate, index) => {
+      if (candidate.score < bestRemaining - MATCH_TOLERANCE) return [];
       const bucket = getVenueBucket(candidate.venue.category);
       const penalty =
         (bucketCounts.get(bucket) ?? 0) * DIVERSITY_PENALTY.sameBucket +
         (categoryCounts.get(candidate.venue.category) ?? 0) * DIVERSITY_PENALTY.sameCategory;
-      return { index, candidate, adjustedScore: candidate.score - penalty };
+      return [{ index, candidate, adjustedScore: candidate.score - penalty }];
     });
 
-    // Step 1: rank by adjusted score (unchanged from before).
+    // Step 1: rank by adjusted score.
     const maxAdjustedScore = Math.max(...candidates.map((c) => c.adjustedScore));
     let tied = candidates.filter((c) => c.adjustedScore === maxAdjustedScore);
 
@@ -657,7 +671,9 @@ function diversify(sorted: ScoredVenue[], count: number, prefs: DatePreferences)
     categoryCounts.set(picked.venue.category, (categoryCounts.get(picked.venue.category) ?? 0) + 1);
   }
 
-  return result;
+  // Show the picks best match first, so card #1 is never a weaker match
+  // than #2. Stable: equal scores keep the order they were picked in.
+  return result.sort((a, b) => b.score - a.score);
 }
 
 // ── 5. Public API ────────────────────────────────────────────────────────

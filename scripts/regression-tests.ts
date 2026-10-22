@@ -503,8 +503,13 @@ section("Phase 2B: quality-gated exact-tie hashing");
           if (JSON.stringify(oldPicks.map((p) => p.venue.id)) !== JSON.stringify(newPicks.map((p) => p.venue.id))) {
             combosReordered++;
           }
+          // Compared best-to-worst rather than by card position: results are
+          // now shown in score order (match first), while the old selection
+          // kept pick order, so the same picks can sit in different slots.
+          const oldScores = oldPicks.map((p) => p.score).sort((a, b) => b - a);
+          const newScores = newPicks.map((p) => p.score).sort((a, b) => b - a);
           for (let slot = 0; slot < 3; slot++) {
-            if (oldPicks[slot] && newPicks[slot] && oldPicks[slot].score - newPicks[slot].score > 1e-9) {
+            if (oldScores[slot] !== undefined && newScores[slot] !== undefined && oldScores[slot] - newScores[slot] > 1e-9) {
               slotRegressions++;
             }
           }
@@ -514,7 +519,7 @@ section("Phase 2B: quality-gated exact-tie hashing");
   }
 
   check(
-    `no selected slot scores lower (raw) than the old tie-break's pick, across all ${combosChecked} combinations`,
+    `no pick, best to worst, scores lower (raw) than the old tie-break's, across all ${combosChecked} combinations`,
     slotRegressions === 0,
     `${slotRegressions} regression(s) found`
   );
@@ -677,6 +682,64 @@ check("all 188 venues remain", VENUES.length === 188, `found ${VENUES.length}`);
     "neighborhood counts match the expected totals",
     JSON.stringify(actualCounts) === JSON.stringify(NEIGHBORHOOD_COUNTS),
     JSON.stringify(actualCounts)
+  );
+}
+
+// ── 8. Match first, variety second ──────────────────────────────────────
+//
+// Variety may only choose among near-equal matches: every pick must be
+// within MATCH_TOLERANCE (1.5 points) of the best venue left out, and the
+// cards are shown best match first. Before this, the variety penalties put
+// a pick 2+ points worse than an available venue into 13% of searches.
+
+section("Match first, variety second");
+{
+  const TOLERANCE = 1.5;
+  const DATE_TYPES: DateType[] = ["first_date", "casual", "anniversary", "special_occasion", "reconnecting", "surprise_me"];
+  const VIBES: Vibe[] = ["cozy_intimate", "relaxed_casual", "lively_social", "romantic", "fun_playful", "trendy", "something_different"];
+  const NEIGHBORHOODS: Neighborhood[] = ["rittenhouse", "center_city", "old_city", "fishtown", "university_city", "south_philly"];
+  const BUDGETS: PriceLevel[] = [1, 2, 3, 4];
+  const OUTINGS = [undefined, "dinner", "drinks", "coffee", "dessert", "activity"] as const;
+
+  let searches = 0;
+  let worsePicks = 0;
+  let outOfOrder = 0;
+  let worstExample = "";
+  for (const outing of OUTINGS)
+    for (const neighborhood of NEIGHBORHOODS)
+      for (const dateType of DATE_TYPES)
+        for (const vibe of VIBES)
+          for (const budget of BUDGETS) {
+            const prefs: DatePreferences = { neighborhood, dateType, vibe, budget, ...(outing ? { filters: { outing } } : {}) };
+            const picks = getRecommendations(prefs, { count: 3 }).results;
+            const everyone = getRecommendations(prefs, { count: 1000 }).results;
+            const chosen = new Set(picks.map((p) => p.venue.id));
+            const bestLeftOut = Math.max(-Infinity, ...everyone.filter((v) => !chosen.has(v.venue.id)).map((v) => v.score));
+            searches++;
+            const weakest = Math.min(...picks.map((p) => p.score));
+            if (picks.length && bestLeftOut - weakest > TOLERANCE + 1e-9) {
+              worsePicks++;
+              worstExample ||= `${JSON.stringify(prefs)}: ${picks.map((p) => `${p.venue.id}=${p.score}`).join(", ")}; best left out ${bestLeftOut}`;
+            }
+            if (picks.some((p, i) => i > 0 && p.score > picks[i - 1].score + 1e-9)) outOfOrder++;
+          }
+  check(
+    `no pick is more than ${TOLERANCE} points worse than a venue left out (${searches} searches, every mood)`,
+    worsePicks === 0,
+    `${worsePicks} searches, e.g. ${worstExample}`
+  );
+  check("cards are always shown best match first", outOfOrder === 0, `${outOfOrder} searches out of order`);
+}
+
+// The case that prompted this: a $$$$ anniversary in Rittenhouse used to put
+// a cocktail bar at #2, ahead of a 15-point restaurant.
+{
+  const prefs: DatePreferences = { neighborhood: "rittenhouse", dateType: "anniversary", vibe: "romantic", budget: 4 };
+  const ids = getRecommendations(prefs, { count: 3 }).results.map((r) => r.venue.id);
+  check(
+    "Rittenhouse anniversary/romantic/$$$$ leads with its two best restaurants",
+    ids.slice(0, 2).sort().join() === ["friday-saturday-sunday", "lacroix"].sort().join(),
+    ids.join(", ")
   );
 }
 
