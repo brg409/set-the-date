@@ -2,6 +2,7 @@
 
 import { Heart } from "lucide-react";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
+import { trackFavorited } from "@/lib/analytics";
 
 /** Mark / unmark a place as a favorite ("Favorites" in My Places). */
 export function FavoriteButton({
@@ -26,6 +27,7 @@ export function FavoriteButton({
         e.preventDefault();
         e.stopPropagation();
         toggleFavorite(venueId);
+        if (!favorite) trackFavorited(venueId);
       }}
       aria-pressed={favorite}
       aria-label={favorite ? "Remove from Favorites" : "Add to Favorites"}

@@ -106,6 +106,7 @@ export function PlaceDetail({ venue }: { venue: Venue }) {
               href={getDirectionsUrl(venue)}
               target="_blank"
               rel="noopener noreferrer"
+              {...trackLinkProps("directions_click", venue.id, "place")}
               className={`${getButtonClasses("outline", "lg")} sm:flex-1`}
             >
               <Navigation size={16} strokeWidth={2.25} aria-hidden />

@@ -1,8 +1,8 @@
-// Outbound links (Reserve a Table, Visit Website) are tracked with data
+// Outbound links (Reserve a Table, Visit Website, Directions) are tracked with data
 // attributes read by one listener in analytics.ts, so the components that
 // render them don't need to be client components or import PostHog.
 
-export const LINK_EVENTS = ["reserve_click", "website_click"] as const;
+export const LINK_EVENTS = ["reserve_click", "website_click", "directions_click"] as const;
 export const LINK_SOURCES = ["results", "place", "my-places"] as const;
 
 export function trackLinkProps(

@@ -137,6 +137,11 @@ export function trackNotForMe(
   capture("not_for_me", { venue_id: venueId, reason: reason ?? "none", position, ...searchProps(prefs) });
 }
 
+/** Added to Favorites (the heart). Removals are not tracked. */
+export function trackFavorited(venueId: string): void {
+  capture("place_favorited", { venue_id: venueId });
+}
+
 /** Marked Been There. Ratings and notes are never sent. */
 export function trackBeenThere(venueId: string): void {
   capture("been_there", { venue_id: venueId });
@@ -146,7 +151,7 @@ const LINK_EVENT_SET = new Set<string>(LINK_EVENTS);
 const LINK_SOURCE_SET = new Set<string>(LINK_SOURCES);
 const VENUE_ID = /^[a-z0-9-]{1,100}$/;
 
-/** Reserve / Website clicks, from the attributes set by trackLinkProps(). */
+/** Reserve / Website / Directions clicks, from the attributes set by trackLinkProps(). */
 export function listenForTrackedLinks(): void {
   if (!TOKEN || typeof document === "undefined") return;
   document.addEventListener(

@@ -40,6 +40,8 @@ Code: `src/lib/analytics.ts` (PostHog setup and every event), `src/lib/trackLink
 | `been_there` | Marked Been There (unmarking isn't tracked) | `venue_id` |
 | `reserve_click` | Reserve a Table tapped | `venue_id`, `from` (`results`, `place`, `my-places`) |
 | `website_click` | Visit Website tapped | `venue_id`, `from` |
+| `directions_click` | Directions tapped (place page) | `venue_id`, `from` (`place`) |
+| `place_favorited` | Added to Favorites with the heart (removals aren't tracked) | `venue_id` |
 
 Venue ids are the readable slugs used in place URLs, e.g. `parc` for
 `/place/parc`.
@@ -117,6 +119,8 @@ or longer.
 | Most saved | `place_saved` | breakdown `venue_id` | Table |
 | Most "Been There" | `been_there` | breakdown `venue_id` | Table |
 | Reserve vs Website clicks | `reserve_click`, `website_click` | breakdown `venue_id` | Table |
+| Most favorited places | `place_favorited` | breakdown `venue_id` | Table |
+| Directions clicks | `directions_click` | breakdown `venue_id` | Table |
 | Search → place → reserve | **Funnel**: `search` → `place_viewed` → `reserve_click` | | Funnel |
 
 With no cookies, PostHog groups a visitor's events by an anonymous hash that

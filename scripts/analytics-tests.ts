@@ -9,6 +9,7 @@
 import posthog from "posthog-js";
 import {
   trackBeenThere,
+  trackFavorited,
   trackNotForMe,
   trackPlaceSaved,
   trackPlaceViewed,
@@ -92,6 +93,8 @@ trackPlaceSaved("parc");
 check("place_saved: venue only", lastSent().event === "place_saved" && keysOf(lastSent().props) === "venue_id");
 trackBeenThere("parc");
 check("been_there: venue only (no rating or note)", lastSent().event === "been_there" && keysOf(lastSent().props) === "venue_id");
+trackFavorited("parc");
+check("place_favorited: venue only", lastSent().event === "place_favorited" && keysOf(lastSent().props) === "venue_id");
 
 console.log("not_for_me");
 trackNotForMe("parc", "too_expensive", prefs, 2);
@@ -119,6 +122,8 @@ check(
   "reserve link carries event, venue and source",
   attrs["data-track"] === "reserve_click" && attrs["data-venue-id"] === "parc" && attrs["data-track-from"] === "results",
 );
+const directions = trackLinkProps("directions_click", "parc", "place");
+check("directions link carries its own event", directions["data-track"] === "directions_click" && directions["data-track-from"] === "place");
 
 console.log(`\n${passed} passed, ${failed} failed.`);
 if (failed > 0) process.exit(1);
