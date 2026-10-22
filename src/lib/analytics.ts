@@ -13,7 +13,7 @@
 // Imports stay minimal: this file loads before the app on every page.
 import posthog from "posthog-js";
 import { LINK_EVENTS, LINK_SOURCES } from "./trackLink";
-import type { DatePreferences, ExpansionState } from "./types";
+import type { DatePreferences, ExpansionState, NotForMeReason } from "./types";
 
 type Value = string | number | boolean;
 
@@ -122,6 +122,19 @@ export function trackPlaceViewed(venueId: string, source: PlaceSource): void {
 /** Saved to Want to Go. Removals are not tracked. */
 export function trackPlaceSaved(venueId: string): void {
   capture("place_saved", { venue_id: venueId });
+}
+
+/**
+ * "Not for me" on a result card: the venue, the reason code the visitor
+ * picked ("none" when they skipped it), and the search it was shown for.
+ */
+export function trackNotForMe(
+  venueId: string,
+  reason: NotForMeReason | null,
+  prefs: DatePreferences,
+  position: number,
+): void {
+  capture("not_for_me", { venue_id: venueId, reason: reason ?? "none", position, ...searchProps(prefs) });
 }
 
 /** Marked Been There. Ratings and notes are never sent. */

@@ -39,7 +39,7 @@ import {
   type ResultSession,
 } from "@/lib/resultSession";
 import { useIsClient } from "@/hooks/useIsClient";
-import { trackRecommendationShown, trackSearch, trackSearchWidened } from "@/lib/analytics";
+import { trackNotForMe, trackRecommendationShown, trackSearch, trackSearchWidened } from "@/lib/analytics";
 import {
   findOption,
   VIBE_OPTIONS,
@@ -180,6 +180,7 @@ function ResultsForPrefs({
   function handleNotForMe(venueId: string, reason: NotForMeReason | null) {
     recordNotForMe(venueId, reason, prefs);
     const current = sets[cursor];
+    trackNotForMe(venueId, reason, prefs, current.indexOf(venueId) + 1);
     const keep = current.filter((id) => id !== venueId);
     const newExcluded = [...excluded, venueId];
     const replacement = getReplacementVenue(prefs, expand, [

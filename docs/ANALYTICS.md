@@ -34,6 +34,7 @@ Code: `src/lib/analytics.ts` (PostHog setup and every event), `src/lib/trackLink
 | `search` | A new search reaches the results page (not when returning to it) | `occasion`, `vibe`, `neighborhood`, `budget` (`$`–`$$$$`), `outing` (`anything` if unset), `indoor_outdoor` (`any`), `food` (`any`), `combination` (all seven, joined with ` \| `), `exact_matches`, `few_matches` (fewer than 3) |
 | `search_widened` | The visitor taps a widening button | the search properties, `widened` (`neighborhood`, `budget`, `indoorOutdoor`, `food`, `outing`), `exact_matches` |
 | `recommendation_shown` | A venue first appears in a search's results (once per venue per search) | `venue_id`, `position` (1–3), `set` (1 = first three), `widened` |
+| `not_for_me` | "Not for me" on a result card | `venue_id`, `reason` (`too_expensive`, `too_far`, `wrong_vibe`, `too_formal`, `too_casual`, `already_been`, `not_interested`, or `none` when skipped), `position`, and the search properties |
 | `place_viewed` | A place page opens | `venue_id`, `source` (`search`, `my-places`, `home`, `direct`) |
 | `place_saved` | Saved to Want to Go (removals aren't tracked) | `venue_id` |
 | `been_there` | Marked Been There (unmarking isn't tracked) | `venue_id` |
@@ -109,6 +110,8 @@ or longer.
 | Top filter combinations | `search` | breakdown `combination` | Table |
 | Thin searches | `search` | filter `few_matches` = true, breakdown `combination` | Table |
 | How people widen | `search_widened` | breakdown `widened` | Bar (total value) |
+| Why places get rejected | `not_for_me` | breakdown `reason` | Bar (total value) |
+| Most rejected places | `not_for_me` | breakdown `venue_id` | Table |
 | Most recommended places | `recommendation_shown` | breakdown `venue_id` | Table |
 | Most opened places | `place_viewed` | breakdown `venue_id` | Table |
 | Most saved | `place_saved` | breakdown `venue_id` | Table |

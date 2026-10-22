@@ -9,6 +9,7 @@
 import posthog from "posthog-js";
 import {
   trackBeenThere,
+  trackNotForMe,
   trackPlaceSaved,
   trackPlaceViewed,
   trackRecommendationShown,
@@ -92,8 +93,21 @@ check("place_saved: venue only", lastSent().event === "place_saved" && keysOf(la
 trackBeenThere("parc");
 check("been_there: venue only (no rating or note)", lastSent().event === "been_there" && keysOf(lastSent().props) === "venue_id");
 
+console.log("not_for_me");
+trackNotForMe("parc", "too_expensive", prefs, 2);
+check(
+  "venue, reason, position and the search's filters",
+  lastSent().event === "not_for_me" &&
+    keysOf(lastSent().props) ===
+      "budget,combination,food,indoor_outdoor,neighborhood,occasion,outing,position,reason,venue_id,vibe",
+  keysOf(lastSent().props),
+);
+check("reason is the fixed code", lastSent().props.reason === "too_expensive" && lastSent().props.position === 2);
+trackNotForMe("parc", null, plain, 1);
+check("a skipped reason is sent as \"none\"", lastSent().props.reason === "none");
+
 console.log("Every event");
-const allowed = /^(occasion|vibe|neighborhood|budget|outing|indoor_outdoor|food|combination|exact_matches|few_matches|widened|venue_id|position|set|source)$/;
+const allowed = /^(occasion|vibe|neighborhood|budget|outing|indoor_outdoor|food|combination|exact_matches|few_matches|widened|venue_id|position|set|source|reason)$/;
 const stray = sent.flatMap((s) => Object.keys(s.props).filter((k) => !allowed.test(k)));
 check("no property outside the agreed list", stray.length === 0, stray.join(", "));
 const values = sent.flatMap((s) => Object.values(s.props));
