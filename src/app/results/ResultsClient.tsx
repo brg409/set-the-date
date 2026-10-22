@@ -39,6 +39,7 @@ import {
   type ResultSession,
 } from "@/lib/resultSession";
 import { useIsClient } from "@/hooks/useIsClient";
+import { trackRecommendationShown, trackSearch, trackSearchWidened } from "@/lib/analytics";
 import {
   findOption,
   VIBE_OPTIONS,
@@ -129,7 +130,28 @@ function ResultsForPrefs({
   // venues happen to be displayed right now.
   const meta = useMemo(() => getRecommendations(prefs, { expand, count: 3 }), [prefs, expand]);
 
+  // Analytics. A search counts once, when it's new (not when coming back to
+  // it); each venue counts once per search when it's first on screen.
+  const searchTracked = useRef(restored !== null);
+  const shownTracked = useRef(new Set(restored ? restored.sets.flat() : []));
+  useEffect(() => {
+    if (searchTracked.current) return;
+    searchTracked.current = true;
+    trackSearch(prefs, meta.exactMatchCount);
+  }, [prefs, meta.exactMatchCount]);
+  useEffect(() => {
+    if (loading) return;
+    const widened = Object.values(expand).some(Boolean);
+    results.forEach((r, i) => {
+      if (shownTracked.current.has(r.venue.id)) return;
+      shownTracked.current.add(r.venue.id);
+      trackRecommendationShown(r.venue.id, { position: i + 1, set: cursor + 1, widened });
+    });
+  }, [loading, results, expand, cursor]);
+
   function applyExpansion(next: ExpansionState) {
+    const added = (Object.keys(next) as (keyof ExpansionState)[]).find((k) => next[k] && !expand[k]);
+    if (added) trackSearchWidened(prefs, added, meta.exactMatchCount);
     const first = getRecommendations(prefs, { expand: next, count: 3 }).results;
     setSession({
       sets: [first.map((r) => r.venue.id)],

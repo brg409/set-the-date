@@ -11,6 +11,7 @@
     "test:regression": "tsx scripts/regression-tests.ts",
     "test:ui-logic": "tsx scripts/ui-logic-tests.ts",
     "test:outing": "tsx scripts/outing-tests.ts",
+    "test:analytics": "tsx scripts/analytics-tests.ts",
     "test:venue-photos": "tsx scripts/test-venue-photos.ts",
     "lookup:place-ids": "tsx scripts/lookup-place-ids.ts"
   },
@@ -18,6 +19,7 @@
     "@vercel/analytics": "2.0.1",
     "lucide-react": "^1.45.0",
     "next": "16.3.5",
+    "posthog-js": "1.438.2",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

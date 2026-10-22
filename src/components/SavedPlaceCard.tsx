@@ -10,6 +10,7 @@ import { SaveButton } from "./SaveButton";
 import { BeenHereButton } from "./BeenHereButton";
 import { FavoriteButton } from "./FavoriteButton";
 import { PlaceNotes } from "./PlaceNotes";
+import { trackLinkProps } from "@/lib/trackLink";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
 
 /**
@@ -93,6 +94,7 @@ export function SavedPlaceCard({
                 href={venue.reservationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                {...trackLinkProps("reserve_click", venue.id, "my-places")}
                 className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-1 text-sm font-medium text-primary hover:text-primary-dark"
               >
                 Reserve a Table
@@ -104,6 +106,7 @@ export function SavedPlaceCard({
                   href={venue.websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  {...trackLinkProps("website_click", venue.id, "my-places")}
                   className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-1 text-sm font-medium text-primary hover:text-primary-dark"
                 >
                   Visit Website

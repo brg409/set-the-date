@@ -2,6 +2,7 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
+import { trackBeenThere } from "@/lib/analytics";
 
 /** Mark / unmark a place as visited ("Been There" in My Places). */
 export function BeenHereButton({
@@ -25,6 +26,7 @@ export function BeenHereButton({
         e.preventDefault();
         e.stopPropagation();
         toggleVisited(venueId, fromSearch);
+        if (!visited) trackBeenThere(venueId);
       }}
       aria-pressed={visited}
       aria-label={visited ? "Remove from Been There" : "Mark as been here"}

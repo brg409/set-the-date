@@ -11,6 +11,7 @@ import { Chip } from "./Chip";
 import { SaveButton } from "./SaveButton";
 import { BeenHereButton } from "./BeenHereButton";
 import { NotForMeControl } from "./NotForMeControl";
+import { trackLinkProps } from "@/lib/trackLink";
 
 export function VenueCard({
   scored,
@@ -145,6 +146,7 @@ export function VenueCard({
               href={reservationUrl}
               target="_blank"
               rel="noopener noreferrer"
+              {...trackLinkProps("reserve_click", venue.id, "results")}
               className="col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
             >
               <ExternalLink size={15} strokeWidth={2.25} />
@@ -156,6 +158,7 @@ export function VenueCard({
                 href={websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                {...trackLinkProps("website_click", venue.id, "results")}
                 className="col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary/40 hover:bg-tint"
               >
                 <ExternalLink size={15} strokeWidth={2.25} />

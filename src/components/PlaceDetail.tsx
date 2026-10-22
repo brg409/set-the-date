@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, ExternalLink, MapPin, Navigation } from "lucide-react";
@@ -19,6 +19,8 @@ import { BeenHereButton } from "./BeenHereButton";
 import { FavoriteButton } from "./FavoriteButton";
 import { PlaceNotes } from "./PlaceNotes";
 import { useMyPlaces } from "@/hooks/useMyPlaces";
+import { trackPlaceViewed } from "@/lib/analytics";
+import { trackLinkProps } from "@/lib/trackLink";
 
 /**
  * A place's own page. Everything shown comes from the venue's record. When the
@@ -36,6 +38,11 @@ export function PlaceDetail({ venue }: { venue: Venue }) {
   const { isVisited } = useMyPlaces();
 
   const { reservationUrl, websiteUrl } = venue;
+
+  const source = ctx.origin ?? (ctx.prefs ? "search" : "direct");
+  useEffect(() => {
+    trackPlaceViewed(venue.id, source);
+  }, [venue.id, source]);
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-5 pb-10 pt-4 sm:pt-6">
@@ -76,6 +83,7 @@ export function PlaceDetail({ venue }: { venue: Venue }) {
                 href={reservationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                {...trackLinkProps("reserve_click", venue.id, "place")}
                 className={`${getButtonClasses("primary", "lg")} sm:flex-1`}
               >
                 <ExternalLink size={16} strokeWidth={2.25} aria-hidden />
@@ -87,6 +95,7 @@ export function PlaceDetail({ venue }: { venue: Venue }) {
                 href={websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                {...trackLinkProps("website_click", venue.id, "place")}
                 className={`${getButtonClasses(reservationUrl ? "outline" : "primary", "lg")} sm:flex-1`}
               >
                 <ExternalLink size={16} strokeWidth={2.25} aria-hidden />

@@ -5,6 +5,7 @@ import { useMyPlaces } from "@/hooks/useMyPlaces";
 import { restoreWantToGo } from "@/lib/myPlaces";
 import { getVenueById } from "@/data/venues";
 import { showToast } from "@/lib/toast";
+import { trackPlaceSaved } from "@/lib/analytics";
 
 /** Save / unsave to "Want to Go" in My Places. */
 export function SaveButton({
@@ -30,6 +31,7 @@ export function SaveButton({
         e.stopPropagation();
         const before = getEntry(venueId);
         toggleSaved(venueId, fromSearch);
+        if (!before?.wantToGo) trackPlaceSaved(venueId);
         // Removing a saved place is easy to do by accident, so offer Undo.
         if (before?.wantToGo) {
           const name = getVenueById(venueId)?.name;
