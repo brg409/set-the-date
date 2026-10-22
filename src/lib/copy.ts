@@ -2,14 +2,16 @@
 // change messaging across the app without hunting through components.
 
 export const BRAND = {
-  name: "Know a Place",
-  tagline: "Every date deserves the right spot.",
-  headline: "Find the right spot for your date.",
-  subhead:
-    "Tell us the occasion, the vibe, the neighborhood, and the budget. We'll match you with three spots that actually fit — not just the highest-rated places nearby.",
-  ctaPrimary: "Plan a date",
-  ctaSecondary: "See how it works",
-  positioning: "Dating apps help you find the person. Know a Place helps you find the place.",
+  name: "KnowaPlace",
+  tagline: "Know the place. Love the night.",
+  about:
+    "KnowaPlace helps you discover great restaurants, bars, and experiences that fit your occasion, preferences, and vibe — without spending hours searching.",
+};
+
+export const FIND_COPY = {
+  heading: "What are you looking for?",
+  subheading: "Find the perfect spot for any occasion.",
+  cta: "Find Me a Place",
 };
 
 export const LOADING_MESSAGES = [
@@ -19,33 +21,18 @@ export const LOADING_MESSAGES = [
   "Narrowing it down to three…",
 ];
 
-export const STEP_TITLES = {
-  dateType: "What kind of date is it?",
-  vibe: "What vibe do you want?",
-  neighborhood: "Where do you want to go?",
-  budget: "What's the budget?",
-};
-
-export const STEP_SUBTITLES = {
-  dateType: "This shapes everything else we recommend.",
-  vibe: "Pick the feeling you're going for tonight.",
-  neighborhood: "Prototype coverage: Philadelphia neighborhoods.",
-  budget: "Roughly what you'd expect to spend per person.",
-};
-
 export const RESULTS_COPY = {
-  heading: "Your three spots",
-  subheading: "Ranked for this date, not just Philadelphia in general.",
-  regenerate: "Show me different spots",
-  editPreferences: "Edit preferences",
-  whyItFitsLabel: "Why it fits",
+  heading: "Your Places",
+  subheading: "Three spots picked just for you.",
+  // When fewer than three places fit, the subtitle shouldn't promise three.
+  subheadingFew: "Spots picked just for you.",
+  showMore: "Show Me 3 More",
+  previous: "Previous three",
+  editFilters: "Edit Filters",
+  whyItFitsLabel: "Why we picked it for you",
 };
 
-export const SAVED_COPY = {
-  heading: "Saved spots",
-  subheading: "Places you've bookmarked, kept right on this device.",
-  emptyTitle: "No saved spots yet",
-  emptyBody:
-    "When you find a place you like, tap Save on its card and it'll show up here.",
-  emptyCta: "Plan a date",
+export const MY_PLACES_COPY = {
+  heading: "My Places",
+  subheading: "Save, rate, and keep track of your favorite spots.",
 };

@@ -1,0 +1,325 @@
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  ArrowRight,
+  CalendarHeart,
+  ChevronDown,
+  DollarSign,
+  MapPin,
+  SlidersHorizontal,
+  Sparkles,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
+import { Button } from "@/components/Button";
+import {
+  BUDGET_OPTIONS,
+  DATE_TYPE_OPTIONS,
+  NEIGHBORHOOD_OPTIONS,
+  VIBE_OPTIONS,
+} from "@/lib/options";
+import {
+  criteriaFromParams,
+  hasAnyCriteria,
+  loadCriteria,
+  saveCriteria,
+  type Criteria,
+} from "@/lib/criteria";
+import { preferencesToParams } from "@/lib/queryParams";
+import { ANYTHING_LABEL, OUTING_OPTIONS } from "@/lib/outing";
+import { budgetCaption } from "@/lib/budget";
+import { useIsClient } from "@/hooks/useIsClient";
+import { FIND_COPY } from "@/lib/copy";
+
+/**
+ * Screen 1 of Find. The shell renders a static placeholder until the client
+ * is ready so the form's initial state (URL params, else the last
+ * selections kept for this tab) can be read synchronously without a
+ * hydration mismatch.
+ */
+export default function FindScreen() {
+  const isClient = useIsClient();
+  return isClient ? <FindForm /> : <FindSkeleton />;
+}
+
+function Heading() {
+  return (
+    <div>
+      <h1 className="font-display text-[1.4rem] leading-tight text-ink sm:text-3xl">
+        {FIND_COPY.heading}
+      </h1>
+      <p className="mt-1 text-sm text-muted sm:mt-1.5 sm:text-base">{FIND_COPY.subheading}</p>
+    </div>
+  );
+}
+
+function FindSkeleton() {
+  return (
+    <main className="mx-auto w-full max-w-2xl px-5 pb-12 pt-7">
+      <Heading />
+      <div className="mt-6 flex flex-col gap-4" aria-hidden>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-32 animate-pulse rounded-3xl bg-tint" />
+        ))}
+      </div>
+    </main>
+  );
+}
+
+function FindForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [criteria, setCriteria] = useState<Criteria>(() => {
+    const fromUrl = criteriaFromParams(new URLSearchParams(searchParams.toString()));
+    return hasAnyCriteria(fromUrl) ? fromUrl : loadCriteria();
+  });
+  const [moreOpen, setMoreOpen] = useState(() =>
+    Boolean(criteria.indoorOutdoor)
+  );
+
+  // Keep selections for this tab session so switching tabs and coming back
+  // (or returning from results) never starts over.
+  useEffect(() => {
+    saveCriteria(criteria);
+  }, [criteria]);
+
+  function toggle<K extends keyof Criteria>(key: K, value: Criteria[K]) {
+    setCriteria((c) => ({ ...c, [key]: c[key] === value ? undefined : value }));
+  }
+
+  const { dateType, vibe, neighborhood, budget, outing, indoorOutdoor } = criteria;
+  const complete = Boolean(dateType && vibe && neighborhood && budget);
+  const moreCount = indoorOutdoor ? 1 : 0;
+
+  const missing = [
+    !dateType && "an occasion",
+    !vibe && "a vibe",
+    !neighborhood && "a neighborhood",
+    !budget && "a budget",
+  ].filter((m): m is string => Boolean(m));
+
+  function findPlaces() {
+    if (!dateType || !vibe || !neighborhood || !budget) return;
+    const params = preferencesToParams({
+      dateType,
+      vibe,
+      neighborhood,
+      budget,
+      filters: outing || indoorOutdoor ? { outing, indoorOutdoor } : undefined,
+    });
+    router.push(`/results?${params.toString()}`);
+  }
+
+  return (
+    <main className="mx-auto w-full max-w-2xl px-5 pb-40 pt-5 md:max-w-3xl md:pb-10 md:pt-6">
+      <div className="flex items-start justify-between gap-4">
+        <Heading />
+        {hasAnyCriteria(criteria) && (
+          <button
+            type="button"
+            onClick={() => {
+              setCriteria({});
+              setMoreOpen(false);
+            }}
+            className="mt-2 shrink-0 text-sm font-medium text-primary hover:underline"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3">
+        <Group icon={UtensilsCrossed} title="What are you in the mood for?" grid="grid-cols-3 sm:grid-cols-6">
+          <OptionChip selected={!outing} onClick={() => toggle("outing", undefined)}>
+            {ANYTHING_LABEL}
+          </OptionChip>
+          {OUTING_OPTIONS.map((opt) => (
+            <OptionChip
+              key={opt.value}
+              selected={outing === opt.value}
+              onClick={() => toggle("outing", opt.value)}
+            >
+              {opt.label}
+            </OptionChip>
+          ))}
+        </Group>
+
+        <Group icon={CalendarHeart} title="Occasion" grid="grid-cols-2 sm:grid-cols-3">
+          {DATE_TYPE_OPTIONS.map((opt) => (
+            <OptionChip
+              key={opt.value}
+              selected={dateType === opt.value}
+              onClick={() => toggle("dateType", opt.value)}
+            >
+              {opt.label}
+            </OptionChip>
+          ))}
+        </Group>
+
+        <Group icon={Sparkles} title="Vibe" grid="grid-cols-2 sm:grid-cols-4 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
+          {VIBE_OPTIONS.map((opt) => (
+            <OptionChip
+              key={opt.value}
+              selected={vibe === opt.value}
+              onClick={() => toggle("vibe", opt.value)}
+            >
+              {opt.label}
+            </OptionChip>
+          ))}
+        </Group>
+
+        <div className="grid gap-3 md:grid-cols-[3fr_2fr]">
+        <Group icon={MapPin} title="Neighborhood" grid="grid-cols-2 sm:grid-cols-3">
+          {NEIGHBORHOOD_OPTIONS.map((opt) => (
+            <OptionChip
+              key={opt.value}
+              selected={neighborhood === opt.value}
+              onClick={() => toggle("neighborhood", opt.value)}
+            >
+              {opt.label}
+            </OptionChip>
+          ))}
+        </Group>
+
+        <Group
+          icon={DollarSign}
+          title="Budget"
+          grid="grid-cols-4 md:grid-cols-2"
+          caption={budgetCaption(budget, outing)}
+        >
+          {BUDGET_OPTIONS.map((opt) => (
+            <OptionChip
+              key={opt.value}
+              selected={budget === opt.value}
+              onClick={() => toggle("budget", opt.value)}
+            >
+              <span className="font-semibold">{opt.label}</span>
+            </OptionChip>
+          ))}
+        </Group>
+        </div>
+
+        <section className="rounded-3xl border border-line bg-card">
+          <button
+            type="button"
+            onClick={() => setMoreOpen((v) => !v)}
+            aria-expanded={moreOpen}
+            className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left sm:px-4"
+          >
+            <span className="flex items-center gap-2.5 text-sm font-semibold text-ink">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-tint text-primary">
+                <SlidersHorizontal size={16} strokeWidth={2.25} />
+              </span>
+              More Filters
+              {moreCount > 0 && (
+                <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                  {moreCount}
+                </span>
+              )}
+            </span>
+            <ChevronDown
+              size={18}
+              strokeWidth={2.25}
+              className={`text-muted transition-transform ${moreOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {moreOpen && (
+            <div className="flex flex-col gap-3 border-t border-line px-3.5 py-3 sm:px-4">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                  Indoor or outdoor
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:max-w-xs">
+                  <OptionChip
+                    selected={indoorOutdoor === "indoor"}
+                    onClick={() => toggle("indoorOutdoor", "indoor")}
+                  >
+                    Indoor
+                  </OptionChip>
+                  <OptionChip
+                    selected={indoorOutdoor === "outdoor"}
+                    onClick={() => toggle("indoorOutdoor", "outdoor")}
+                  >
+                    Outdoor
+                  </OptionChip>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Phones: pinned just above the tab bar so the primary action is
+          always reachable. Desktop: sits inline under the form. */}
+      <div className="fixed inset-x-0 bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom))] z-30 border-t border-line/70 bg-page/95 px-5 pb-3 pt-3 backdrop-blur md:static md:mt-6 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+        <div className="mx-auto max-w-2xl">
+          {!complete && (
+            <p className="mb-2 text-center text-xs text-muted" aria-live="polite">
+              Choose {missing.join(", ")} to continue.
+            </p>
+          )}
+          <Button size="lg" className="w-full" disabled={!complete} onClick={findPlaces}>
+            {FIND_COPY.cta}
+            <ArrowRight size={18} strokeWidth={2.25} />
+          </Button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function Group({
+  icon: Icon,
+  title,
+  caption,
+  grid,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  caption?: string;
+  /** Column layout for the chips, so every row is the same width. */
+  grid: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-line bg-card p-3.5 sm:p-4">
+      <div className="mb-2.5 flex items-center gap-2.5">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-tint text-primary">
+          <Icon size={15} strokeWidth={2.25} />
+        </span>
+        <h2 className="text-sm font-semibold text-ink">{title}</h2>
+      </div>
+      <div className={`grid gap-2 ${grid}`}>{children}</div>
+      {caption && <p className="mt-2 text-xs text-muted">{caption}</p>}
+    </section>
+  );
+}
+
+function OptionChip({
+  selected,
+  onClick,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`inline-flex min-h-10 w-full items-center justify-center rounded-full border px-2.5 py-1.5 text-center text-sm font-medium leading-tight transition-colors md:min-h-9 ${
+        selected
+          ? "border-primary bg-primary text-white"
+          : "border-line bg-card text-ink hover:border-primary/40 hover:bg-tint"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}

@@ -1,0 +1,377 @@
+<title>Know a Place Concept</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    /* current app palette */
+    --cur-bg: #fbf6ee;
+    --cur-surface: #ffffff;
+    --cur-surface-2: #f3ead9;
+    --cur-text: #1f2a44;
+    --cur-text-dim: #5b6580;
+    --cur-accent: #e2683f;
+    --cur-accent-bright: #c8552f;
+    --cur-border: #ecdfc9;
+    --cur-photo-a: #f4b58f;
+    --cur-photo-b: #e2683f;
+
+    /* "Know a Place" — dark wine (what's currently implemented in the app) */
+    --dk-bg: #241019;
+    --dk-surface: #34182a;
+    --dk-surface-2: #472a2e;
+    --dk-text: #f4e9d8;
+    --dk-text-dim: #c9ac9a;
+    --dk-accent: #c9a06a;
+    --dk-accent-bright: #e8cd97;
+    --dk-border: #573a3f;
+    --dk-photo-a: #472a2e;
+    --dk-photo-b: #241019;
+
+    /* "Know a Place" — lighter wine (same hues, raised a couple stops for readability) */
+    --lt-bg: #5c2f45;
+    --lt-surface: #70394f;
+    --lt-surface-2: #86495f;
+    --lt-text: #fdf6ea;
+    --lt-text-dim: #f0dfc9;
+    --lt-accent: #dcae74;
+    --lt-accent-bright: #f5e2ab;
+    --lt-border: #97576c;
+    --lt-photo-a: #86495f;
+    --lt-photo-b: #5c2f45;
+
+    color-scheme: light dark;
+    background: #eee6db;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #eee6db;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #2a1f1a;
+    padding-block: 28px;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .intro { display: flex; flex-direction: column; gap: 6px; }
+  .intro h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .intro p { margin: 0; color: #6b5d52; font-size: 14px; max-width: 66ch; }
+
+  .toggle {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-self: flex-start;
+    background: #ffffff;
+    border: 1px solid #ddccb8;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .toggle button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #6b5d52;
+    white-space: nowrap;
+  }
+  .toggle button[aria-pressed="true"] { background: #2a1420; color: #f4e9d8; }
+  .toggle button:focus-visible { outline: 2px solid #c9a06a; outline-offset: 2px; }
+
+  /* ---- phone frame, driven entirely by CSS variables set per data-theme ---- */
+  .frame {
+    --bg: var(--cur-bg);
+    --surface: var(--cur-surface);
+    --surface-2: var(--cur-surface-2);
+    --text: var(--cur-text);
+    --text-dim: var(--cur-text-dim);
+    --accent: var(--cur-accent);
+    --accent-bright: var(--cur-accent-bright);
+    --border: var(--cur-border);
+    --photo-a: var(--cur-photo-a);
+    --photo-b: var(--cur-photo-b);
+    --on-accent: #ffffff;
+
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--bg);
+    box-shadow: 0 20px 50px -20px rgba(30, 15, 20, 0.35);
+    transition: background 0.3s ease;
+  }
+  .frame[data-theme="dark"] {
+    --bg: var(--dk-bg); --surface: var(--dk-surface); --surface-2: var(--dk-surface-2);
+    --text: var(--dk-text); --text-dim: var(--dk-text-dim);
+    --accent: var(--dk-accent); --accent-bright: var(--dk-accent-bright);
+    --border: var(--dk-border); --photo-a: var(--dk-photo-a); --photo-b: var(--dk-photo-b);
+    --on-accent: #241019;
+  }
+  .frame[data-theme="light"] {
+    --bg: var(--lt-bg); --surface: var(--lt-surface); --surface-2: var(--lt-surface-2);
+    --text: var(--lt-text); --text-dim: var(--lt-text-dim);
+    --accent: var(--lt-accent); --accent-bright: var(--lt-accent-bright);
+    --border: var(--lt-border); --photo-a: var(--lt-photo-a); --photo-b: var(--lt-photo-b);
+    --on-accent: #33182a;
+  }
+
+  header.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .mark {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: var(--accent);
+    transition: background 0.3s ease;
+  }
+  .mark svg { width: 18px; height: 18px; stroke: var(--on-accent); }
+
+  .wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    transition: color 0.3s ease;
+  }
+
+  .header-icon {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .body-area { padding: 18px 20px 26px; display: flex; flex-direction: column; gap: 16px; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  .chip.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    transition: color 0.3s ease;
+  }
+  .frame[data-theme="current"] .eyebrow { color: var(--accent-bright); }
+
+  .cards { display: flex; flex-direction: column; gap: 14px; }
+  .card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .card-photo {
+    width: 84px; height: 84px;
+    border-radius: 14px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    background: linear-gradient(145deg, var(--photo-a), var(--photo-b));
+    border: 1px solid var(--border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .card-body { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1; }
+  .card-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: var(--text);
+    transition: color 0.3s ease;
+  }
+  .card-meta { font-size: 12.5px; color: var(--text-dim); transition: color 0.3s ease; }
+  .card-why {
+    font-size: 12.5px;
+    font-style: italic;
+    margin-top: 2px;
+    color: var(--accent-bright);
+    transition: color 0.3s ease;
+  }
+  .frame[data-theme="current"] .card-why { color: var(--accent); }
+
+  .cta {
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .swatches { display: flex; gap: 8px; margin-top: 2px; }
+  .swatch {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+
+  .notes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    color: #6b5d52;
+    line-height: 1.55;
+  }
+  .notes b { color: #2a1f1a; }
+
+  @media (max-width: 460px) {
+    .card { flex-direction: row; }
+    .card-photo { width: 68px; height: 68px; }
+  }
+</style>
+
+<div class="wrap">
+  <div class="intro">
+    <h1>"Know a Place" — dark vs. lighter wine tone</h1>
+    <p>Same layout and hues throughout — only the overall lightness changes. "Dark wine" is what's currently live in the app; "Lighter wine" raises the background and surfaces a couple of steps for easier reading while keeping the same gold accent and mood.</p>
+  </div>
+
+  <div class="toggle" role="group" aria-label="Palette">
+    <button type="button" data-choice="current" aria-pressed="true">Original (cream)</button>
+    <button type="button" data-choice="dark" aria-pressed="false">Dark wine (current build)</button>
+    <button type="button" data-choice="light" aria-pressed="false">Lighter wine (new)</button>
+  </div>
+
+  <div class="frame" data-theme="current" id="frame">
+    <header class="app-header">
+      <div class="brand">
+        <div class="mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.127 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v5.125" />
+            <path d="M14.62 17.8A2.25 2.25 0 1118 14.836a2.25 2.25 0 113.38 2.966l-2.626 2.856a.998.998 0 01-1.507 0z" />
+            <path d="M16 2v3" />
+            <path d="M3 9h18" />
+            <path d="M8 2v3" />
+          </svg>
+        </div>
+        <span class="wordmark" id="wordmark">Set the Date</span>
+      </div>
+      <div class="header-icon">☰</div>
+    </header>
+
+    <div class="body-area">
+      <div class="filters">
+        <span class="chip active">Rittenhouse</span>
+        <span class="chip">Anniversary</span>
+        <span class="chip">Romantic</span>
+        <span class="chip">$$$</span>
+      </div>
+
+      <span class="eyebrow">Top match for tonight</span>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-photo">🍷</div>
+          <div class="card-body">
+            <span class="card-title">Vernick Fish</span>
+            <span class="card-meta">Rittenhouse · $$$$ · Seafood &amp; Oyster Bar</span>
+            <span class="card-why">"An intimate raw bar built for a slow, memorable night."</span>
+            <span class="cta">See details</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-photo">🕯️</div>
+          <div class="card-body">
+            <span class="card-title">Zahav</span>
+            <span class="card-meta">Old City · $$$$ · Israeli Restaurant</span>
+            <span class="card-why">"A landmark room made for marking an occasion."</span>
+            <span class="cta">See details</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes" id="swatch-row"></div>
+
+  <div class="notes">
+    <p><b>What changed between the two wine versions:</b> only the lightness of background, surfaces, and border tokens moved up — the same hue family (deep plum/wine + gold) and every layout, spacing, and copy choice stays identical. Text and accent colors shifted slightly too, just enough to keep contrast comfortable at the new, lighter base.</p>
+    <p><b>My read:</b> "Lighter wine" keeps the romantic, distinctive mood while feeling noticeably less heavy — a good middle ground if the darkest version felt like too much. If you want it lighter still, the same technique extends further toward the original cream; just say how far.</p>
+  </div>
+</div>
+
+<script>
+  const frame = document.getElementById('frame');
+  const wordmark = document.getElementById('wordmark');
+  const buttons = document.querySelectorAll('.toggle button');
+  const swatchRow = document.getElementById('swatch-row');
+
+  const swatchSets = {
+    current: ['#fbf6ee', '#ffffff', '#1f2a44', '#e2683f'],
+    dark: ['#241019', '#34182a', '#f4e9d8', '#c9a06a'],
+    light: ['#5c2f45', '#70394f', '#fdf6ea', '#dcae74'],
+  };
+
+  function renderSwatches(choice) {
+    swatchRow.innerHTML = '<b style="align-self:center;">Palette:</b>' +
+      swatchSets[choice]
+        .map((c) => `<span class="swatch" style="background:${c}"></span>`)
+        .join('');
+    swatchRow.style.display = 'flex';
+    swatchRow.style.alignItems = 'center';
+    swatchRow.style.gap = '8px';
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const choice = btn.dataset.choice;
+      frame.dataset.theme = choice;
+      wordmark.textContent = choice === 'current' ? 'Set the Date' : 'Know a Place';
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      renderSwatches(choice);
+    });
+  });
+
+  renderSwatches('current');
+</script>

@@ -23,6 +23,7 @@ const NO_EXPANSION: ExpansionState = {
   budget: false,
   indoorOutdoor: false,
   food: false,
+  outing: false,
 };
 
 let failures = 0;

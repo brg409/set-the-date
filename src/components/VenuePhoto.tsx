@@ -127,7 +127,7 @@ function cacheKey(venueId: string, count: number, preferOutdoor: boolean) {
 /** A plain grey pulse shown only while the photo request is in flight. */
 export function PhotoSkeleton({ className = "" }: { className?: string }) {
   return (
-    <div className={`h-full w-full animate-pulse bg-navy/10 ${className}`} aria-hidden />
+    <div className={`h-full w-full animate-pulse bg-tint-strong ${className}`} aria-hidden />
   );
 }
 
@@ -151,7 +151,7 @@ export function AttributionBadge({
   const href = linkable ? photo.attributionUri ?? googleMapsUri : undefined;
   const label = photo.attributionText ?? "Photo: Google";
   const content = (
-    <span className="inline-flex items-center gap-1 rounded-full bg-navy/60 px-2 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm">
+    <span className="inline-flex items-center gap-1 rounded-full bg-ink/65 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
       {label}
       {href && <ExternalLink size={10} strokeWidth={2.5} />}
     </span>
@@ -182,6 +182,8 @@ export function VenuePhoto({
   sizePx = 800,
   preferOutdoor = false,
   linkAttribution = true,
+  eager = false,
+  creditBelowOnMobile = false,
 }: {
   venue: Venue;
   className?: string;
@@ -192,6 +194,13 @@ export function VenuePhoto({
   preferOutdoor?: boolean;
   /** False when this is rendered inside a native `<button>` (e.g. the recommendation card), where a nested link isn't valid HTML. */
   linkAttribution?: boolean;
+  /** Load the image immediately instead of lazily — for photos visible on first paint. */
+  eager?: boolean;
+  /**
+   * On phones, show Google's photo credit on its own line under the photo
+   * instead of over it — for small tiles where an overlay would cover the picture.
+   */
+  creditBelowOnMobile?: boolean;
 }) {
   const key = cacheKey(venue.id, 1, preferOutdoor);
   const initialState = (): PhotoState => {
@@ -255,13 +264,35 @@ export function VenuePhoto({
 
   if (state.status === "ready" && state.photos[0]) {
     const photo = state.photos[0];
+    if (creditBelowOnMobile) {
+      return (
+        <div className={`flex h-full w-full flex-col ${className}`}>
+          <div className="relative min-h-0 flex-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo.url}
+              alt={`${venue.categoryLabel} interior at ${venue.name}`}
+              loading={eager ? "eager" : "lazy"}
+              className="h-full w-full object-cover object-center"
+              onError={() => setState({ status: "unavailable" })}
+            />
+            <div className="hidden sm:block">
+              <AttributionBadge photo={photo} googleMapsUri={state.googleMapsUri} linkable={linkAttribution} />
+            </div>
+          </div>
+          <p className="shrink-0 bg-card px-2 py-1 text-[10px] font-medium leading-snug text-muted sm:hidden">
+            {photo.attributionText ?? "Photo: Google"}
+          </p>
+        </div>
+      );
+    }
     return (
       <div className={`relative h-full w-full ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={photo.url}
           alt={`${venue.categoryLabel} interior at ${venue.name}`}
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           className="h-full w-full object-cover object-center"
           onError={() => setState({ status: "unavailable" })}
         />

@@ -1,4 +1,4 @@
-// Core domain types for Know a Place.
+// Core domain types for KnowaPlace.
 // Kept separate from data/logic so a future real data provider (Google Places, etc.)
 // only needs to produce values that satisfy these shapes.
 
@@ -90,6 +90,15 @@ export type VenueCategory =
   | "dessert";
 
 export type FoodDrinkActivity = "food" | "drinks" | "activity";
+
+/**
+ * "What are you in the mood for?" on the Find page. Separate from
+ * `FoodDrinkActivity` (which describes what a venue offers): this is the kind
+ * of outing a venue is genuinely right for, set per venue in
+ * src/data/outingTypes.ts. A venue can have several. Leaving it unset on a
+ * search ("Anything") applies no outing filter at all.
+ */
+export type OutingType = "dinner" | "drinks" | "coffee" | "dessert" | "activity";
 
 export type NoiseLevel = "quiet" | "moderate" | "lively";
 export type Lighting = "dim" | "warm" | "bright";
@@ -204,7 +213,10 @@ export interface Venue {
 }
 
 export interface DateFilters {
+  /** Legacy food/drinks/activity filter; the Find page now uses `outing`. */
   food?: FoodDrinkActivity;
+  /** The selected "mood". Undefined means Anything. */
+  outing?: OutingType;
   indoorOutdoor?: IndoorOutdoorPreference;
   maxTravelMinutes?: number;
   alcohol?: "yes" | "no";
@@ -237,6 +249,8 @@ export interface ExpansionState {
   indoorOutdoor: boolean;
   /** Ignore the food/drinks/activity filter (if one was selected). */
   food: boolean;
+  /** Ignore the outing-type ("mood") filter (if one was selected). */
+  outing: boolean;
 }
 
 /**
@@ -256,6 +270,8 @@ export interface RecommendationResult {
   canExpandIndoorOutdoor: boolean;
   /** Whether dropping the food/drinks/activity filter would surface additional eligible venues. */
   canExpandFood: boolean;
+  /** Whether dropping the outing-type ("mood") filter would surface additional eligible venues. */
+  canExpandOuting: boolean;
   /** Which relaxations are currently applied to produce `results`. */
   expanded: ExpansionState;
 }

@@ -236,7 +236,7 @@ for (const prefs of regenSamples) {
   const keepIds = initial.results.slice(1).map((r) => r.venue.id);
   const replacement = getReplacementVenue(
     prefs,
-    { neighborhood: false, budget: false, indoorOutdoor: false, food: false },
+    { neighborhood: false, budget: false, indoorOutdoor: false, food: false, outing: false },
     [dismissedId, ...keepIds]
   );
   const dupInKeep = replacement && keepIds.includes(replacement.venue.id);
