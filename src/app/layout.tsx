@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { ToastHost } from "@/components/ToastHost";
 import { preconnect } from "react-dom";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -72,6 +73,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </div>
         <BottomNav />
         <ToastHost />
+        {/* Vercel Web Analytics: visitors, page views, devices. No cookies. */}
+        <Analytics />
       </body>
     </html>
   );
