@@ -52,7 +52,7 @@ const FAILURES: Record<string, string> = {
 
 type Status = { state: "idle" } | { state: "sending" } | { state: "sent" } | { state: "failed"; message: string };
 
-export function SubmissionForm({ kind }: { kind: SubmissionKind }) {
+export function SubmissionForm({ kind, enabled }: { kind: SubmissionKind; enabled: boolean }) {
   const intro = INTRO[kind];
   const uid = useId();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -136,7 +136,17 @@ export function SubmissionForm({ kind }: { kind: SubmissionKind }) {
       <h1 className="mt-2 font-display text-2xl text-ink sm:text-3xl">{intro.title}</h1>
       <p className="mt-1 text-sm leading-relaxed text-muted">{intro.body}</p>
 
-      {status.state === "sent" ? (
+      {!enabled ? (
+        <div role="status" className="mt-6 flex flex-col items-start gap-3 rounded-3xl border border-line bg-card p-6">
+          <span className="rounded-full bg-tint px-2.5 py-0.5 text-xs font-medium text-muted">Coming soon</span>
+          <p className="text-sm text-muted">
+            This form isn&apos;t open yet. Check back soon, and thanks for wanting to help.
+          </p>
+          <Link href="/more" className={getButtonClasses("secondary", "md")}>
+            Back to More
+          </Link>
+        </div>
+      ) : status.state === "sent" ? (
         <div role="status" className="mt-6 flex flex-col items-start gap-3 rounded-3xl border border-line bg-card p-6">
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-tint text-primary">
             <CheckCircle2 size={22} strokeWidth={2} aria-hidden />

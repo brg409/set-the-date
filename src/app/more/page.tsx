@@ -9,17 +9,26 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BRAND } from "@/lib/copy";
+import { submissionsEnabled } from "@/lib/submissionsConfig";
 
-const ROWS: { icon: LucideIcon; title: string; body: string; href?: string }[] = [
+type Row = { icon: LucideIcon; title: string; body: string; href?: string };
+
+const FORM_ROWS: Row[] = [
   { icon: Lightbulb, title: "Suggest a Place", body: "Know a place we should add?", href: "/more/suggest" },
   { icon: MessageSquare, title: "Give Feedback", body: "We'd love to hear from you.", href: "/more/feedback" },
   { icon: Mail, title: "Contact Us", body: "Questions? Ideas? Reach out.", href: "/more/contact" },
-  { icon: Settings, title: "Settings", body: "Manage your preferences." },
+];
+const SETTINGS_ROW: Row = { icon: Settings, title: "Settings", body: "Manage your preferences." };
+
+// A row without an href shows as "Coming soon".
+const ROWS: Row[] = [
+  ...(submissionsEnabled() ? FORM_ROWS : FORM_ROWS.map((row) => ({ ...row, href: undefined }))),
+  SETTINGS_ROW,
 ];
 
 const ROW_CLASSES = "flex items-center gap-4 rounded-2xl border border-line bg-card px-4 py-4";
 
-function RowBody({ icon: Icon, title, body, href }: (typeof ROWS)[number]) {
+function RowBody({ icon: Icon, title, body, href }: Row) {
   return (
     <>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint text-primary">

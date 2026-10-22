@@ -25,8 +25,12 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   // Needed so the auto-detected opengraph-image/apple-icon files resolve to
   // absolute URLs for link-preview crawlers (they can't follow a relative
-  // path the way a browser can). Stays on the existing Vercel URL.
-  metadataBase: new URL("https://set-the-date-two.vercel.app"),
+  // path the way a browser can). Vercel sets VERCEL_PROJECT_PRODUCTION_URL to
+  // the production domain (a custom domain once one is added), so previews
+  // and production builds both point at the live site.
+  metadataBase: new URL(
+    `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "set-the-date-two.vercel.app"}`,
+  ),
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
